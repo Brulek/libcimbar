@@ -135,40 +135,53 @@ enum ReceivedFileCache {
             options: [.skipsHiddenFiles]
         )
 
-        let metadataStore = ReceivedFileMetadataStore.shared
-        var files: [CachedReceivedFile] = []
-        var presentNames: Set<String> = []
+        struct Entry {
+            let url: URL
+            let name: String
+            let modifiedAt: Date
+            let fileSize: Int64
+            let fallbackReceivedAt: Date
+        }
+
+        var entries: [Entry] = []
         for fileURL in fileURLs {
             let values = try fileURL.resourceValues(forKeys: resourceKeys)
             if values.isDirectory == true { continue }
             let lastComponent = fileURL.lastPathComponent
             if lastComponent == "manifest.json" { continue }
-            presentNames.insert(lastComponent)
             let modifiedAt = values.contentModificationDate ?? .distantPast
-            let fileSize = Int64(values.fileSize ?? 0)
             // manifest 丢失/损坏后懒注册时优先用「加入目录时间」兜底：
             // 拖入的文件 creationDate/mtime 可能是数月前，addedToDirectoryDate
             // 才是它真正出现在 Inbox 的时刻，避免接收时间漂移或被保留策略误杀
             let fallbackReceivedAt = values.addedToDirectoryDate ?? values.creationDate ?? modifiedAt
-            let metadata = metadataStore.metadata(for: lastComponent)
-                ?? metadataStore.register(
-                    filename: lastComponent,
-                    originalName: lastComponent,
-                    fileSize: fileSize,
-                    receivedAt: fallbackReceivedAt == .distantPast ? Date() : fallbackReceivedAt
-                )
-            files.append(
-                CachedReceivedFile(
+            entries.append(
+                Entry(
                     url: fileURL,
-                    fileName: lastComponent,
-                    displayName: metadata.displayName,
-                    receivedAt: metadata.receivedAt,
+                    name: lastComponent,
                     modifiedAt: modifiedAt,
-                    fileSize: fileSize
+                    fileSize: Int64(values.fileSize ?? 0),
+                    fallbackReceivedAt: fallbackReceivedAt == .distantPast ? Date() : fallbackReceivedAt
                 )
             )
         }
-        metadataStore.reconcile(presentFilenames: presentNames)
+
+        let metadataStore = ReceivedFileMetadataStore.shared
+        let metadataByName = metadataStore.metadataRegisteringMissing(
+            entries.map { (filename: $0.name, fileSize: $0.fileSize, fallbackReceivedAt: $0.fallbackReceivedAt) }
+        )
+
+        let files: [CachedReceivedFile] = entries.map { entry in
+            let metadata = metadataByName[entry.name]
+            return CachedReceivedFile(
+                url: entry.url,
+                fileName: entry.name,
+                displayName: metadata?.displayName ?? entry.name,
+                receivedAt: metadata?.receivedAt ?? entry.fallbackReceivedAt,
+                modifiedAt: entry.modifiedAt,
+                fileSize: entry.fileSize
+            )
+        }
+        metadataStore.reconcile(presentFilenames: Set(entries.map { $0.name }))
         return files.sorted { $0.receivedAt > $1.receivedAt }
     }
 

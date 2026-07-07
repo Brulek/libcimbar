@@ -28,7 +28,9 @@ struct CameraPreviewView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: PreviewView, context: Context) {
-        uiView.previewLayer.session = session
+        if uiView.previewLayer.session !== session {
+            uiView.previewLayer.session = session
+        }
         context.coordinator.parent = self
     }
 

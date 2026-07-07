@@ -15,6 +15,10 @@ struct ReceiverScreen: View {
     @State private var focusIndicatorPoint: CGPoint?
     @State private var focusIndicatorID = UUID()
 
+    // 动态字体放大时，顶部标题区/底部面板占用更多空间，取景框预留区随之缩放
+    @ScaledMetric(relativeTo: .body) private var topReservedHeight: CGFloat = 110
+    @ScaledMetric(relativeTo: .body) private var bottomReservedHeight: CGFloat = 180
+
     private var scanState: ScanState {
         if viewModel.progressValue != nil && viewModel.receivedFileURL == nil {
             return .detecting
@@ -39,8 +43,8 @@ struct ReceiverScreen: View {
                 .accessibilityElement(children: .ignore)
                 .overlay {
                     ScanFrameOverlay(
-                        topReservedHeight: 110,
-                        bottomReservedHeight: 180,
+                        topReservedHeight: topReservedHeight,
+                        bottomReservedHeight: bottomReservedHeight,
                         scanState: scanState,
                         showCheckmark: showCheckmark
                     )
@@ -77,6 +81,7 @@ struct ReceiverScreen: View {
                 progressValue: viewModel.progressValue,
                 progressLabel: viewModel.progressLabel,
                 statsText: viewModel.statsText,
+                stallHint: viewModel.stallHint,
                 receivedFileURL: viewModel.receivedFileURL,
                 showCheckmark: showCheckmark,
                 onShare: onShare,
@@ -225,6 +230,7 @@ private struct ReceiverBottomPanel: View {
     let progressValue: Double?
     let progressLabel: String?
     let statsText: String?
+    let stallHint: String?
     let receivedFileURL: URL?
     let showCheckmark: Bool
     let onShare: (URL) -> Void
@@ -244,7 +250,12 @@ private struct ReceiverBottomPanel: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             } else {
                 StatusCapsule(text: statusText)
-                ProgressCard(progressValue: progressValue, progressLabel: progressLabel, statsText: statsText)
+                ProgressCard(
+                    progressValue: progressValue,
+                    progressLabel: progressLabel,
+                    statsText: statsText,
+                    stallHint: stallHint
+                )
             }
         }
         .padding(16)
@@ -258,13 +269,14 @@ private struct ProgressCard: View {
     let progressValue: Double?
     let progressLabel: String?
     let statsText: String?
+    let stallHint: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let value = progressValue {
                 ProgressView(value: value)
                     .progressViewStyle(.linear)
-                    .tint(.accentColor)
+                    .tint(stallHint == nil ? .accentColor : .orange)
             } else {
                 ProgressView(value: 0)
                     .progressViewStyle(.linear)
@@ -281,11 +293,18 @@ private struct ProgressCard: View {
                     .lineLimit(1)
                     .transition(.opacity)
             }
+            if let hint = stallHint {
+                Label(hint, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                    .transition(.opacity)
+            }
         }
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .animation(.easeInOut(duration: 0.25), value: stallHint)
         .accessibilityElement(children: .combine)
-        .accessibilityValue([progressLabel ?? "等待识别", statsText].compactMap { $0 }.joined(separator: "，"))
+        .accessibilityValue([progressLabel ?? "等待识别", statsText, stallHint].compactMap { $0 }.joined(separator: "，"))
     }
 }
 

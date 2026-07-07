@@ -10,6 +10,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var progressValue: Double?
     @Published private(set) var progressLabel: String?
     @Published private(set) var statsText: String?
+    @Published private(set) var stallHint: String?
     @Published private(set) var receivedFileURL: URL?
     @Published private(set) var cameraPermissionDenied = false
     @Published private(set) var torchAvailable = false
@@ -46,12 +47,17 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var zoomGestureBase: CGFloat = 1.0
     // 仅在主线程读写：进度采样（时间, 进度分数），用于估算速率与剩余时间
     private var progressSamples: [(time: TimeInterval, fraction: Double)] = []
+    // 仅在主线程读写：停滞检测
+    private var lastAdvanceUptime: TimeInterval = 0
+    private var lastAdvanceFraction: Double = -1
+    private var stallTimer: Timer?
 
     func start() {
         impactGenerator.prepare()
         notificationGenerator.prepare()
         updateStatusIfIdle("启动相机中...")
         publishCameraPermissionDenied(false)
+        startStallTimerIfNeeded()
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -74,6 +80,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     }
 
     func stop() {
+        DispatchQueue.main.async { [weak self] in
+            self?.stallTimer?.invalidate()
+            self?.stallTimer = nil
+        }
         sessionQueue.async { [weak self] in
             guard let self else { return }
             if let device = self.videoDevice, device.hasTorch, device.torchMode != .off,
@@ -338,7 +348,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             progressValue = result.progressFraction?.doubleValue ?? 1.0
             progressLabel = result.progressLabel ?? "文件接收 100%"
             statsText = nil
+            stallHint = nil
             progressSamples.removeAll()
+            lastAdvanceFraction = -1
             // 文件已落盘，后续帧不会再产生新结果；停掉解码链，
             // 避免相机回调继续满载 CPU（用户点「继续扫码」时恢复）
             pauseProcessing()
@@ -352,11 +364,49 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
     }
 
+    // MARK: - 停滞检测
+
+    // 主线程调用。传输开始后若进度长时间不再前进，给出分级操作建议
+    private func startStallTimerIfNeeded() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.stallTimer == nil else { return }
+            self.stallTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                self?.evaluateStall()
+            }
+        }
+    }
+
+    private func evaluateStall() {
+        // 只在「传输已开始且未完成」的窗口内提示
+        guard progressValue != nil, receivedFileURL == nil, lastAdvanceFraction >= 0 else {
+            if stallHint != nil { stallHint = nil }
+            return
+        }
+        let elapsed = ProcessInfo.processInfo.systemUptime - lastAdvanceUptime
+        let newHint: String?
+        if elapsed > 12 {
+            newHint = "仍无新数据：试试靠近一点、调整角度避免反光，或调高发送端屏幕亮度"
+        } else if elapsed > 5 {
+            newHint = "进度停滞了？请确保动画码完整、无遮挡地处于取景框内"
+        } else {
+            newHint = nil
+        }
+        if newHint != stallHint {
+            stallHint = newHint
+        }
+    }
+
     // 主线程调用。用最近一段时间的进度斜率估算剩余时间，避免瞬时抖动
     private func updateStats(fraction: Double, frameCount: UInt) {
         let now = ProcessInfo.processInfo.systemUptime
         progressSamples.append((time: now, fraction: fraction))
         progressSamples.removeAll { now - $0.time > 12 }
+
+        if lastAdvanceFraction < 0 || fraction > lastAdvanceFraction + 0.0001 {
+            lastAdvanceFraction = fraction
+            lastAdvanceUptime = now
+            if stallHint != nil { stallHint = nil }
+        }
 
         var parts: [String] = []
         if frameCount > 0 {
@@ -409,7 +459,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.progressValue = nil
             self.progressLabel = nil
             self.statsText = nil
+            self.stallHint = nil
             self.progressSamples.removeAll()
+            self.lastAdvanceFraction = -1
             self.statusText = "相机已启动，请将发送端动画码放入取景框"
         }
     }

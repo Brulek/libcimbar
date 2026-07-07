@@ -55,6 +55,37 @@ final class ReceivedFileMetadataStore {
         }
     }
 
+    /// 批量查询并为缺失项登记元数据，整批只持久化一次
+    /// （manifest 丢失后冷启动逐文件持久化是 O(N²) 字节写盘）
+    func metadataRegisteringMissing(
+        _ requests: [(filename: String, fileSize: Int64, fallbackReceivedAt: Date)]
+    ) -> [String: ReceivedFileMetadata] {
+        queue.sync {
+            ensureLoadedLocked()
+            var result: [String: ReceivedFileMetadata] = [:]
+            var changed = false
+            for request in requests {
+                if let existing = entries[request.filename] {
+                    result[request.filename] = existing
+                } else {
+                    let metadata = ReceivedFileMetadata(
+                        originalName: request.filename,
+                        displayName: request.filename,
+                        receivedAt: request.fallbackReceivedAt,
+                        fileSize: request.fileSize
+                    )
+                    entries[request.filename] = metadata
+                    result[request.filename] = metadata
+                    changed = true
+                }
+            }
+            if changed {
+                persistLocked()
+            }
+            return result
+        }
+    }
+
     func register(filename: String, originalName: String? = nil, fileSize: Int64, receivedAt: Date = Date()) -> ReceivedFileMetadata {
         queue.sync {
             ensureLoadedLocked()
