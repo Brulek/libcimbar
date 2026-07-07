@@ -54,10 +54,12 @@ cd ios/CimbarTransfer
 # 无签名编译验证（真机 SDK）
 xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
   -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
-# 模拟器（Apple Silicon 上走 x86_64/Rosetta：opencv2.framework 无模拟器 arm64 切片）
-xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
+
+> **模拟器限制**：捆绑的 opencv2.framework 是老式 fat framework，模拟器只有
+> x86_64 切片，而 Xcode 16+ 已移除 Rosetta 模拟器支持，因此当前无法在模拟器
+> 运行本 app。要支持模拟器需将 opencv2 升级为包含 ios-arm64-simulator 切片的
+> xcframework（官方源码 `platforms/apple/build_xcframework.py` 可构建）。
 
 ## 说明
 
