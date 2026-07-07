@@ -27,6 +27,10 @@
 - 保留策略（永久 / 30 天 / 7 天，按接收时间计算）
 - 在「文件」App 中直接打开接收目录
 
+## 截图
+
+模拟器验证截图（中/英、深/浅色、iPhone/iPad）见 [docs/screenshots/](docs/screenshots/)。
+
 ## 目录
 
 - `App/`: SwiftUI 应用代码、原生扫码流程、文件缓存与分享逻辑
