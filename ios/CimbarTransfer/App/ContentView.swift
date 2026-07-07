@@ -11,7 +11,15 @@ struct ContentView: View {
     @StateObject private var cacheStore = ReceivedFileCacheStore()
     @StateObject private var preferences = AppPreferences.shared
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selectedTab: AppTab = .scan
+    // 调试/自动化钩子：launch argument `-InitialTab library|settings` 可指定初始标签
+    // （launch args 会进 UserDefaults 的 argument domain，正常使用不受影响）
+    @State private var selectedTab: AppTab = {
+        switch UserDefaults.standard.string(forKey: "InitialTab") {
+        case "library": return .library
+        case "settings": return .settings
+        default: return .scan
+        }
+    }()
     @State private var shareRequest: ShareRequest?
     @State private var previewRequest: PreviewRequest?
     @State private var autoJumpTask: Task<Void, Never>?
