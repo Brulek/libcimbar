@@ -119,6 +119,13 @@ struct FileDetailScreen: View {
         .task(id: file.fileName) {
             await loadChecksum()
         }
+        .onChange(of: store.cachedFiles) { files in
+            // 文件被外部删除/清空后自动退出，避免变成预览分享全是死链的僵尸页。
+            // （重命名场景不受影响：store.rename 先回调新文件名再发布新列表）
+            if !files.contains(where: { $0.fileName == trackedFileName }) {
+                dismiss()
+            }
+        }
         .alert("重命名", isPresented: $renamePresented) {
             TextField("文件名", text: $renameText)
                 .textInputAutocapitalization(.never)
@@ -192,7 +199,9 @@ struct FileDetailScreen: View {
 
     private func loadChecksum() async {
         checksumFailed = false
-        if let cached = ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.sha256 {
+        // 缓存的校验值只有在文件内容自接收后未被外部改动时才可信
+        if let cached = ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.sha256,
+           file.modifiedAt <= file.receivedAt.addingTimeInterval(2) {
             sha256 = cached
             return
         }
@@ -206,26 +215,29 @@ struct FileDetailScreen: View {
             if file.fileName == filename {
                 sha256 = digest
             }
+        } catch is CancellationError {
+            // 用户离开页面，.task 被取消——不是失败
         } catch {
             checksumFailed = true
         }
     }
 
-    /// 流式计算，支持大文件而不占内存
+    /// 流式计算，支持大文件而不占内存；随宿主 .task 的取消而中止
     private static func computeSHA256(url: URL) async throws -> String {
-        try await Task.detached(priority: .utility) {
-            let handle = try FileHandle(forReadingFrom: url)
-            defer { try? handle.close() }
-            var hasher = SHA256()
-            while true {
-                let chunk = try autoreleasepool {
-                    try handle.read(upToCount: 1 << 20)
-                }
-                guard let chunk, !chunk.isEmpty else { break }
-                hasher.update(data: chunk)
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var hasher = SHA256()
+        while true {
+            try Task.checkCancellation()
+            let chunk = try autoreleasepool {
+                try handle.read(upToCount: 1 << 20)
             }
-            return hasher.finalize().map { String(format: "%02x", $0) }.joined()
-        }.value
+            guard let chunk, !chunk.isEmpty else { break }
+            hasher.update(data: chunk)
+            // 大文件哈希让出协作池线程，避免长期独占
+            await Task.yield()
+        }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
     @MainActor

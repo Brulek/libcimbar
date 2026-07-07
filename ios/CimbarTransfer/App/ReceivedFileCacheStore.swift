@@ -75,13 +75,15 @@ final class ReceivedFileCacheStore: ObservableObject {
     ) {
         workerQueue.async { [weak self] in
             var renamed: CachedReceivedFile?
+            var files: [CachedReceivedFile]?
             do {
                 renamed = try ReceivedFileCache.renameFile(file, newDisplayName: newDisplayName)
-                let files = try ReceivedFileCache.listFiles()
-                self?.publish(files: files)
+                files = try ReceivedFileCache.listFiles()
             } catch {
                 self?.onMain { $0.refresh(cleanup: false) }
             }
+            // 主队列 FIFO：先投递 completion（更新调用方跟踪的文件名），
+            // 再发布新列表——否则详情页会先看到旧文件名从列表消失而误判被删除
             if let completion {
                 let result = renamed
                 DispatchQueue.main.async {
@@ -89,6 +91,9 @@ final class ReceivedFileCacheStore: ObservableObject {
                         completion(result)
                     }
                 }
+            }
+            if let files {
+                self?.publish(files: files)
             }
         }
     }

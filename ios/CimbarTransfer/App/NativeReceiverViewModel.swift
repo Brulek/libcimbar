@@ -152,6 +152,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         session.beginConfiguration()
         session.sessionPreset = preset
         session.commitConfiguration()
+        // preset 切换可能更换 activeFormat 并把设备端 zoom 重置为 1；
+        // 重新读取真实值，避免变焦徽标与画面脱钩、下次捏合基准跳变
+        if let device = videoDevice {
+            maxZoomFactor = min(device.activeFormat.videoMaxZoomFactor, 5.0)
+            let actualZoom = device.videoZoomFactor
+            DispatchQueue.main.async { self.zoomFactor = actualZoom }
+        }
     }
 
     // MARK: - 相机控制（手电筒 / 变焦 / 对焦）
@@ -341,6 +348,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         } else if let label = result.progressLabel {
             progressValue = nil
             progressLabel = label
+            // 信号丢失（idle 输出）：清掉冻结的帧数/ETA，避免展示过期数据；
+            // 采样也清空，信号恢复后重新估算速率而不是跨断档平均
+            statsText = nil
+            progressSamples.removeAll()
         }
 
         if let fileURL = result.fileURL {
@@ -369,7 +380,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     // 主线程调用。传输开始后若进度长时间不再前进，给出分级操作建议
     private func startStallTimerIfNeeded() {
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.stallTimer == nil else { return }
+            guard let self else { return }
+            // 切走再回来时给计时一个新起点：stop() 期间 systemUptime 仍在走，
+            // 不重置会在回来 1 秒内弹出最严重的假阳性警告
+            if self.lastAdvanceFraction >= 0 {
+                self.lastAdvanceUptime = ProcessInfo.processInfo.systemUptime
+                self.stallHint = nil
+            }
+            guard self.stallTimer == nil else { return }
             self.stallTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
                 self?.evaluateStall()
             }
@@ -377,8 +395,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     }
 
     private func evaluateStall() {
-        // 只在「传输已开始且未完成」的窗口内提示
-        guard progressValue != nil, receivedFileURL == nil, lastAdvanceFraction >= 0 else {
+        // 只在「传输已开始且未完成」的窗口内提示。
+        // 不能依赖 progressValue：码完全离开取景框后 idle 输出会把它置 nil，
+        // 而那正是最需要提示的场景；lastAdvanceFraction 只在完成/重置时清掉
+        guard receivedFileURL == nil, lastAdvanceFraction >= 0 else {
             if stallHint != nil { stallHint = nil }
             return
         }

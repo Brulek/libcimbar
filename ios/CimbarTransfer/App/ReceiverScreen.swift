@@ -134,8 +134,12 @@ struct ReceiverScreen: View {
         }
 
         // .task(id:) 在每次页面出现时都会重跑；同一个文件只庆祝一次，
-        // 避免切走再切回时重放 2.5 秒打勾动画
-        guard fileURL != lastCelebratedURL else { return }
+        // 避免切走再切回时重放 2.5 秒打勾动画。庆祝中途切走会取消收尾的
+        // sleep，重进时必须补上 showCheckmark 复位，否则绿勾永久卡住
+        guard fileURL != lastCelebratedURL else {
+            withAnimation { showCheckmark = false }
+            return
+        }
         lastCelebratedURL = fileURL
 
         withAnimation(.spring(duration: 0.4)) {
@@ -317,6 +321,9 @@ private struct CompletedTransferCard: View {
 
     // 状态缓存文件大小：body 可能因动画每秒重算多次，不能每次都读磁盘
     @State private var fileSize: String?
+    // 缩略图缓存键必须含内容成分（mtime）：删除后重收同名文件会复用同一路径，
+    // 纯文件名键会命中 NSCache 里旧文件的缩略图
+    @State private var thumbnailKey: String = ""
     @State private var photoSaving = false
     @State private var photoSaved = false
     @State private var photoSaveError: String?
@@ -325,17 +332,25 @@ private struct CompletedTransferCard: View {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
     }
 
-    private static func loadFileSize(for url: URL) -> String? {
-        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
-              let size = attrs[.size] as? NSNumber else { return nil }
-        return ByteCountFormatter.string(fromByteCount: size.int64Value, countStyle: .file)
+    private static func loadFileInfo(for url: URL) -> (size: String?, modified: TimeInterval) {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else {
+            return (nil, 0)
+        }
+        let size = (attrs[.size] as? NSNumber).map {
+            ByteCountFormatter.string(fromByteCount: $0.int64Value, countStyle: .file)
+        }
+        let modified = (attrs[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
+        return (size, modified)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                FileThumbnailView(url: fileURL, cacheKey: "completed-\(fileURL.lastPathComponent)")
-                    .frame(width: 48, height: 48)
+                FileThumbnailView(
+                    url: fileURL,
+                    cacheKey: thumbnailKey.isEmpty ? "completed-\(fileURL.lastPathComponent)" : thumbnailKey
+                )
+                .frame(width: 48, height: 48)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(fileURL.lastPathComponent)
                         .font(.subheadline.weight(.semibold))
@@ -391,7 +406,9 @@ private struct CompletedTransferCard: View {
             .foregroundStyle(.secondary)
         }
         .task(id: fileURL) {
-            fileSize = Self.loadFileSize(for: fileURL)
+            let info = Self.loadFileInfo(for: fileURL)
+            fileSize = info.size
+            thumbnailKey = "completed-\(fileURL.lastPathComponent)-\(info.modified)"
             photoSaving = false
             photoSaved = false
             photoSaveError = nil
