@@ -75,6 +75,9 @@ struct TermsOfServiceScreen: View {
             Text("使用本应用前请仔细阅读本协议。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            Text("法律文本以中文版本为准。")
+                .font(.footnote)
+                .foregroundStyle(.tertiary)
         }
     }
 }

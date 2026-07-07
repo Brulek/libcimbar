@@ -69,6 +69,9 @@ struct PrivacyPolicyScreen: View {
             Text("我们尊重并保护您的隐私。请在使用前仔细阅读本政策。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            Text("法律文本以中文版本为准。")
+                .font(.footnote)
+                .foregroundStyle(.tertiary)
         }
     }
 }
