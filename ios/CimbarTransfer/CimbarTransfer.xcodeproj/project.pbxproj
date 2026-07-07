@@ -1,0 +1,859 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		021AD30CA6FEC927701E248E /* CimbReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 72523A31A545B291AC248582 /* CimbReader.cpp */; };
+		04FA19CB09D48A85CA4683F2 /* WirehairCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4F16E0AE342D3C578F359CD /* WirehairCodec.cpp */; };
+		0853640EBB56BD316CBFD3E2 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9372C120084DE71D9397228 /* opencv2.framework */; };
+		09C096FA60F5BD15E580D921 /* AppPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B3A3A71C9E9172263AD2F7 /* AppPreferences.swift */; };
+		0A80F26DF02315F1C369F470 /* WirehairTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A21482A3F21E44F49078C68 /* WirehairTools.cpp */; };
+		0C6AAF3DFAE1A2AFD72C7035 /* AdjacentCellFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02A48426A82837B3A282FE56 /* AdjacentCellFinder.cpp */; };
+		0FE9909F6E8FE41A4CDB7B06 /* cimbar_recv_js.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4C0352A99B1A8A08CDDD895 /* cimbar_recv_js.cpp */; };
+		1024BA0225BF72704413ACB4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1F827998BB6A6BEE77172532 /* PrivacyInfo.xcprivacy */; };
+		12103AD4A454501B36422704 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30975B7A7C60EFDC6BDFB5C4 /* CoreGraphics.framework */; };
+		12941372E729DD4F099AA01B /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261B9EECF8AF7F2D750D844 /* Scanner.cpp */; };
+		1439B880D12AA49685B93EB2 /* huf_decompress_amd64.S in Sources */ = {isa = PBXBuildFile; fileRef = 94A6755BE319E393BF8B6E5E /* huf_decompress_amd64.S */; };
+		14FF77FB689796DE2AD74FE7 /* entropy_common.c in Sources */ = {isa = PBXBuildFile; fileRef = B7F4A868FBFC155368ECBA14 /* entropy_common.c */; };
+		178CC01F5143D0A911E4C1F1 /* CellPositions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EFBB96875F5D49F0E799DDCC /* CellPositions.cpp */; };
+		21216AA086813B89B2CB8D4F /* gf256.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AD2161C6358BBEA969E6A02 /* gf256.cpp */; };
+		214EA28BD748B4CD50ADEA4F /* wirehair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D66A68A9490520C2EDF637 /* wirehair.cpp */; };
+		22E259AE379E0C3344D36427 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 330060639CFF8856209B6265 /* CoreImage.framework */; };
+		23215C249ED111F2C9AF1A96 /* reed-solomon.c in Sources */ = {isa = PBXBuildFile; fileRef = D836BE664808256137E82D6D /* reed-solomon.c */; };
+		24C345DE43E5A88FEB1036B3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 908CD9DCCB1609B3EB111D0C /* QuartzCore.framework */; };
+		253E6C08EF64376D8A36208B /* debug.c in Sources */ = {isa = PBXBuildFile; fileRef = E3BEA37D289AD9C388BE9E6C /* debug.c */; };
+		25C00B8E15A0E6166E93D357 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7566D65EF5544E1795DEEC0E /* Assets.xcassets */; };
+		2B25DDC58253BB209A29A872 /* LibraryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EED17D2B8E3C5737C94D54 /* LibraryScreen.swift */; };
+		2CB8541074E5F73C27C54DC7 /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB33C49D73F150537F3D5BF5 /* Common.cpp */; };
+		34697F2F23D8F532F40995A3 /* CimbarTransferApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF128EE5BFD4CC7859D7FC74 /* CimbarTransferApp.swift */; };
+		3B4882346C639DF5673F40F8 /* QuickLookPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267211FAB3A8100EDC33F5BB /* QuickLookPreview.swift */; };
+		3F17A030B0E91D265E277B02 /* zstd_decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 277E489A612B7A2126FC118F /* zstd_decompress.c */; };
+		3FDB8429AA466C804CD41BA6 /* SimpleCameraCalibration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC5FE30C88DFAA1D9AB3337C /* SimpleCameraCalibration.cpp */; };
+		40BD3EEBED6BECE55962605B /* Extractor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7390ACF6E83D47E6F04B32C /* Extractor.cpp */; };
+		41D329E8387B0F97F5251AAD /* PrivacyPolicyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A031A6BD93D618C47D422D9 /* PrivacyPolicyScreen.swift */; };
+		44227C3507C364730829BA7B /* polynomial.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A28D4F38DDC519E3633EF6A /* polynomial.c */; };
+		459CF89A85A08BD3333B73DE /* OpenSourceLicensesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED9035BFE5C6C6F7FF83C41 /* OpenSourceLicensesScreen.swift */; };
+		48ACBC9F61B427547214237E /* ReceivedFileStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE43755FB3F843AA0C2C70E4 /* ReceivedFileStorage.mm */; };
+		503694EFF77FEC3B278C59A5 /* fse_decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = AC1229A88F81D3592370888D /* fse_decompress.c */; };
+		50EC0D7884063A08F94C5CF5 /* CimbDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8678BEE34391CE883FE4E53E /* CimbDecoder.cpp */; };
+		538454A57BB5AE6137C72ACE /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4F844EF42E866877521FEAD /* AVFoundation.framework */; };
+		59364C0550871029C1721339 /* Deskewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 255E0D39EFA4886082FF276E /* Deskewer.cpp */; };
+		5ED06D7002A674CC7DB68D0F /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01132593540B24982EB9A565 /* OnboardingScreen.swift */; };
+		6194886BD9080E7951C6CE57 /* zstd_common.c in Sources */ = {isa = PBXBuildFile; fileRef = F22D4AB13583383631ABBAD7 /* zstd_common.c */; };
+		622DFDA8F5411C26E3F78378 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD48C8C48A6BFC93F1C1564F /* Accelerate.framework */; };
+		67653260C76000D5DE94706E /* CellDrift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0193543CD9029E6BF816C9C /* CellDrift.cpp */; };
+		689780980949DF2F3328F452 /* zstd_decompress_block.c in Sources */ = {isa = PBXBuildFile; fileRef = F57094A4D90BBAC925388177 /* zstd_decompress_block.c */; };
+		6CE6CBBF92F0CC3A09DCB664 /* error_private.c in Sources */ = {isa = PBXBuildFile; fileRef = A0108831E93117E36CB2F36F /* error_private.c */; };
+		76B7EA5425E53957D8DF269F /* huf_decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 91F498291C18A154B7D1FCE8 /* huf_decompress.c */; };
+		7CF57D20BC69B57DECDCA8EA /* decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 38408673B808EB6C04EF1A16 /* decode.c */; };
+		87FA5625D58D20E15253A3F8 /* FloodDecodePositions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E25312F43CD43355B287A39 /* FloodDecodePositions.cpp */; };
+		8934DA91EBBF072227555393 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D7D1ECBD95FC110CF0AB72 /* libz.tbd */; };
+		8F91885C32E71770108E2FF6 /* NativeCimbarDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4F1AB19C8856EBBA7F1EE290 /* NativeCimbarDecoder.mm */; };
+		91F8F5C9C01A1C69DDAF6CA9 /* threading.c in Sources */ = {isa = PBXBuildFile; fileRef = A47E711A911BC2DA97AFAA85 /* threading.c */; };
+		98AF3C4592B31AB667E6B3C9 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821DAE87481916D8F61ED286 /* SettingsScreen.swift */; };
+		9A302113EC7A63F02237C4E2 /* ReceivedFileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CD545F0EDBB9F9D06E61D6 /* ReceivedFileMetadata.swift */; };
+		A052E0223DD9B5028BA2BF8E /* CimbEncoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A8C09D50BDF4EB20A01ECB2 /* CimbEncoder.cpp */; };
+		A36D9573371223B146B34532 /* OpenSourceLicenseTexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE1EE599623738DD847161D /* OpenSourceLicenseTexts.swift */; };
+		A7F9E3DF09460BC0C7638BC8 /* pool.c in Sources */ = {isa = PBXBuildFile; fileRef = E647F32A1ABCE0562E301BC0 /* pool.c */; };
+		AB38F695BF4E139F74E587E3 /* ReceivedFileCacheStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2235303437794716B65B0D2 /* ReceivedFileCacheStore.swift */; };
+		B063974937022618BB5953B6 /* ReceiverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 774E9C11CA7D06541CAE5F8E /* ReceiverScreen.swift */; };
+		B0A825D944AD1B66E51423DA /* CimbWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D3E7849A47B0AF87470131 /* CimbWriter.cpp */; };
+		B7035180B598AB52D85391DB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925D9CD2FF4E4B1E8B33B028 /* ContentView.swift */; };
+		C6661657870ECA3B5141D433 /* encode.c in Sources */ = {isa = PBXBuildFile; fileRef = C2A5530CDDF16258463B455C /* encode.c */; };
+		CAA53390C34AB192965B5004 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC06CB99E561AED4D88C487F /* CoreVideo.framework */; };
+		D4C79FAA3E0BD51C9CBDA3CC /* NativeReceiverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4403A1D091529603BA1D4472 /* NativeReceiverViewModel.swift */; };
+		D8C7230769B04141BBDC4DCD /* TermsOfServiceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E81F443C6D1FE5FBEF6EA6 /* TermsOfServiceScreen.swift */; };
+		DFB3959FC937AD50E513C322 /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B99F504BE8073F54612041 /* AboutScreen.swift */; };
+		E7459FA1B3D991F937B4B2B2 /* xxhash.c in Sources */ = {isa = PBXBuildFile; fileRef = C8E0D5F8E145F0FB492A10F5 /* xxhash.c */; };
+		EB4FF9EC623FA307D41EE223 /* zstd_ddict.c in Sources */ = {isa = PBXBuildFile; fileRef = 3CEA2399C1341BA398A10365 /* zstd_ddict.c */; };
+		EC4A1C28AE18DBE8982E2833 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BE7663E30DD0913469292028 /* CoreMedia.framework */; };
+		F1658F54DB8166587AD0D1CC /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478E0A0083D449AF46DAF3FB /* ShareSheet.swift */; };
+		F6F8084525EC98B2CC2E7D43 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14F236FBFB2168DB9CDBE0E /* CameraPreviewView.swift */; };
+		F90DA07AFCF49CEE59F15829 /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5468CC77B58FC32F8F03A6CD /* PhotoLibrarySaver.swift */; };
+		FFF69F4BC5520CF4BB465DBC /* ReceivedFileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42886AEA0AB1044BA398BCC5 /* ReceivedFileCache.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		01132593540B24982EB9A565 /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
+		02A48426A82837B3A282FE56 /* AdjacentCellFinder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AdjacentCellFinder.cpp; sourceTree = "<group>"; };
+		064A7F8E054F9A9CF3182354 /* Undistort.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Undistort.h; sourceTree = "<group>"; };
+		073FD0C56C96D076DE2EB21F /* CimbReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CimbReader.h; sourceTree = "<group>"; };
+		097094135F5599ED50B93836 /* CellPositions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CellPositions.h; sourceTree = "<group>"; };
+		1330B5084BB73CAFF064BAC2 /* gf256.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gf256.h; sourceTree = "<group>"; };
+		19352193C4B95ED835600125 /* zstd_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_internal.h; sourceTree = "<group>"; };
+		19CD545F0EDBB9F9D06E61D6 /* ReceivedFileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedFileMetadata.swift; sourceTree = "<group>"; };
+		1BFFA7E712ECD8ED4EB27362 /* Anchor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Anchor.h; sourceTree = "<group>"; };
+		1E56C907EE86829FEDF6A38B /* wirehair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wirehair.h; sourceTree = "<group>"; };
+		1F827998BB6A6BEE77172532 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		210A8D90C55C3609B5E7E6C5 /* CimbEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CimbEncoder.h; sourceTree = "<group>"; };
+		23CC2B989D4F6EECADE60185 /* DistortionParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DistortionParameters.h; sourceTree = "<group>"; };
+		24B99F504BE8073F54612041 /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
+		255E0D39EFA4886082FF276E /* Deskewer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Deskewer.cpp; sourceTree = "<group>"; };
+		267211FAB3A8100EDC33F5BB /* QuickLookPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookPreview.swift; sourceTree = "<group>"; };
+		277E489A612B7A2126FC118F /* zstd_decompress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zstd_decompress.c; sourceTree = "<group>"; };
+		281361084483B5E6A13310EC /* bitstream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bitstream.h; sourceTree = "<group>"; };
+		295DE64EF2FF2BCA1C177F02 /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
+		30975B7A7C60EFDC6BDFB5C4 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		3152FBCF1CD680187E5FD199 /* huf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = huf.h; sourceTree = "<group>"; };
+		330060639CFF8856209B6265 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
+		33AAAB3343A7FB4950CB1D15 /* Midpoints.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Midpoints.h; sourceTree = "<group>"; };
+		37EED17D2B8E3C5737C94D54 /* LibraryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScreen.swift; sourceTree = "<group>"; };
+		38408673B808EB6C04EF1A16 /* decode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = decode.c; sourceTree = "<group>"; };
+		39C44D0D898A080E727BF878 /* bitmaps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bitmaps.h; sourceTree = "<group>"; };
+		3A8C09D50BDF4EB20A01ECB2 /* CimbEncoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CimbEncoder.cpp; sourceTree = "<group>"; };
+		3CEA2399C1341BA398A10365 /* zstd_ddict.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zstd_ddict.c; sourceTree = "<group>"; };
+		3E25312F43CD43355B287A39 /* FloodDecodePositions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FloodDecodePositions.cpp; sourceTree = "<group>"; };
+		3F2AC1A3E1CAFFCED7124D1C /* WirehairCodec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WirehairCodec.h; sourceTree = "<group>"; };
+		3F8A52174E90373ED86E81D1 /* compiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
+		42886AEA0AB1044BA398BCC5 /* ReceivedFileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedFileCache.swift; sourceTree = "<group>"; };
+		43E81F443C6D1FE5FBEF6EA6 /* TermsOfServiceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceScreen.swift; sourceTree = "<group>"; };
+		4403A1D091529603BA1D4472 /* NativeReceiverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeReceiverViewModel.swift; sourceTree = "<group>"; };
+		478E0A0083D449AF46DAF3FB /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		48E6FF0EC755893B5016E3A2 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		4EE333E8681A7DD65CD5DAE9 /* EdgeScanState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdgeScanState.h; sourceTree = "<group>"; };
+		4F1AB19C8856EBBA7F1EE290 /* NativeCimbarDecoder.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NativeCimbarDecoder.mm; sourceTree = "<group>"; };
+		5468CC77B58FC32F8F03A6CD /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
+		56324312A322298AAA8AD232 /* CimbDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CimbDecoder.h; sourceTree = "<group>"; };
+		5AD2161C6358BBEA969E6A02 /* gf256.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gf256.cpp; sourceTree = "<group>"; };
+		5DF763C16202D0DE4DD7ABE0 /* pool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pool.h; sourceTree = "<group>"; };
+		5FCEAC113963BD4A74CDC09B /* cimbar_recv_js.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cimbar_recv_js.h; sourceTree = "<group>"; };
+		61D3E7849A47B0AF87470131 /* CimbWriter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CimbWriter.cpp; sourceTree = "<group>"; };
+		68D616F3443CC24838202E0A /* Corners.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Corners.h; sourceTree = "<group>"; };
+		6A031A6BD93D618C47D422D9 /* PrivacyPolicyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyScreen.swift; sourceTree = "<group>"; };
+		6A28D4F38DDC519E3633EF6A /* polynomial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = polynomial.c; sourceTree = "<group>"; };
+		7026190D5764588083F9BB4E /* Scanner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scanner.h; sourceTree = "<group>"; };
+		72523A31A545B291AC248582 /* CimbReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CimbReader.cpp; sourceTree = "<group>"; };
+		7566D65EF5544E1795DEEC0E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		75ACECAA1142AFEB680C6C7A /* Deskewer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Deskewer.h; sourceTree = "<group>"; };
+		774E9C11CA7D06541CAE5F8E /* ReceiverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverScreen.swift; sourceTree = "<group>"; };
+		78010A6CC5260BB54F040C7F /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
+		7D36E37D156A777E92D5A789 /* ReceivedFileStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReceivedFileStorage.h; sourceTree = "<group>"; };
+		7E37CD135A9E29789C6C360D /* bits.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bits.h; sourceTree = "<group>"; };
+		80D79AB5D5952FBDA280D82F /* threading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threading.h; sourceTree = "<group>"; };
+		821DAE87481916D8F61ED286 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		8382AC93F800E66904B52FFF /* CimbWriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CimbWriter.h; sourceTree = "<group>"; };
+		8678BEE34391CE883FE4E53E /* CimbDecoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CimbDecoder.cpp; sourceTree = "<group>"; };
+		87E53FDF17554E2569EDA041 /* xxhash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xxhash.h; sourceTree = "<group>"; };
+		899468F57E21BB58B04AC04E /* CimbarTransfer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CimbarTransfer-Bridging-Header.h"; sourceTree = "<group>"; };
+		8A21482A3F21E44F49078C68 /* WirehairTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WirehairTools.cpp; sourceTree = "<group>"; };
+		8BBD434EAC37E345ADB36F94 /* ScanState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScanState.h; sourceTree = "<group>"; };
+		8ED9035BFE5C6C6F7FF83C41 /* OpenSourceLicensesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSourceLicensesScreen.swift; sourceTree = "<group>"; };
+		908CD9DCCB1609B3EB111D0C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		91F498291C18A154B7D1FCE8 /* huf_decompress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = huf_decompress.c; sourceTree = "<group>"; };
+		925D9CD2FF4E4B1E8B33B028 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		92B3A3A71C9E9172263AD2F7 /* AppPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPreferences.swift; sourceTree = "<group>"; };
+		948A9CEB6675E4F842A441B0 /* NativeCimbarDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeCimbarDecoder.h; sourceTree = "<group>"; };
+		94A6755BE319E393BF8B6E5E /* huf_decompress_amd64.S */ = {isa = PBXFileReference; path = huf_decompress_amd64.S; sourceTree = "<group>"; };
+		951C6C0B3E14ABAA062A1E1F /* error_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = error_private.h; sourceTree = "<group>"; };
+		9F158492A8663B9F96288AE6 /* portability_macros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = portability_macros.h; sourceTree = "<group>"; };
+		A0108831E93117E36CB2F36F /* error_private.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = error_private.c; sourceTree = "<group>"; };
+		A062235E94EED4AAA7A19AAA /* zstd_decompress_block.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_decompress_block.h; sourceTree = "<group>"; };
+		A1D636EEE6E8D18789770B80 /* zstd_trace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_trace.h; sourceTree = "<group>"; };
+		A2235303437794716B65B0D2 /* ReceivedFileCacheStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedFileCacheStore.swift; sourceTree = "<group>"; };
+		A47E711A911BC2DA97AFAA85 /* threading.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = threading.c; sourceTree = "<group>"; };
+		A6D66A68A9490520C2EDF637 /* wirehair.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = wirehair.cpp; sourceTree = "<group>"; };
+		A73F2428D99E9822C82AC2FB /* mem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mem.h; sourceTree = "<group>"; };
+		A87DF0C509AF81B4C77E1810 /* SimpleCameraCalibration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimpleCameraCalibration.h; sourceTree = "<group>"; };
+		A94E3BBA539D246405346E8C /* WirehairTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WirehairTools.h; sourceTree = "<group>"; };
+		AC1229A88F81D3592370888D /* fse_decompress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fse_decompress.c; sourceTree = "<group>"; };
+		AE43755FB3F843AA0C2C70E4 /* ReceivedFileStorage.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ReceivedFileStorage.mm; sourceTree = "<group>"; };
+		AFE1EE599623738DD847161D /* OpenSourceLicenseTexts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSourceLicenseTexts.swift; sourceTree = "<group>"; };
+		B0193543CD9029E6BF816C9C /* CellDrift.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CellDrift.cpp; sourceTree = "<group>"; };
+		B045A87FE40DDC30E09001F4 /* GridConf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GridConf.h; sourceTree = "<group>"; };
+		B261B9EECF8AF7F2D750D844 /* Scanner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scanner.cpp; sourceTree = "<group>"; };
+		B2C919650C7F5DFD9045C0A2 /* PositionData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PositionData.h; sourceTree = "<group>"; };
+		B4F844EF42E866877521FEAD /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		B7390ACF6E83D47E6F04B32C /* Extractor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Extractor.cpp; sourceTree = "<group>"; };
+		B7F4A868FBFC155368ECBA14 /* entropy_common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropy_common.c; sourceTree = "<group>"; };
+		BC5FE30C88DFAA1D9AB3337C /* SimpleCameraCalibration.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SimpleCameraCalibration.cpp; sourceTree = "<group>"; };
+		BE084C89A60F7753653A7A31 /* FloodDecodePositions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FloodDecodePositions.h; sourceTree = "<group>"; };
+		BE1B54DB3A918B1D0F850A20 /* Interleave.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Interleave.h; sourceTree = "<group>"; };
+		BE7663E30DD0913469292028 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		BF73232E83E91100702AD19E /* cpu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
+		C1472696E217C8468689AD5A /* Point.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Point.h; sourceTree = "<group>"; };
+		C14F236FBFB2168DB9CDBE0E /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		C2A5530CDDF16258463B455C /* encode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = encode.c; sourceTree = "<group>"; };
+		C5EAEAEEE0DEC8DE155360B9 /* CimbarTransfer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CimbarTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7E24733006E46DA00C1B1A4 /* zstd_ddict.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_ddict.h; sourceTree = "<group>"; };
+		C8E0D5F8E145F0FB492A10F5 /* xxhash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = xxhash.c; sourceTree = "<group>"; };
+		C9372C120084DE71D9397228 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = ../ThirdParty/opencv2.framework; sourceTree = "<group>"; };
+		CC42F884939B398D5EDEC442 /* ExtractorPlus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtractorPlus.h; sourceTree = "<group>"; };
+		CF128EE5BFD4CC7859D7FC74 /* CimbarTransferApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CimbarTransferApp.swift; sourceTree = "<group>"; };
+		D17EA83F95F2BDE4AFD3DD05 /* fse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fse.h; sourceTree = "<group>"; };
+		D219CDE8A3FFF3829829FA68 /* zstd_decompress_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_decompress_internal.h; sourceTree = "<group>"; };
+		D4C0352A99B1A8A08CDDD895 /* cimbar_recv_js.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cimbar_recv_js.cpp; sourceTree = "<group>"; };
+		D836BE664808256137E82D6D /* reed-solomon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "reed-solomon.c"; sourceTree = "<group>"; };
+		DD48C8C48A6BFC93F1C1564F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		E05AC33007A6FA2E7D2B94A0 /* DeskewerPlus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeskewerPlus.h; sourceTree = "<group>"; };
+		E3BEA37D289AD9C388BE9E6C /* debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = debug.c; sourceTree = "<group>"; };
+		E4F16E0AE342D3C578F359CD /* WirehairCodec.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WirehairCodec.cpp; sourceTree = "<group>"; };
+		E647F32A1ABCE0562E301BC0 /* pool.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = pool.c; sourceTree = "<group>"; };
+		EB1C82A602EB6F3733DB1D26 /* zstd_deps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_deps.h; sourceTree = "<group>"; };
+		EB33C49D73F150537F3D5BF5 /* Common.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Common.cpp; sourceTree = "<group>"; };
+		EC06CB99E561AED4D88C487F /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		EFB8A0227F4CFE0F45F20091 /* AdjacentCellFinder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AdjacentCellFinder.h; sourceTree = "<group>"; };
+		EFBB96875F5D49F0E799DDCC /* CellPositions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CellPositions.cpp; sourceTree = "<group>"; };
+		F22D4AB13583383631ABBAD7 /* zstd_common.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zstd_common.c; sourceTree = "<group>"; };
+		F3BC91BE232327F21C0D7B02 /* allocations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = allocations.h; sourceTree = "<group>"; };
+		F3C9CF27A0D2E3F65E589652 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		F3D7D1ECBD95FC110CF0AB72 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		F57094A4D90BBAC925388177 /* zstd_decompress_block.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zstd_decompress_block.c; sourceTree = "<group>"; };
+		F6343FDD2092016D43367C72 /* Extractor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Extractor.h; sourceTree = "<group>"; };
+		F7E18EF3B5C18D34556F9826 /* LinearDecodePositions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LinearDecodePositions.h; sourceTree = "<group>"; };
+		FE682F401CF256698AD349D4 /* Cell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Cell.h; sourceTree = "<group>"; };
+		FF33C34190618C83D06CA5C0 /* CellDrift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CellDrift.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9C69FDEEF804DE0C8A795091 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0853640EBB56BD316CBFD3E2 /* opencv2.framework in Frameworks */,
+				622DFDA8F5411C26E3F78378 /* Accelerate.framework in Frameworks */,
+				538454A57BB5AE6137C72ACE /* AVFoundation.framework in Frameworks */,
+				12103AD4A454501B36422704 /* CoreGraphics.framework in Frameworks */,
+				22E259AE379E0C3344D36427 /* CoreImage.framework in Frameworks */,
+				EC4A1C28AE18DBE8982E2833 /* CoreMedia.framework in Frameworks */,
+				CAA53390C34AB192965B5004 /* CoreVideo.framework in Frameworks */,
+				24C345DE43E5A88FEB1036B3 /* QuartzCore.framework in Frameworks */,
+				8934DA91EBBF072227555393 /* libz.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		123469858EDE8C6B82F9B257 /* cimbar_js */ = {
+			isa = PBXGroup;
+			children = (
+				D4C0352A99B1A8A08CDDD895 /* cimbar_recv_js.cpp */,
+				5FCEAC113963BD4A74CDC09B /* cimbar_recv_js.h */,
+			);
+			name = cimbar_js;
+			path = ../../src/lib/cimbar_js;
+			sourceTree = "<group>";
+		};
+		2494EF1AFD281DD8B3926B0E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DD48C8C48A6BFC93F1C1564F /* Accelerate.framework */,
+				B4F844EF42E866877521FEAD /* AVFoundation.framework */,
+				30975B7A7C60EFDC6BDFB5C4 /* CoreGraphics.framework */,
+				330060639CFF8856209B6265 /* CoreImage.framework */,
+				BE7663E30DD0913469292028 /* CoreMedia.framework */,
+				EC06CB99E561AED4D88C487F /* CoreVideo.framework */,
+				F3D7D1ECBD95FC110CF0AB72 /* libz.tbd */,
+				C9372C120084DE71D9397228 /* opencv2.framework */,
+				908CD9DCCB1609B3EB111D0C /* QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		41832FD53EA551268A2389AA /* common */ = {
+			isa = PBXGroup;
+			children = (
+				F3BC91BE232327F21C0D7B02 /* allocations.h */,
+				7E37CD135A9E29789C6C360D /* bits.h */,
+				281361084483B5E6A13310EC /* bitstream.h */,
+				3F8A52174E90373ED86E81D1 /* compiler.h */,
+				BF73232E83E91100702AD19E /* cpu.h */,
+				E3BEA37D289AD9C388BE9E6C /* debug.c */,
+				48E6FF0EC755893B5016E3A2 /* debug.h */,
+				B7F4A868FBFC155368ECBA14 /* entropy_common.c */,
+				A0108831E93117E36CB2F36F /* error_private.c */,
+				951C6C0B3E14ABAA062A1E1F /* error_private.h */,
+				AC1229A88F81D3592370888D /* fse_decompress.c */,
+				D17EA83F95F2BDE4AFD3DD05 /* fse.h */,
+				3152FBCF1CD680187E5FD199 /* huf.h */,
+				A73F2428D99E9822C82AC2FB /* mem.h */,
+				E647F32A1ABCE0562E301BC0 /* pool.c */,
+				5DF763C16202D0DE4DD7ABE0 /* pool.h */,
+				9F158492A8663B9F96288AE6 /* portability_macros.h */,
+				A47E711A911BC2DA97AFAA85 /* threading.c */,
+				80D79AB5D5952FBDA280D82F /* threading.h */,
+				C8E0D5F8E145F0FB492A10F5 /* xxhash.c */,
+				87E53FDF17554E2569EDA041 /* xxhash.h */,
+				F22D4AB13583383631ABBAD7 /* zstd_common.c */,
+				EB1C82A602EB6F3733DB1D26 /* zstd_deps.h */,
+				19352193C4B95ED835600125 /* zstd_internal.h */,
+				A1D636EEE6E8D18789770B80 /* zstd_trace.h */,
+			);
+			name = common;
+			path = ../../src/third_party_lib/zstd/common;
+			sourceTree = "<group>";
+		};
+		53ED651EC8232AB9C398FD9B /* extractor */ = {
+			isa = PBXGroup;
+			children = (
+				1BFFA7E712ECD8ED4EB27362 /* Anchor.h */,
+				68D616F3443CC24838202E0A /* Corners.h */,
+				255E0D39EFA4886082FF276E /* Deskewer.cpp */,
+				75ACECAA1142AFEB680C6C7A /* Deskewer.h */,
+				E05AC33007A6FA2E7D2B94A0 /* DeskewerPlus.h */,
+				23CC2B989D4F6EECADE60185 /* DistortionParameters.h */,
+				4EE333E8681A7DD65CD5DAE9 /* EdgeScanState.h */,
+				B7390ACF6E83D47E6F04B32C /* Extractor.cpp */,
+				F6343FDD2092016D43367C72 /* Extractor.h */,
+				CC42F884939B398D5EDEC442 /* ExtractorPlus.h */,
+				78010A6CC5260BB54F040C7F /* Geometry.h */,
+				33AAAB3343A7FB4950CB1D15 /* Midpoints.h */,
+				C1472696E217C8468689AD5A /* Point.h */,
+				B261B9EECF8AF7F2D750D844 /* Scanner.cpp */,
+				7026190D5764588083F9BB4E /* Scanner.h */,
+				8BBD434EAC37E345ADB36F94 /* ScanState.h */,
+				BC5FE30C88DFAA1D9AB3337C /* SimpleCameraCalibration.cpp */,
+				A87DF0C509AF81B4C77E1810 /* SimpleCameraCalibration.h */,
+				064A7F8E054F9A9CF3182354 /* Undistort.h */,
+			);
+			name = extractor;
+			path = ../../src/lib/extractor;
+			sourceTree = "<group>";
+		};
+		54325BAD32A6B8B42848F248 /* wirehair */ = {
+			isa = PBXGroup;
+			children = (
+				5AD2161C6358BBEA969E6A02 /* gf256.cpp */,
+				1330B5084BB73CAFF064BAC2 /* gf256.h */,
+				A6D66A68A9490520C2EDF637 /* wirehair.cpp */,
+				E4F16E0AE342D3C578F359CD /* WirehairCodec.cpp */,
+				3F2AC1A3E1CAFFCED7124D1C /* WirehairCodec.h */,
+				8A21482A3F21E44F49078C68 /* WirehairTools.cpp */,
+				A94E3BBA539D246405346E8C /* WirehairTools.h */,
+				F443085A2459701209F4989E /* include */,
+			);
+			name = wirehair;
+			path = ../../src/third_party_lib/wirehair;
+			sourceTree = "<group>";
+		};
+		7CE82C2427AE3C87229A6DC7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C5EAEAEEE0DEC8DE155360B9 /* CimbarTransfer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8CF1DEC01C9C713239FEC698 /* cimb_translator */ = {
+			isa = PBXGroup;
+			children = (
+				02A48426A82837B3A282FE56 /* AdjacentCellFinder.cpp */,
+				EFB8A0227F4CFE0F45F20091 /* AdjacentCellFinder.h */,
+				39C44D0D898A080E727BF878 /* bitmaps.h */,
+				FE682F401CF256698AD349D4 /* Cell.h */,
+				B0193543CD9029E6BF816C9C /* CellDrift.cpp */,
+				FF33C34190618C83D06CA5C0 /* CellDrift.h */,
+				EFBB96875F5D49F0E799DDCC /* CellPositions.cpp */,
+				097094135F5599ED50B93836 /* CellPositions.h */,
+				8678BEE34391CE883FE4E53E /* CimbDecoder.cpp */,
+				56324312A322298AAA8AD232 /* CimbDecoder.h */,
+				3A8C09D50BDF4EB20A01ECB2 /* CimbEncoder.cpp */,
+				210A8D90C55C3609B5E7E6C5 /* CimbEncoder.h */,
+				72523A31A545B291AC248582 /* CimbReader.cpp */,
+				073FD0C56C96D076DE2EB21F /* CimbReader.h */,
+				61D3E7849A47B0AF87470131 /* CimbWriter.cpp */,
+				8382AC93F800E66904B52FFF /* CimbWriter.h */,
+				EB33C49D73F150537F3D5BF5 /* Common.cpp */,
+				295DE64EF2FF2BCA1C177F02 /* Common.h */,
+				F3C9CF27A0D2E3F65E589652 /* Config.h */,
+				3E25312F43CD43355B287A39 /* FloodDecodePositions.cpp */,
+				BE084C89A60F7753653A7A31 /* FloodDecodePositions.h */,
+				B045A87FE40DDC30E09001F4 /* GridConf.h */,
+				BE1B54DB3A918B1D0F850A20 /* Interleave.h */,
+				F7E18EF3B5C18D34556F9826 /* LinearDecodePositions.h */,
+				B2C919650C7F5DFD9045C0A2 /* PositionData.h */,
+			);
+			name = cimb_translator;
+			path = ../../src/lib/cimb_translator;
+			sourceTree = "<group>";
+		};
+		91320C4B3BC876C32DF7EE16 /* decompress */ = {
+			isa = PBXGroup;
+			children = (
+				94A6755BE319E393BF8B6E5E /* huf_decompress_amd64.S */,
+				91F498291C18A154B7D1FCE8 /* huf_decompress.c */,
+				3CEA2399C1341BA398A10365 /* zstd_ddict.c */,
+				C7E24733006E46DA00C1B1A4 /* zstd_ddict.h */,
+				F57094A4D90BBAC925388177 /* zstd_decompress_block.c */,
+				A062235E94EED4AAA7A19AAA /* zstd_decompress_block.h */,
+				D219CDE8A3FFF3829829FA68 /* zstd_decompress_internal.h */,
+				277E489A612B7A2126FC118F /* zstd_decompress.c */,
+			);
+			name = decompress;
+			path = ../../src/third_party_lib/zstd/decompress;
+			sourceTree = "<group>";
+		};
+		914E46346A19BB6F9393637A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				24B99F504BE8073F54612041 /* AboutScreen.swift */,
+				92B3A3A71C9E9172263AD2F7 /* AppPreferences.swift */,
+				C14F236FBFB2168DB9CDBE0E /* CameraPreviewView.swift */,
+				899468F57E21BB58B04AC04E /* CimbarTransfer-Bridging-Header.h */,
+				CF128EE5BFD4CC7859D7FC74 /* CimbarTransferApp.swift */,
+				925D9CD2FF4E4B1E8B33B028 /* ContentView.swift */,
+				37EED17D2B8E3C5737C94D54 /* LibraryScreen.swift */,
+				948A9CEB6675E4F842A441B0 /* NativeCimbarDecoder.h */,
+				4F1AB19C8856EBBA7F1EE290 /* NativeCimbarDecoder.mm */,
+				4403A1D091529603BA1D4472 /* NativeReceiverViewModel.swift */,
+				01132593540B24982EB9A565 /* OnboardingScreen.swift */,
+				8ED9035BFE5C6C6F7FF83C41 /* OpenSourceLicensesScreen.swift */,
+				AFE1EE599623738DD847161D /* OpenSourceLicenseTexts.swift */,
+				5468CC77B58FC32F8F03A6CD /* PhotoLibrarySaver.swift */,
+				6A031A6BD93D618C47D422D9 /* PrivacyPolicyScreen.swift */,
+				267211FAB3A8100EDC33F5BB /* QuickLookPreview.swift */,
+				42886AEA0AB1044BA398BCC5 /* ReceivedFileCache.swift */,
+				A2235303437794716B65B0D2 /* ReceivedFileCacheStore.swift */,
+				19CD545F0EDBB9F9D06E61D6 /* ReceivedFileMetadata.swift */,
+				7D36E37D156A777E92D5A789 /* ReceivedFileStorage.h */,
+				AE43755FB3F843AA0C2C70E4 /* ReceivedFileStorage.mm */,
+				774E9C11CA7D06541CAE5F8E /* ReceiverScreen.swift */,
+				821DAE87481916D8F61ED286 /* SettingsScreen.swift */,
+				478E0A0083D449AF46DAF3FB /* ShareSheet.swift */,
+				43E81F443C6D1FE5FBEF6EA6 /* TermsOfServiceScreen.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A83D8CFE7D91A1E4700F9C6A /* wirehair */ = {
+			isa = PBXGroup;
+			children = (
+				1E56C907EE86829FEDF6A38B /* wirehair.h */,
+			);
+			path = wirehair;
+			sourceTree = "<group>";
+		};
+		B5831BEB6C48B609E8285C77 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				7566D65EF5544E1795DEEC0E /* Assets.xcassets */,
+				1F827998BB6A6BEE77172532 /* PrivacyInfo.xcprivacy */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		D00BCB03B101E203E36BC693 = {
+			isa = PBXGroup;
+			children = (
+				914E46346A19BB6F9393637A /* App */,
+				8CF1DEC01C9C713239FEC698 /* cimb_translator */,
+				123469858EDE8C6B82F9B257 /* cimbar_js */,
+				41832FD53EA551268A2389AA /* common */,
+				91320C4B3BC876C32DF7EE16 /* decompress */,
+				53ED651EC8232AB9C398FD9B /* extractor */,
+				F2842E4C2EE786F6BE584A03 /* reed-solomon */,
+				B5831BEB6C48B609E8285C77 /* Support */,
+				54325BAD32A6B8B42848F248 /* wirehair */,
+				2494EF1AFD281DD8B3926B0E /* Frameworks */,
+				7CE82C2427AE3C87229A6DC7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F2842E4C2EE786F6BE584A03 /* reed-solomon */ = {
+			isa = PBXGroup;
+			children = (
+				38408673B808EB6C04EF1A16 /* decode.c */,
+				C2A5530CDDF16258463B455C /* encode.c */,
+				6A28D4F38DDC519E3633EF6A /* polynomial.c */,
+				D836BE664808256137E82D6D /* reed-solomon.c */,
+			);
+			name = "reed-solomon";
+			path = "../../src/third_party_lib/libcorrect/src/reed-solomon";
+			sourceTree = "<group>";
+		};
+		F443085A2459701209F4989E /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A83D8CFE7D91A1E4700F9C6A /* wirehair */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F1D199AA464245BD972C1EFF /* CimbarTransfer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10C9BD7F6FB11AB0ABF01B3C /* Build configuration list for PBXNativeTarget "CimbarTransfer" */;
+			buildPhases = (
+				B34D5304635861031CCCF90B /* Sources */,
+				A7089E080A3BAE6408B3C78E /* Resources */,
+				9C69FDEEF804DE0C8A795091 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CimbarTransfer;
+			packageProductDependencies = (
+			);
+			productName = CimbarTransfer;
+			productReference = C5EAEAEEE0DEC8DE155360B9 /* CimbarTransfer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		95F19721231FDF80B4C4F4CF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					F1D199AA464245BD972C1EFF = {
+						DevelopmentTeam = DF24DNZFWX;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 9E5D55D0EEE58355C3B01FCC /* Build configuration list for PBXProject "CimbarTransfer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D00BCB03B101E203E36BC693;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7CE82C2427AE3C87229A6DC7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F1D199AA464245BD972C1EFF /* CimbarTransfer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A7089E080A3BAE6408B3C78E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25C00B8E15A0E6166E93D357 /* Assets.xcassets in Resources */,
+				1024BA0225BF72704413ACB4 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B34D5304635861031CCCF90B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFB3959FC937AD50E513C322 /* AboutScreen.swift in Sources */,
+				0C6AAF3DFAE1A2AFD72C7035 /* AdjacentCellFinder.cpp in Sources */,
+				09C096FA60F5BD15E580D921 /* AppPreferences.swift in Sources */,
+				F6F8084525EC98B2CC2E7D43 /* CameraPreviewView.swift in Sources */,
+				67653260C76000D5DE94706E /* CellDrift.cpp in Sources */,
+				178CC01F5143D0A911E4C1F1 /* CellPositions.cpp in Sources */,
+				50EC0D7884063A08F94C5CF5 /* CimbDecoder.cpp in Sources */,
+				A052E0223DD9B5028BA2BF8E /* CimbEncoder.cpp in Sources */,
+				021AD30CA6FEC927701E248E /* CimbReader.cpp in Sources */,
+				B0A825D944AD1B66E51423DA /* CimbWriter.cpp in Sources */,
+				34697F2F23D8F532F40995A3 /* CimbarTransferApp.swift in Sources */,
+				2CB8541074E5F73C27C54DC7 /* Common.cpp in Sources */,
+				B7035180B598AB52D85391DB /* ContentView.swift in Sources */,
+				59364C0550871029C1721339 /* Deskewer.cpp in Sources */,
+				40BD3EEBED6BECE55962605B /* Extractor.cpp in Sources */,
+				87FA5625D58D20E15253A3F8 /* FloodDecodePositions.cpp in Sources */,
+				2B25DDC58253BB209A29A872 /* LibraryScreen.swift in Sources */,
+				8F91885C32E71770108E2FF6 /* NativeCimbarDecoder.mm in Sources */,
+				D4C79FAA3E0BD51C9CBDA3CC /* NativeReceiverViewModel.swift in Sources */,
+				5ED06D7002A674CC7DB68D0F /* OnboardingScreen.swift in Sources */,
+				A36D9573371223B146B34532 /* OpenSourceLicenseTexts.swift in Sources */,
+				459CF89A85A08BD3333B73DE /* OpenSourceLicensesScreen.swift in Sources */,
+				F90DA07AFCF49CEE59F15829 /* PhotoLibrarySaver.swift in Sources */,
+				41D329E8387B0F97F5251AAD /* PrivacyPolicyScreen.swift in Sources */,
+				3B4882346C639DF5673F40F8 /* QuickLookPreview.swift in Sources */,
+				FFF69F4BC5520CF4BB465DBC /* ReceivedFileCache.swift in Sources */,
+				AB38F695BF4E139F74E587E3 /* ReceivedFileCacheStore.swift in Sources */,
+				9A302113EC7A63F02237C4E2 /* ReceivedFileMetadata.swift in Sources */,
+				48ACBC9F61B427547214237E /* ReceivedFileStorage.mm in Sources */,
+				B063974937022618BB5953B6 /* ReceiverScreen.swift in Sources */,
+				12941372E729DD4F099AA01B /* Scanner.cpp in Sources */,
+				98AF3C4592B31AB667E6B3C9 /* SettingsScreen.swift in Sources */,
+				F1658F54DB8166587AD0D1CC /* ShareSheet.swift in Sources */,
+				3FDB8429AA466C804CD41BA6 /* SimpleCameraCalibration.cpp in Sources */,
+				D8C7230769B04141BBDC4DCD /* TermsOfServiceScreen.swift in Sources */,
+				04FA19CB09D48A85CA4683F2 /* WirehairCodec.cpp in Sources */,
+				0A80F26DF02315F1C369F470 /* WirehairTools.cpp in Sources */,
+				0FE9909F6E8FE41A4CDB7B06 /* cimbar_recv_js.cpp in Sources */,
+				253E6C08EF64376D8A36208B /* debug.c in Sources */,
+				7CF57D20BC69B57DECDCA8EA /* decode.c in Sources */,
+				C6661657870ECA3B5141D433 /* encode.c in Sources */,
+				14FF77FB689796DE2AD74FE7 /* entropy_common.c in Sources */,
+				6CE6CBBF92F0CC3A09DCB664 /* error_private.c in Sources */,
+				503694EFF77FEC3B278C59A5 /* fse_decompress.c in Sources */,
+				21216AA086813B89B2CB8D4F /* gf256.cpp in Sources */,
+				76B7EA5425E53957D8DF269F /* huf_decompress.c in Sources */,
+				1439B880D12AA49685B93EB2 /* huf_decompress_amd64.S in Sources */,
+				44227C3507C364730829BA7B /* polynomial.c in Sources */,
+				A7F9E3DF09460BC0C7638BC8 /* pool.c in Sources */,
+				23215C249ED111F2C9AF1A96 /* reed-solomon.c in Sources */,
+				91F8F5C9C01A1C69DDAF6CA9 /* threading.c in Sources */,
+				214EA28BD748B4CD50ADEA4F /* wirehair.cpp in Sources */,
+				E7459FA1B3D991F937B4B2B2 /* xxhash.c in Sources */,
+				6194886BD9080E7951C6CE57 /* zstd_common.c in Sources */,
+				EB4FF9EC623FA307D41EE223 /* zstd_ddict.c in Sources */,
+				3F17A030B0E91D265E277B02 /* zstd_decompress.c in Sources */,
+				689780980949DF2F3328F452 /* zstd_decompress_block.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		086D8227B9F2521CBFFC2DDF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		131EF0B2F046C432BA32E1A8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_COMMA = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_UNREACHABLE_CODE = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DF24DNZFWX;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]" = huf_decompress_amd64.S;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../ThirdParty\"",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"IOS=1",
+					"ZSTD_STATIC_LINKING_ONLY=1",
+					"CIMBARD_NO_DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../src/lib",
+					"$(SRCROOT)/../../src/third_party_lib",
+					"$(SRCROOT)/../../src/third_party_lib/wirehair/include",
+					"$(SRCROOT)/../../src/third_party_lib/libcorrect/include",
+					"$(SRCROOT)/../ThirdParty/opencv2.framework/Headers",
+				);
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.cimbar.CimbarTransfer;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "App/CimbarTransfer-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"-Wno-deprecated-literal-operator",
+					"-Wno-macro-redefined",
+					"-Wno-unused-function",
+				);
+			};
+			name = Release;
+		};
+		4C2F0703F6105B69BDF25B4B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_COMMA = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_UNREACHABLE_CODE = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DF24DNZFWX;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]" = huf_decompress_amd64.S;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../ThirdParty\"",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"IOS=1",
+					"ZSTD_STATIC_LINKING_ONLY=1",
+					"CIMBARD_NO_DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../src/lib",
+					"$(SRCROOT)/../../src/third_party_lib",
+					"$(SRCROOT)/../../src/third_party_lib/wirehair/include",
+					"$(SRCROOT)/../../src/third_party_lib/libcorrect/include",
+					"$(SRCROOT)/../ThirdParty/opencv2.framework/Headers",
+				);
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.cimbar.CimbarTransfer;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "App/CimbarTransfer-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"-Wno-deprecated-literal-operator",
+					"-Wno-macro-redefined",
+					"-Wno-unused-function",
+				);
+			};
+			name = Debug;
+		};
+		EAE9BDBEE412B9B26A538A9F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		10C9BD7F6FB11AB0ABF01B3C /* Build configuration list for PBXNativeTarget "CimbarTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C2F0703F6105B69BDF25B4B /* Debug */,
+				131EF0B2F046C432BA32E1A8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9E5D55D0EEE58355C3B01FCC /* Build configuration list for PBXProject "CimbarTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				086D8227B9F2521CBFFC2DDF /* Debug */,
+				EAE9BDBEE412B9B26A538A9F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 95F19721231FDF80B4C4F4CF /* Project object */;
+}

@@ -1,0 +1,97 @@
+name: CimbarTransfer
+options:
+  deploymentTarget:
+    iOS: 16.0
+targets:
+  CimbarTransfer:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Support/Assets.xcassets
+        buildPhase: resources
+      - path: Support/PrivacyInfo.xcprivacy
+        buildPhase: resources
+      - path: ../../src/lib/cimb_translator
+        includes:
+          - "**/*.cpp"
+          - "**/*.h"
+        excludes:
+          - test/**
+      - path: ../../src/lib/cimbar_js
+        includes:
+          - cimbar_recv_js.cpp
+          - cimbar_recv_js.h
+      - path: ../../src/lib/extractor
+        includes:
+          - "**/*.cpp"
+          - "**/*.h"
+        excludes:
+          - test/**
+      - path: ../../src/third_party_lib/wirehair
+        includes:
+          - "*.cpp"
+          - "*.h"
+          - "include/**/*.h"
+        excludes:
+          - test/**
+          - tables/**
+      - path: ../../src/third_party_lib/libcorrect/src/reed-solomon
+        includes:
+          - "*.c"
+          - "*.h"
+      - path: ../../src/third_party_lib/zstd/common
+        includes:
+          - "*.c"
+          - "*.h"
+      - path: ../../src/third_party_lib/zstd/decompress
+        includes:
+          - "*.c"
+          - "*.h"
+          - "*.S"
+    dependencies:
+      - framework: ../ThirdParty/opencv2.framework
+        embed: false
+      - sdk: Accelerate.framework
+      - sdk: AVFoundation.framework
+      - sdk: CoreGraphics.framework
+      - sdk: CoreImage.framework
+      - sdk: CoreMedia.framework
+      - sdk: CoreVideo.framework
+      - sdk: QuartzCore.framework
+      - sdk: libz.tbd
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.cimbar.CimbarTransfer
+        DEVELOPMENT_TEAM: DF24DNZFWX
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: Support/Info.plist
+        SWIFT_VERSION: 5.0
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_OBJC_BRIDGING_HEADER: App/CimbarTransfer-Bridging-Header.h
+        CLANG_CXX_LANGUAGE_STANDARD: gnu++17
+        CLANG_CXX_LIBRARY: libc++
+        CLANG_WARN_COMMA: NO
+        CLANG_WARN_DOCUMENTATION_COMMENTS: NO
+        CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: NO
+        CLANG_WARN_UNREACHABLE_CODE: NO
+        GCC_WARN_64_TO_32_BIT_CONVERSION: NO
+        HEADER_SEARCH_PATHS:
+          - $(SRCROOT)/../../src/lib
+          - $(SRCROOT)/../../src/third_party_lib
+          - $(SRCROOT)/../../src/third_party_lib/wirehair/include
+          - $(SRCROOT)/../../src/third_party_lib/libcorrect/include
+          - $(SRCROOT)/../ThirdParty/opencv2.framework/Headers
+        WARNING_CFLAGS:
+          - $(inherited)
+          - -Wno-deprecated-literal-operator
+          - -Wno-macro-redefined
+          - -Wno-unused-function
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - $(inherited)
+          - IOS=1
+          - ZSTD_STATIC_LINKING_ONLY=1
+          # iOS 不使用上游的调试帧和 stdout 输出，裁掉每帧整帧拷贝（720p 约 2.7MB/帧）
+          - CIMBARD_NO_DEBUG=1
+        EXCLUDED_ARCHS[sdk=iphonesimulator*]: arm64
+        EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]: huf_decompress_amd64.S
