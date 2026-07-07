@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SettingsScreen: View {
     @ObservedObject var store: ReceivedFileCacheStore
@@ -47,6 +48,11 @@ struct SettingsScreen: View {
             Section("存储") {
                 LabeledContent("已接收", value: store.cacheSummary)
                 LabeledContent("保存位置", value: ReceivedFileCache.displayPath)
+                Button {
+                    openInFilesApp()
+                } label: {
+                    Label("在「文件」App 中查看", systemImage: "folder.badge.gearshape")
+                }
                 Text("文件保存在 App 的文档目录，可在系统「文件」App 中浏览。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -144,6 +150,15 @@ struct SettingsScreen: View {
                 showingOnboarding = false
             }
         }
+    }
+
+    private func openInFilesApp() {
+        guard let directory = try? ReceivedFileCache.directoryURL(),
+              var components = URLComponents(url: directory, resolvingAgainstBaseURL: false) else { return }
+        // 系统「文件」App 的官方跳转方式：file:// 换成 shareddocuments://
+        components.scheme = "shareddocuments"
+        guard let url = components.url else { return }
+        UIApplication.shared.open(url)
     }
 
     private var retentionHint: String {
