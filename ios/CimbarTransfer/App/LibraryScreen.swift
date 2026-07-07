@@ -32,6 +32,7 @@ struct LibraryScreen: View {
     @State private var selectedIDs: Set<String> = []
     @State private var bulkDeleteConfirm = false
     @State private var saveToast: SaveToast?
+    @State private var detailTarget: CachedReceivedFile?
 
     private var filteredFiles: [CachedReceivedFile] {
         let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -88,6 +89,19 @@ struct LibraryScreen: View {
         .animation(.spring(duration: 0.3), value: saveToast?.id)
         .navigationTitle("我的文件")
         .navigationBarTitleDisplayMode(.large)
+        .navigationDestination(isPresented: Binding(
+            get: { detailTarget != nil },
+            set: { if !$0 { detailTarget = nil } }
+        )) {
+            if let target = detailTarget {
+                FileDetailScreen(
+                    store: store,
+                    initialFile: target,
+                    onShare: onShare,
+                    onPreview: onPreview
+                )
+            }
+        }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "搜索文件名")
         .toolbar { toolbarContent }
         .refreshable {
@@ -180,6 +194,9 @@ struct LibraryScreen: View {
                         }
                     }
                     .contextMenu {
+                        Button {
+                            detailTarget = file
+                        } label: { Label("详情", systemImage: "info.circle") }
                         Button {
                             onPreview(file.url)
                         } label: { Label("预览", systemImage: "eye") }
@@ -310,8 +327,11 @@ private struct LibraryRow: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .font(.title3)
             }
-            FileIconView(file: file)
-                .frame(width: 44, height: 44)
+            FileThumbnailView(
+                url: file.url,
+                cacheKey: "row-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)"
+            )
+            .frame(width: 44, height: 44)
             VStack(alignment: .leading, spacing: 4) {
                 Text(file.displayName)
                     .font(.body)
@@ -328,54 +348,6 @@ private struct LibraryRow: View {
             }
         }
         .padding(.vertical, 4)
-    }
-}
-
-private struct FileIconView: View {
-    let file: CachedReceivedFile
-
-    private struct IconStyle {
-        let symbol: String
-        let tint: Color
-    }
-
-    private var style: IconStyle {
-        switch file.fileExtension {
-        case "jpg", "jpeg", "png", "heic", "gif", "webp", "tiff", "bmp":
-            return IconStyle(symbol: "photo", tint: .pink)
-        case "mp4", "mov", "m4v", "avi", "mkv":
-            return IconStyle(symbol: "play.rectangle.fill", tint: .red)
-        case "mp3", "wav", "aac", "flac", "m4a":
-            return IconStyle(symbol: "music.note", tint: .purple)
-        case "pdf":
-            return IconStyle(symbol: "doc.richtext.fill", tint: .red)
-        case "zip", "rar", "7z", "tar", "gz":
-            return IconStyle(symbol: "archivebox.fill", tint: .brown)
-        case "txt", "log", "md":
-            return IconStyle(symbol: "doc.text.fill", tint: .gray)
-        case "json", "xml", "yaml", "yml", "toml":
-            return IconStyle(symbol: "curlybraces", tint: .orange)
-        case "doc", "docx":
-            return IconStyle(symbol: "doc.fill", tint: .blue)
-        case "xls", "xlsx", "csv":
-            return IconStyle(symbol: "tablecells.fill", tint: .green)
-        case "ppt", "pptx", "key":
-            return IconStyle(symbol: "rectangle.on.rectangle.fill", tint: .orange)
-        case "html", "htm":
-            return IconStyle(symbol: "globe", tint: .blue)
-        default:
-            return IconStyle(symbol: "doc", tint: .secondary)
-        }
-    }
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(style.tint.opacity(0.18))
-            Image(systemName: style.symbol)
-                .font(.title3)
-                .foregroundStyle(style.tint)
-        }
     }
 }
 

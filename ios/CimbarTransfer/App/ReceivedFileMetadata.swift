@@ -97,6 +97,17 @@ final class ReceivedFileMetadataStore {
         }
     }
 
+    /// 记录一次性计算出的校验值，之后打开详情页可直接展示
+    func updateChecksum(filename: String, sha256: String) {
+        queue.sync {
+            ensureLoadedLocked()
+            guard var existing = entries[filename] else { return }
+            existing.sha256 = sha256
+            entries[filename] = existing
+            persistLocked()
+        }
+    }
+
     func renameKey(from oldFilename: String, to newFilename: String) {
         queue.sync {
             ensureLoadedLocked()

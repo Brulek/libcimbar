@@ -291,6 +291,13 @@ private struct CompletedTransferCard: View {
 
     // 状态缓存文件大小：body 可能因动画每秒重算多次，不能每次都读磁盘
     @State private var fileSize: String?
+    @State private var photoSaving = false
+    @State private var photoSaved = false
+    @State private var photoSaveError: String?
+
+    private var canSaveToPhotos: Bool {
+        PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
+    }
 
     private static func loadFileSize(for url: URL) -> String? {
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
@@ -301,7 +308,7 @@ private struct CompletedTransferCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                CompletedFileIcon(extension: fileURL.pathExtension)
+                FileThumbnailView(url: fileURL, cacheKey: "completed-\(fileURL.lastPathComponent)")
                     .frame(width: 48, height: 48)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(fileURL.lastPathComponent)
@@ -325,6 +332,19 @@ private struct CompletedTransferCard: View {
                 }
                 .buttonStyle(.bordered)
 
+                if canSaveToPhotos {
+                    Button {
+                        Task { await saveToPhotos() }
+                    } label: {
+                        Label(photoSaved ? "已保存" : "存相册", systemImage: photoSaved ? "checkmark" : "photo.on.rectangle")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(photoSaved ? .green : nil)
+                    .disabled(photoSaving || photoSaved)
+                }
+
                 Button(action: onShare) {
                     Label("分享", systemImage: "square.and.arrow.up")
                         .frame(maxWidth: .infinity)
@@ -333,6 +353,7 @@ private struct CompletedTransferCard: View {
                 .buttonStyle(.borderedProminent)
                 .tint(highlightShareAction ? .green : .accentColor)
             }
+            .labelStyle(CompactActionLabelStyle())
 
             Button(action: onContinueScanning) {
                 Label("继续扫码", systemImage: "arrow.counterclockwise")
@@ -345,37 +366,42 @@ private struct CompletedTransferCard: View {
         }
         .task(id: fileURL) {
             fileSize = Self.loadFileSize(for: fileURL)
+            photoSaving = false
+            photoSaved = false
+            photoSaveError = nil
+        }
+        .alert("存到相册失败", isPresented: Binding(
+            get: { photoSaveError != nil },
+            set: { if !$0 { photoSaveError = nil } }
+        )) {
+            Button("好", role: .cancel) {}
+        } message: {
+            Text(photoSaveError ?? "")
+        }
+    }
+
+    @MainActor
+    private func saveToPhotos() async {
+        photoSaving = true
+        defer { photoSaving = false }
+        do {
+            try await PhotoLibrarySaver.save(fileURL: fileURL)
+            withAnimation { photoSaved = true }
+        } catch {
+            photoSaveError = (error as? LocalizedError)?.errorDescription ?? "保存失败"
         }
     }
 }
 
-private struct CompletedFileIcon: View {
-    let `extension`: String
-
-    private var symbolName: String {
-        switch self.extension.lowercased() {
-        case "jpg", "jpeg", "png", "heic", "gif", "webp", "tiff", "bmp": return "photo"
-        case "mp4", "mov", "m4v", "avi", "mkv": return "play.rectangle.fill"
-        case "mp3", "wav", "aac", "flac", "m4a": return "music.note"
-        case "pdf": return "doc.richtext.fill"
-        case "zip", "rar", "7z", "tar", "gz": return "archivebox.fill"
-        case "txt", "log", "md": return "doc.text.fill"
-        case "json", "xml", "yaml", "yml", "toml": return "curlybraces"
-        case "doc", "docx": return "doc.fill"
-        case "xls", "xlsx", "csv": return "tablecells.fill"
-        case "ppt", "pptx", "key": return "rectangle.on.rectangle.fill"
-        default: return "doc"
+/// 三个按钮并排时空间紧张，压缩 Label 的图文间距
+private struct CompactActionLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) {
+            configuration.icon
+            configuration.title
         }
-    }
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.tint.opacity(0.18))
-            Image(systemName: symbolName)
-                .font(.title3)
-                .foregroundStyle(.tint)
-        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 }
 

@@ -18,6 +18,7 @@
 		12103AD4A454501B36422704 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30975B7A7C60EFDC6BDFB5C4 /* CoreGraphics.framework */; };
 		12941372E729DD4F099AA01B /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B261B9EECF8AF7F2D750D844 /* Scanner.cpp */; };
 		1439B880D12AA49685B93EB2 /* huf_decompress_amd64.S in Sources */ = {isa = PBXBuildFile; fileRef = 94A6755BE319E393BF8B6E5E /* huf_decompress_amd64.S */; };
+		14B3405DB2417C2FD30CA4C9 /* FileDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B9430892758DB7E9A7DE4A /* FileDetailScreen.swift */; };
 		14FF77FB689796DE2AD74FE7 /* entropy_common.c in Sources */ = {isa = PBXBuildFile; fileRef = B7F4A868FBFC155368ECBA14 /* entropy_common.c */; };
 		178CC01F5143D0A911E4C1F1 /* CellPositions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EFBB96875F5D49F0E799DDCC /* CellPositions.cpp */; };
 		21216AA086813B89B2CB8D4F /* gf256.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AD2161C6358BBEA969E6A02 /* gf256.cpp */; };
@@ -49,6 +50,7 @@
 		689780980949DF2F3328F452 /* zstd_decompress_block.c in Sources */ = {isa = PBXBuildFile; fileRef = F57094A4D90BBAC925388177 /* zstd_decompress_block.c */; };
 		6CE6CBBF92F0CC3A09DCB664 /* error_private.c in Sources */ = {isa = PBXBuildFile; fileRef = A0108831E93117E36CB2F36F /* error_private.c */; };
 		76B7EA5425E53957D8DF269F /* huf_decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 91F498291C18A154B7D1FCE8 /* huf_decompress.c */; };
+		7BF14C4DB200AC6A0F34DF01 /* FileThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2446F0A4CCB285870D04EC /* FileThumbnailView.swift */; };
 		7CF57D20BC69B57DECDCA8EA /* decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 38408673B808EB6C04EF1A16 /* decode.c */; };
 		87FA5625D58D20E15253A3F8 /* FloodDecodePositions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E25312F43CD43355B287A39 /* FloodDecodePositions.cpp */; };
 		8934DA91EBBF072227555393 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D7D1ECBD95FC110CF0AB72 /* libz.tbd */; };
@@ -112,6 +114,7 @@
 		42886AEA0AB1044BA398BCC5 /* ReceivedFileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedFileCache.swift; sourceTree = "<group>"; };
 		43E81F443C6D1FE5FBEF6EA6 /* TermsOfServiceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceScreen.swift; sourceTree = "<group>"; };
 		4403A1D091529603BA1D4472 /* NativeReceiverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeReceiverViewModel.swift; sourceTree = "<group>"; };
+		46B9430892758DB7E9A7DE4A /* FileDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileDetailScreen.swift; path = App/FileDetailScreen.swift; sourceTree = SOURCE_ROOT; };
 		478E0A0083D449AF46DAF3FB /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		48E6FF0EC755893B5016E3A2 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
 		4EE333E8681A7DD65CD5DAE9 /* EdgeScanState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EdgeScanState.h; sourceTree = "<group>"; };
@@ -131,6 +134,7 @@
 		75ACECAA1142AFEB680C6C7A /* Deskewer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Deskewer.h; sourceTree = "<group>"; };
 		774E9C11CA7D06541CAE5F8E /* ReceiverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverScreen.swift; sourceTree = "<group>"; };
 		78010A6CC5260BB54F040C7F /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
+		7D2446F0A4CCB285870D04EC /* FileThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FileThumbnailView.swift; path = App/FileThumbnailView.swift; sourceTree = SOURCE_ROOT; };
 		7D36E37D156A777E92D5A789 /* ReceivedFileStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReceivedFileStorage.h; sourceTree = "<group>"; };
 		7E37CD135A9E29789C6C360D /* bits.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bits.h; sourceTree = "<group>"; };
 		80D79AB5D5952FBDA280D82F /* threading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threading.h; sourceTree = "<group>"; };
@@ -415,6 +419,8 @@
 				821DAE87481916D8F61ED286 /* SettingsScreen.swift */,
 				478E0A0083D449AF46DAF3FB /* ShareSheet.swift */,
 				43E81F443C6D1FE5FBEF6EA6 /* TermsOfServiceScreen.swift */,
+				7D2446F0A4CCB285870D04EC /* FileThumbnailView.swift */,
+				46B9430892758DB7E9A7DE4A /* FileDetailScreen.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -603,6 +609,8 @@
 				EB4FF9EC623FA307D41EE223 /* zstd_ddict.c in Sources */,
 				3F17A030B0E91D265E277B02 /* zstd_decompress.c in Sources */,
 				689780980949DF2F3328F452 /* zstd_decompress_block.c in Sources */,
+				7BF14C4DB200AC6A0F34DF01 /* FileThumbnailView.swift in Sources */,
+				14B3405DB2417C2FD30CA4C9 /* FileDetailScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
