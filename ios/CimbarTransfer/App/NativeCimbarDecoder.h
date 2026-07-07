@@ -10,6 +10,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSURL *fileURL;
 @property (nonatomic, assign) BOOL didDetectFirstFrame;
 @property (nonatomic, assign) NSUInteger revision;
+// 本次扫码会话累计识别到的有效码帧数（0 表示该输出不携带计数）
+@property (nonatomic, assign) NSUInteger detectedFrameCount;
 @end
 
 @interface NativeCimbarDecoder : NSObject

@@ -139,6 +139,7 @@
 
     _detectedFrameCount += 1;
     NativeCimbarDecodeOutput *output = [NativeCimbarDecodeOutput new];
+    output.detectedFrameCount = _detectedFrameCount;
     output.statusText = [NSString stringWithFormat:@"已识别到码帧，正在解码（%lu）", (unsigned long)_detectedFrameCount];
     output.progressLabel = @"已检测到传输，正在重组数据";
 

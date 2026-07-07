@@ -11,6 +11,8 @@ struct ReceiverScreen: View {
     let onPreview: (URL) -> Void
 
     @State private var showCheckmark = false
+    @State private var focusIndicatorPoint: CGPoint?
+    @State private var focusIndicatorID = UUID()
 
     private var scanState: ScanState {
         if viewModel.progressValue != nil && viewModel.receivedFileURL == nil {
@@ -21,9 +23,18 @@ struct ReceiverScreen: View {
 
     var body: some View {
         ZStack {
-            CameraPreviewView(session: viewModel.session)
+            CameraPreviewView(
+                session: viewModel.session,
+                onTapToFocus: { devicePoint, viewPoint in
+                    viewModel.focus(atDevicePoint: devicePoint)
+                    presentFocusIndicator(at: viewPoint)
+                },
+                onPinchBegan: { viewModel.beginZoomGesture() },
+                onPinchChanged: { viewModel.updateZoomGesture(scale: $0) },
+                onDoubleTap: { viewModel.resetZoom() }
+            )
                 .ignoresSafeArea()
-                .accessibilityLabel("相机预览")
+                .accessibilityLabel("相机预览，轻点对焦，捏合缩放")
                 .accessibilityElement(children: .ignore)
                 .overlay {
                     ScanFrameOverlay(
@@ -34,13 +45,26 @@ struct ReceiverScreen: View {
                     )
                 }
                 .overlay {
+                    if let point = focusIndicatorPoint {
+                        FocusIndicatorView()
+                            .position(point)
+                            .id(focusIndicatorID)
+                    }
+                }
+                .overlay {
                     if viewModel.cameraPermissionDenied {
                         PermissionDeniedCard()
                     }
                 }
 
             VStack(spacing: 18) {
-                ReceiverTopBar()
+                ReceiverTopBar(
+                    zoomFactor: viewModel.zoomFactor,
+                    torchAvailable: viewModel.torchAvailable,
+                    torchActive: viewModel.torchActive,
+                    onResetZoom: { viewModel.resetZoom() },
+                    onToggleTorch: { viewModel.toggleTorch() }
+                )
                 Spacer()
             }
             .padding(.horizontal)
@@ -51,6 +75,7 @@ struct ReceiverScreen: View {
                 statusText: viewModel.statusText,
                 progressValue: viewModel.progressValue,
                 progressLabel: viewModel.progressLabel,
+                statsText: viewModel.statsText,
                 receivedFileURL: viewModel.receivedFileURL,
                 showCheckmark: showCheckmark,
                 onShare: onShare,
@@ -76,6 +101,20 @@ struct ReceiverScreen: View {
     private func resetScan() {
         withAnimation {
             viewModel.resetScan()
+        }
+    }
+
+    private func presentFocusIndicator(at point: CGPoint) {
+        let id = UUID()
+        focusIndicatorID = id
+        focusIndicatorPoint = point
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            if focusIndicatorID == id {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    focusIndicatorPoint = nil
+                }
+            }
         }
     }
 
@@ -106,6 +145,12 @@ struct ReceiverScreen: View {
 }
 
 private struct ReceiverTopBar: View {
+    let zoomFactor: CGFloat
+    let torchAvailable: Bool
+    let torchActive: Bool
+    let onResetZoom: () -> Void
+    let onToggleTorch: () -> Void
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
@@ -117,7 +162,54 @@ private struct ReceiverTopBar: View {
                     .foregroundStyle(.white.opacity(0.7))
             }
             Spacer()
+
+            if zoomFactor > 1.01 {
+                Button(action: onResetZoom) {
+                    Text(String(format: "%.1f×", zoomFactor))
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(.yellow)
+                        .frame(height: 44)
+                        .padding(.horizontal, 12)
+                        .background(Color.white.opacity(0.16), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("当前变焦 \(String(format: "%.1f", zoomFactor)) 倍，点按恢复 1 倍")
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+
+            if torchAvailable {
+                Button(action: onToggleTorch) {
+                    Image(systemName: torchActive ? "flashlight.on.fill" : "flashlight.off.fill")
+                        .font(.headline)
+                        .foregroundStyle(torchActive ? .yellow : .white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(torchActive ? "关闭手电筒" : "打开手电筒")
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: zoomFactor > 1.01)
+        .animation(.easeInOut(duration: 0.2), value: torchActive)
+    }
+}
+
+private struct FocusIndicatorView: View {
+    @State private var appeared = false
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .stroke(Color.yellow, lineWidth: 1.5)
+            .frame(width: 68, height: 68)
+            .scaleEffect(appeared ? 1.0 : 1.45)
+            .opacity(appeared ? 1.0 : 0.4)
+            .shadow(color: .black.opacity(0.35), radius: 2)
+            .onAppear {
+                withAnimation(.spring(duration: 0.3)) {
+                    appeared = true
+                }
+            }
+            .allowsHitTesting(false)
     }
 }
 
@@ -125,6 +217,7 @@ private struct ReceiverBottomPanel: View {
     let statusText: String
     let progressValue: Double?
     let progressLabel: String?
+    let statsText: String?
     let receivedFileURL: URL?
     let showCheckmark: Bool
     let onShare: (URL) -> Void
@@ -144,7 +237,7 @@ private struct ReceiverBottomPanel: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             } else {
                 StatusCapsule(text: statusText)
-                ProgressCard(progressValue: progressValue, progressLabel: progressLabel)
+                ProgressCard(progressValue: progressValue, progressLabel: progressLabel, statsText: statsText)
             }
         }
         .padding(16)
@@ -157,6 +250,7 @@ private struct ReceiverBottomPanel: View {
 private struct ProgressCard: View {
     let progressValue: Double?
     let progressLabel: String?
+    let statsText: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -173,11 +267,18 @@ private struct ProgressCard: View {
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(.primary)
                 .lineLimit(2)
+            if let stats = statsText {
+                Text(stats)
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .transition(.opacity)
+            }
         }
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityValue(progressLabel ?? "等待识别")
+        .accessibilityValue([progressLabel ?? "等待识别", statsText].compactMap { $0 }.joined(separator: "，"))
     }
 }
 
@@ -188,8 +289,11 @@ private struct CompletedTransferCard: View {
     let onShare: () -> Void
     let onContinueScanning: () -> Void
 
-    private var fileSize: String? {
-        guard let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
+    // 状态缓存文件大小：body 可能因动画每秒重算多次，不能每次都读磁盘
+    @State private var fileSize: String?
+
+    private static func loadFileSize(for url: URL) -> String? {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
               let size = attrs[.size] as? NSNumber else { return nil }
         return ByteCountFormatter.string(fromByteCount: size.int64Value, countStyle: .file)
     }
@@ -238,6 +342,9 @@ private struct CompletedTransferCard: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
+        }
+        .task(id: fileURL) {
+            fileSize = Self.loadFileSize(for: fileURL)
         }
     }
 }

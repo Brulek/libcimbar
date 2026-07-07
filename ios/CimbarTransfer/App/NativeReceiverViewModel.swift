@@ -9,8 +9,12 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var statusText: String = "准备中..."
     @Published private(set) var progressValue: Double?
     @Published private(set) var progressLabel: String?
+    @Published private(set) var statsText: String?
     @Published private(set) var receivedFileURL: URL?
     @Published private(set) var cameraPermissionDenied = false
+    @Published private(set) var torchAvailable = false
+    @Published private(set) var torchActive = false
+    @Published private(set) var zoomFactor: CGFloat = 1.0
 
     let session = AVCaptureSession()
 
@@ -25,6 +29,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private let revisionState = OSAllocatedUnfairLock<UInt>(initialState: 0)
     private let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let notificationGenerator = UINotificationFeedbackGenerator()
+
+    // 仅在 sessionQueue 上读写
+    private var videoDevice: AVCaptureDevice?
+    private var maxZoomFactor: CGFloat = 1.0
+    // 仅在主线程读写：捏合手势开始时的基准倍率
+    private var zoomGestureBase: CGFloat = 1.0
+    // 仅在主线程读写：进度采样（时间, 进度分数），用于估算速率与剩余时间
+    private var progressSamples: [(time: TimeInterval, fraction: Double)] = []
 
     func start() {
         impactGenerator.prepare()
@@ -55,6 +67,12 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     func stop() {
         sessionQueue.async { [weak self] in
             guard let self else { return }
+            if let device = self.videoDevice, device.hasTorch, device.torchMode != .off,
+               (try? device.lockForConfiguration()) != nil {
+                device.torchMode = .off
+                device.unlockForConfiguration()
+            }
+            DispatchQueue.main.async { self.torchActive = false }
             if self.session.isRunning {
                 self.session.stopRunning()
             }
@@ -87,6 +105,80 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.isPaused = false
             self.decoder?.reset()
             self.publishResetState()
+        }
+    }
+
+    // MARK: - 相机控制（手电筒 / 变焦 / 对焦）
+
+    func toggleTorch() {
+        sessionQueue.async { [weak self] in
+            guard let self, let device = self.videoDevice, device.hasTorch else { return }
+            do {
+                try device.lockForConfiguration()
+                defer { device.unlockForConfiguration() }
+                let turnOn = device.torchMode != .on
+                device.torchMode = turnOn && device.isTorchAvailable ? .on : .off
+                let isOn = device.torchMode == .on
+                DispatchQueue.main.async { self.torchActive = isOn }
+            } catch {
+                // 锁定失败则保持现状，下次点击重试
+            }
+        }
+    }
+
+    func beginZoomGesture() {
+        zoomGestureBase = zoomFactor
+    }
+
+    func updateZoomGesture(scale: CGFloat) {
+        setZoomFactor(zoomGestureBase * scale)
+    }
+
+    func resetZoom() {
+        setZoomFactor(1.0)
+    }
+
+    private func setZoomFactor(_ raw: CGFloat) {
+        sessionQueue.async { [weak self] in
+            guard let self, let device = self.videoDevice else { return }
+            let clamped = min(max(raw, 1.0), self.maxZoomFactor)
+            do {
+                try device.lockForConfiguration()
+                device.videoZoomFactor = clamped
+                device.unlockForConfiguration()
+                DispatchQueue.main.async { self.zoomFactor = clamped }
+            } catch {
+                // 锁定失败时跳过本次缩放更新
+            }
+        }
+    }
+
+    /// devicePoint 为 AVCaptureVideoPreviewLayer 转换后的设备坐标（0~1）
+    func focus(atDevicePoint devicePoint: CGPoint) {
+        sessionQueue.async { [weak self] in
+            guard let self, let device = self.videoDevice else { return }
+            do {
+                try device.lockForConfiguration()
+                defer { device.unlockForConfiguration() }
+                if device.isFocusPointOfInterestSupported {
+                    device.focusPointOfInterest = devicePoint
+                    // 保持连续对焦模式，只移动关注点：扫动画码时画面持续变化，
+                    // 一次性 autoFocus 会在对上后锁死
+                    if device.isFocusModeSupported(.continuousAutoFocus) {
+                        device.focusMode = .continuousAutoFocus
+                    } else if device.isFocusModeSupported(.autoFocus) {
+                        device.focusMode = .autoFocus
+                    }
+                }
+                if device.isExposurePointOfInterestSupported {
+                    device.exposurePointOfInterest = devicePoint
+                    if device.isExposureModeSupported(.continuousAutoExposure) {
+                        device.exposureMode = .continuousAutoExposure
+                    }
+                }
+            } catch {
+                // 对焦失败无需提示，用户可再次点按
+            }
         }
     }
 
@@ -152,6 +244,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
         camera.unlockForConfiguration()
 
+        videoDevice = camera
+        // 超过 5x 后画质衰减明显、抖动被放大，对屏幕扫码没有增益
+        maxZoomFactor = min(camera.activeFormat.videoMaxZoomFactor, 5.0)
+        let hasTorch = camera.hasTorch
+        DispatchQueue.main.async { [weak self] in
+            self?.torchAvailable = hasTorch
+        }
+
         let output = AVCaptureVideoDataOutput()
         output.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
@@ -191,6 +291,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             }
             progressValue = fraction.doubleValue
             progressLabel = result.progressLabel
+            updateStats(fraction: fraction.doubleValue, frameCount: result.detectedFrameCount)
         } else if let label = result.progressLabel {
             progressValue = nil
             progressLabel = label
@@ -200,6 +301,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             receivedFileURL = fileURL
             progressValue = result.progressFraction?.doubleValue ?? 1.0
             progressLabel = result.progressLabel ?? "文件接收 100%"
+            statsText = nil
+            progressSamples.removeAll()
             if preferences.hapticEnabled {
                 notificationGenerator.notificationOccurred(.success)
             }
@@ -208,6 +311,36 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             }
             UIAccessibility.post(notification: .announcement, argument: statusText)
         }
+    }
+
+    // 主线程调用。用最近一段时间的进度斜率估算剩余时间，避免瞬时抖动
+    private func updateStats(fraction: Double, frameCount: UInt) {
+        let now = ProcessInfo.processInfo.systemUptime
+        progressSamples.append((time: now, fraction: fraction))
+        progressSamples.removeAll { now - $0.time > 12 }
+
+        var parts: [String] = []
+        if frameCount > 0 {
+            parts.append("已识别 \(frameCount) 帧")
+        }
+        if let first = progressSamples.first,
+           now - first.time >= 1.5,
+           fraction > first.fraction {
+            let rate = (fraction - first.fraction) / (now - first.time)
+            if rate > 0.0005 {
+                parts.append("预计还需\(Self.formatRemainingTime((1.0 - fraction) / rate))")
+            }
+        }
+        statsText = parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    private static func formatRemainingTime(_ seconds: Double) -> String {
+        let clamped = max(1, Int(seconds.rounded(.up)))
+        if clamped < 90 {
+            return " \(clamped) 秒"
+        }
+        let minutes = Int((Double(clamped) / 60.0).rounded())
+        return " \(minutes) 分钟"
     }
 
     private func updateStatus(_ text: String) {
@@ -228,6 +361,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.receivedFileURL = nil
             self.progressValue = nil
             self.progressLabel = nil
+            self.statsText = nil
+            self.progressSamples.removeAll()
             self.statusText = "相机已启动，请将发送端动画码放入取景框"
         }
     }
