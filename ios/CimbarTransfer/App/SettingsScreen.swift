@@ -79,6 +79,15 @@ struct SettingsScreen: View {
                 } label: {
                     Label("查看使用指南", systemImage: "questionmark.circle")
                 }
+                Link(destination: URL(string: "https://cimbar.org")!) {
+                    Label("发送端网页（cimbar.org）", systemImage: "safari")
+                }
+                Link(destination: URL(string: "https://github.com/sz3/libcimbar")!) {
+                    Label("libcimbar 开源项目", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+                Text("发送文件：在对方设备的浏览器打开 cimbar.org，选择文件生成动画码，用本机扫描即可。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("法律") {
@@ -142,9 +151,9 @@ struct SettingsScreen: View {
         case .keepAll:
             return "默认设置。文件不会被自动删除，需要手动清理。"
         case .days30:
-            return "超过 30 天未被修改的文件会在下次启动时清理。"
+            return "接收超过 30 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。"
         case .days7:
-            return "超过 7 天未被修改的文件会在下次启动时清理。"
+            return "接收超过 7 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。"
         }
     }
 }

@@ -16,10 +16,25 @@ struct FileDetailScreen: View {
     @State private var renameText = ""
     @State private var deleteConfirm = false
     @State private var photoSaveMessage: String?
+    /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
+    @State private var trackedFileName: String
+
+    init(
+        store: ReceivedFileCacheStore,
+        initialFile: CachedReceivedFile,
+        onShare: @escaping (URL) -> Void,
+        onPreview: @escaping (URL) -> Void
+    ) {
+        self.store = store
+        self.initialFile = initialFile
+        self.onShare = onShare
+        self.onPreview = onPreview
+        _trackedFileName = State(initialValue: initialFile.fileName)
+    }
 
     /// 重命名等操作会刷新 store，这里始终取最新快照，避免展示旧显示名
     private var file: CachedReceivedFile {
-        store.cachedFiles.first { $0.id == initialFile.id } ?? initialFile
+        store.cachedFiles.first { $0.fileName == trackedFileName } ?? initialFile
     }
 
     private var originalName: String {
@@ -109,11 +124,15 @@ struct FileDetailScreen: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
             Button("保存") {
-                store.rename(file: file, to: renameText)
+                store.rename(file: file, to: renameText) { renamed in
+                    if let renamed {
+                        trackedFileName = renamed.fileName
+                    }
+                }
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("仅修改显示名称，不会改变实际文件名")
+            Text("将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变")
         }
         .alert("删除文件", isPresented: $deleteConfirm) {
             Button("删除", role: .destructive) {

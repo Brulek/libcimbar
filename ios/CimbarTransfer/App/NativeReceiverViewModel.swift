@@ -25,6 +25,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var isConfigured = false
     private var hasDetectedFirstFrame = false
     private var isPaused = false
+    // 仅在 frameQueue 上读写：上次向主线程发布常规进度的时间
+    private var lastRoutinePublishUptime: TimeInterval = 0
     // 被主线程（apply/resetScan）与 frameQueue（captureOutput）同时访问，必须加锁
     private let revisionState = OSAllocatedUnfairLock<UInt>(initialState: 0)
     // 偏好的原子副本：主线程写入（onChange），sessionQueue/frameQueue 读取
@@ -48,7 +50,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     func start() {
         impactGenerator.prepare()
         notificationGenerator.prepare()
-        updateStatus("启动相机中...")
+        updateStatusIfIdle("启动相机中...")
         publishCameraPermissionDenied(false)
 
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -245,7 +247,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             }
             // 接收过程用户全程无触摸，扫码期间禁用自动锁屏，避免长传输被打断
             self.setIdleTimerDisabled(true)
-            self.updateStatus("相机已启动，正在初始化解码器...")
+            self.updateStatusIfIdle("相机已启动，正在初始化解码器...")
         }
     }
 
@@ -337,6 +339,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             progressLabel = result.progressLabel ?? "文件接收 100%"
             statsText = nil
             progressSamples.removeAll()
+            // 文件已落盘，后续帧不会再产生新结果；停掉解码链，
+            // 避免相机回调继续满载 CPU（用户点「继续扫码」时恢复）
+            pauseProcessing()
             if preferences.hapticEnabled {
                 notificationGenerator.notificationOccurred(.success)
             }
@@ -379,6 +384,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     private func updateStatus(_ text: String) {
         DispatchQueue.main.async {
+            self.statusText = text
+        }
+    }
+
+    // 传输进行中/完成后回前台重启相机时，启动类文案不应覆盖实时进度
+    private func updateStatusIfIdle(_ text: String) {
+        DispatchQueue.main.async {
+            guard self.progressLabel == nil, self.receivedFileURL == nil else { return }
             self.statusText = text
         }
     }
@@ -452,6 +465,14 @@ extension NativeReceiverViewModel: AVCaptureVideoDataOutputSampleBufferDelegate 
                     hasDetectedFirstFrame = true
                     result.didDetectFirstFrame = true
                 }
+                // 常规进度更新限流到 10Hz：30Hz 的 @Published 写入会让整个
+                // 底部面板持续重算。关键事件（文件完成、首帧检测）始终放行
+                let isCritical = result.fileURL != nil || result.didDetectFirstFrame
+                let now = ProcessInfo.processInfo.systemUptime
+                if !isCritical && now - lastRoutinePublishUptime < 0.1 {
+                    return
+                }
+                lastRoutinePublishUptime = now
                 DispatchQueue.main.async {
                     self.apply(result)
                 }

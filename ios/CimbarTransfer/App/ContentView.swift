@@ -102,6 +102,13 @@ struct ContentView: View {
                 viewModel.stop()
             }
         }
+        .onChange(of: cacheStore.cachedFiles) { _ in
+            // 在「我的文件」/设置里删除或清空后，扫码页完成卡片若还指向
+            // 已删除的文件，会给出死链的「查看/分享」入口——直接重置扫码
+            guard let url = viewModel.receivedFileURL,
+                  !FileManager.default.fileExists(atPath: url.path) else { return }
+            viewModel.resetScan()
+        }
         .onChange(of: preferences.decodeMode) { newMode in
             viewModel.setDecodeMode(newMode)
         }

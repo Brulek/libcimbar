@@ -37,6 +37,36 @@ namespace {
 	// settings
 	int _modeVal = 68;
 
+	// Config::active_conf() is thread_local, but callers (e.g. iOS GCD queues)
+	// do not guarantee a stable thread. Track the last mode applied on *this*
+	// thread and re-sync Config before any decode work. This keeps non-default
+	// modes correct across thread migration without resetting the sink.
+	thread_local int _threadModeVal = 0;
+
+	void sync_thread_config()
+	{
+		if (_threadModeVal != _modeVal)
+		{
+			cimbar::Config::update(_modeVal);
+			_threadModeVal = _modeVal;
+		}
+	}
+
+	// Decoder construction decodes + hashes all symbol tiles -- far too heavy
+	// to do per frame. Cache it per mode. Serial use only (single decode queue).
+	std::unique_ptr<Decoder> _decoder;
+	int _decoderModeVal = 0;
+
+	Decoder& get_decoder()
+	{
+		if (!_decoder || _decoderModeVal != _modeVal)
+		{
+			_decoder = std::make_unique<Decoder>();
+			_decoderModeVal = _modeVal;
+		}
+		return *_decoder;
+	}
+
 	// set up stateful decompressor
 	// for api simplicity, this is coupled to recover_contents()
 	// ... but we *could* split them up
@@ -150,11 +180,13 @@ unsigned cimbard_get_debug(uchar* buff, unsigned maxlen)
 
 int cimbard_get_bufsize()
 {
+	sync_thread_config();
 	return fountain_chunks_per_frame() * fountain_chunk_size();
 }
 
 int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned imgh, int format, uchar* bufspace, unsigned bufsize)
 {
+	sync_thread_config();
 	if (format <= 0)
 		format = 3;
 	if (imgw == 0 or imgh == 0)
@@ -169,7 +201,7 @@ int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned im
 	// interface to take the aligned output buffers of chunkSize and dump them into bufspace
 	escrow_buffer_writer ebw(bufspace, chunksPerFrame, chunkSize);
 	Extractor ext;
-	Decoder dec;
+	Decoder& dec = get_decoder();
 
 	cv::UMat img = get_rgb((void*)imgdata, imgw, imgh, format);
 #ifndef CIMBARD_NO_DEBUG
@@ -201,6 +233,7 @@ int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned im
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
 int64_t cimbard_fountain_decode(const unsigned char* buffer, unsigned size)
 {
+	sync_thread_config();
 	unsigned chunkSize = fountain_chunk_size();
 	if (!_sink) // lazy-create the sink on first run
 		_sink = std::make_shared<fountain_decoder_sink>(chunkSize);
@@ -295,12 +328,12 @@ int cimbard_configure_decode(int mode_val)
 		mode_val = 68;
 
 	bool refresh = (mode_val != _modeVal);
+	_modeVal = mode_val;
+	sync_thread_config();
 	if (refresh)
 	{
-		// update config
-		_modeVal = mode_val;
-		cimbar::Config::update(mode_val);
 		_sink.reset();
+		_decoder.reset();
 	}
 
 	return 0;

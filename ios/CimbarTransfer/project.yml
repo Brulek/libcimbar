@@ -95,3 +95,8 @@ targets:
           - CIMBARD_NO_DEBUG=1
         EXCLUDED_ARCHS[sdk=iphonesimulator*]: arm64
         EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]: huf_decompress_amd64.S
+      configs:
+        Debug:
+          # 原生解码链在 -O0 下扫码性能严重失真（每帧毫秒级 vs 数十毫秒级），
+          # Debug 也用 O2 编译 C/C++/ObjC++；Swift 仍是 -Onone 不影响调试
+          GCC_OPTIMIZATION_LEVEL: 2

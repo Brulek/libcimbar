@@ -233,7 +233,7 @@
     char filenameBuffer[512] = {0};
     const int filenameLength = cimbard_get_filename(fileID, filenameBuffer, sizeof(filenameBuffer));
     if (filenameLength < 0) {
-        [self latchError:[NSString stringWithFormat:@"文件重组失败: %d", filenameLength] into:output];
+        [self latchError:[NSString stringWithFormat:@"文件数据重组失败（错误 %d），可能是传输受损", filenameLength] into:output];
         return;
     }
 
@@ -289,18 +289,34 @@
         if (writeFailed) {
             [self latchError:@"写入文件失败，请检查设备可用存储空间" into:output];
         } else {
-            [self latchError:[NSString stringWithFormat:@"文件解压失败: %d", readSize] into:output];
+            [self latchError:[NSString stringWithFormat:@"接收的数据无法解压（错误 %d），可能是传输受损", readSize] into:output];
         }
         return;
     }
 
-    // 写入完成，移动到最终位置（同卷 rename，原子操作）
-    NSError *pathError = nil;
-    NSURL *fileURL = [ReceivedFileStorage uniqueDestinationURLForFilename:filename error:&pathError];
-    NSError *moveError = nil;
-    if (fileURL == nil || ![fileManager moveItemAtURL:tmpURL toURL:fileURL error:&moveError]) {
+    // 写入完成，移动到最终位置（同卷 rename，原子操作）。
+    // uniqueDestinationURL 的存在性探测与 move 之间存在竞态窗口（启动迁移线程
+    // 可能同时占用同名路径）；喷泉流此刻已在 sink 中标记完成、无法重放，
+    // 所以失败时必须换个名字重试而不是删掉 tmp 丢弃整份文件。
+    NSURL *fileURL = nil;
+    NSError *lastError = nil;
+    for (int attempt = 0; attempt < 3 && fileURL == nil; ++attempt) {
+        NSError *pathError = nil;
+        NSURL *candidate = [ReceivedFileStorage uniqueDestinationURLForFilename:filename error:&pathError];
+        if (candidate == nil) {
+            lastError = pathError;
+            continue;
+        }
+        NSError *moveError = nil;
+        if ([fileManager moveItemAtURL:tmpURL toURL:candidate error:&moveError]) {
+            fileURL = candidate;
+        } else {
+            lastError = moveError;
+        }
+    }
+    if (fileURL == nil) {
         [fileManager removeItemAtURL:tmpURL error:nil];
-        [self latchError:(pathError.localizedDescription ?: (moveError.localizedDescription ?: @"无法保存接收文件")) into:output];
+        [self latchError:(lastError.localizedDescription ?: @"无法保存接收文件") into:output];
         return;
     }
     NSString *safeName = fileURL.lastPathComponent;

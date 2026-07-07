@@ -751,6 +751,7 @@
 					"$(inherited)",
 					"\"../ThirdParty\"",
 				);
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"IOS=1",

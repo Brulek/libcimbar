@@ -15,6 +15,9 @@ struct QuickLookPreview: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+        // 只有 URL 真正变化才 reload：任何无关的 SwiftUI 重渲染都会走到这里，
+        // 无条件 reload 会把用户正在浏览的页码/缩放状态重置掉
+        guard context.coordinator.fileURL != fileURL else { return }
         context.coordinator.fileURL = fileURL
         if let preview = uiViewController.viewControllers.first as? QLPreviewController {
             preview.reloadData()

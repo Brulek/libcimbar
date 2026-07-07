@@ -115,7 +115,9 @@ enum ReceivedFileCache {
         }
         let now = Date()
         let files = try listFiles()
-        let expired = files.filter { now.timeIntervalSince($0.modifiedAt) > maxAge }
+        // 按「接收时间」（manifest 登记时间）判定过期，而不是文件 mtime：
+        // 用户经「文件」App 拖入的旧文件 mtime 可能是数月前，按 mtime 会被立即清掉
+        let expired = files.filter { now.timeIntervalSince($0.receivedAt) > maxAge }
         try delete(files: expired)
     }
 
@@ -126,7 +128,7 @@ enum ReceivedFileCache {
     static func listFiles() throws -> [CachedReceivedFile] {
         let fileManager = FileManager.default
         let directory = try directoryURL()
-        let resourceKeys: Set<URLResourceKey> = [.contentModificationDateKey, .creationDateKey, .isDirectoryKey, .fileSizeKey]
+        let resourceKeys: Set<URLResourceKey> = [.contentModificationDateKey, .creationDateKey, .addedToDirectoryDateKey, .isDirectoryKey, .fileSizeKey]
         let fileURLs = try fileManager.contentsOfDirectory(
             at: directory,
             includingPropertiesForKeys: Array(resourceKeys),
@@ -144,8 +146,10 @@ enum ReceivedFileCache {
             presentNames.insert(lastComponent)
             let modifiedAt = values.contentModificationDate ?? .distantPast
             let fileSize = Int64(values.fileSize ?? 0)
-            // manifest 丢失/损坏后懒注册时，用文件创建时间兜底，避免接收时间全部漂移到当下
-            let fallbackReceivedAt = values.creationDate ?? modifiedAt
+            // manifest 丢失/损坏后懒注册时优先用「加入目录时间」兜底：
+            // 拖入的文件 creationDate/mtime 可能是数月前，addedToDirectoryDate
+            // 才是它真正出现在 Inbox 的时刻，避免接收时间漂移或被保留策略误杀
+            let fallbackReceivedAt = values.addedToDirectoryDate ?? values.creationDate ?? modifiedAt
             let metadata = metadataStore.metadata(for: lastComponent)
                 ?? metadataStore.register(
                     filename: lastComponent,
@@ -196,16 +200,43 @@ enum ReceivedFileCache {
         return failedCount
     }
 
+    /// 物理重命名磁盘文件（分享/「文件」App 中同步生效），扩展名保持不变
     static func renameFile(_ file: CachedReceivedFile, newDisplayName: String) throws -> CachedReceivedFile {
         let trimmed = newDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw NSError(domain: "ReceivedFileCache", code: 1, userInfo: [NSLocalizedDescriptionKey: "新文件名不能为空"])
         }
-        ReceivedFileMetadataStore.shared.rename(filename: file.fileName, to: trimmed)
+
+        var targetName = trimmed
+        let originalExtension = file.url.pathExtension
+        if !originalExtension.isEmpty,
+           (targetName as NSString).pathExtension.lowercased() != originalExtension.lowercased() {
+            targetName += ".\(originalExtension)"
+        }
+        let sanitized = ReceivedFileCache.sanitizedFilename(targetName)
+
+        if sanitized == file.fileName {
+            // 磁盘名未变，只同步显示名
+            ReceivedFileMetadataStore.shared.rename(filename: file.fileName, to: sanitized)
+            return CachedReceivedFile(
+                url: file.url,
+                fileName: file.fileName,
+                displayName: sanitized,
+                receivedAt: file.receivedAt,
+                modifiedAt: file.modifiedAt,
+                fileSize: file.fileSize
+            )
+        }
+
+        let destination = try ReceivedFileStorage.uniqueDestinationURL(for: sanitized)
+        try FileManager.default.moveItem(at: file.url, to: destination)
+        let newFileName = destination.lastPathComponent
+        ReceivedFileMetadataStore.shared.renameKey(from: file.fileName, to: newFileName)
+        ReceivedFileMetadataStore.shared.rename(filename: newFileName, to: newFileName)
         return CachedReceivedFile(
-            url: file.url,
-            fileName: file.fileName,
-            displayName: trimmed,
+            url: destination,
+            fileName: newFileName,
+            displayName: newFileName,
             receivedAt: file.receivedAt,
             modifiedAt: file.modifiedAt,
             fileSize: file.fileSize

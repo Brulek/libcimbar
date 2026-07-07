@@ -88,6 +88,9 @@ struct OnboardingScreen: View {
             }
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("第 \(pageIndex + 1) 页，共 \(pages.count) 页")
+        .accessibilityAddTraits(.updatesFrequently)
     }
 
     private var actionRow: some View {
@@ -212,6 +215,9 @@ private struct OnboardingPageView: View {
                 if !page.bullets.isEmpty {
                     content
                 }
+                if page.title == "怎么收文件" {
+                    senderLink
+                }
                 if page.title == "准备就绪" {
                     confirmationToggle
                 }
@@ -219,6 +225,17 @@ private struct OnboardingPageView: View {
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var senderLink: some View {
+        Link(destination: URL(string: "https://cimbar.org")!) {
+            Label("发送端：在对方设备浏览器打开 cimbar.org", systemImage: "safari")
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(Color(red: 0.55, green: 0.85, blue: 1.0))
+                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .background(.white.opacity(0.06), in: Capsule())
         }
     }
 
@@ -279,7 +296,8 @@ private struct OnboardingPageView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
             }
-            .toggleStyle(SwitchToggleStyle(tint: .green))
+            .toggleStyle(.switch)
+            .tint(.green)
             .padding(16)
             .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(

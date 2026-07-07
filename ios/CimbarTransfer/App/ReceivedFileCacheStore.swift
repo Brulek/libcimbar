@@ -67,14 +67,28 @@ final class ReceivedFileCacheStore: ObservableObject {
         }
     }
 
-    func rename(file: CachedReceivedFile, to newDisplayName: String) {
+    /// completion 在主线程回调；重命名失败时参数为 nil
+    func rename(
+        file: CachedReceivedFile,
+        to newDisplayName: String,
+        completion: (@MainActor (CachedReceivedFile?) -> Void)? = nil
+    ) {
         workerQueue.async { [weak self] in
+            var renamed: CachedReceivedFile?
             do {
-                _ = try ReceivedFileCache.renameFile(file, newDisplayName: newDisplayName)
+                renamed = try ReceivedFileCache.renameFile(file, newDisplayName: newDisplayName)
                 let files = try ReceivedFileCache.listFiles()
                 self?.publish(files: files)
             } catch {
                 self?.onMain { $0.refresh(cleanup: false) }
+            }
+            if let completion {
+                let result = renamed
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated {
+                        completion(result)
+                    }
+                }
             }
         }
     }

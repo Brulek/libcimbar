@@ -136,6 +136,7 @@ struct LibraryScreen: View {
             } label: {
                 Image(systemName: "arrow.up.arrow.down")
             }
+            .accessibilityLabel("排序方式")
         }
 
         if isMultiSelect {
@@ -148,6 +149,7 @@ struct LibraryScreen: View {
                 } label: {
                     Image(systemName: "trash")
                 }
+                .accessibilityLabel("删除所选文件")
                 .disabled(selectedIDs.isEmpty)
             }
         }
@@ -157,13 +159,18 @@ struct LibraryScreen: View {
         List {
             Section {
                 ForEach(filteredFiles) { file in
-                    LibraryRow(
-                        file: file,
-                        isSelecting: isMultiSelect,
-                        isSelected: selectedIDs.contains(file.id)
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture { handleTap(file) }
+                    Button {
+                        handleTap(file)
+                    } label: {
+                        LibraryRow(
+                            file: file,
+                            isSelecting: isMultiSelect,
+                            isSelected: selectedIDs.contains(file.id)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(isMultiSelect ? "轻点切换选中" : "轻点预览文件")
+                    .accessibilityAddTraits(isMultiSelect && selectedIDs.contains(file.id) ? [.isSelected] : [])
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
                             deleteTarget = file
@@ -364,6 +371,9 @@ private struct EmptyStateView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
+            Text("发送端：在对方设备浏览器打开 cimbar.org")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -391,7 +401,7 @@ private struct LibraryAlertsModifier: ViewModifier {
                 Button("保存", action: onCommitRename)
                 Button("取消", role: .cancel) { renameTarget = nil }
             } message: {
-                Text("仅修改显示名称，不会改变实际文件名")
+                Text("将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变")
             }
             .alert("删除文件", isPresented: Binding(
                 get: { deleteTarget != nil },

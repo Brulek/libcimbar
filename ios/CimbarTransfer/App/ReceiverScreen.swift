@@ -11,6 +11,7 @@ struct ReceiverScreen: View {
     let onPreview: (URL) -> Void
 
     @State private var showCheckmark = false
+    @State private var lastCelebratedURL: URL?
     @State private var focusIndicatorPoint: CGPoint?
     @State private var focusIndicatorID = UUID()
 
@@ -119,12 +120,18 @@ struct ReceiverScreen: View {
     }
 
     private func updateCompletionState(for fileURL: URL?) async {
-        guard fileURL != nil else {
+        guard let fileURL else {
+            lastCelebratedURL = nil
             withAnimation {
                 showCheckmark = false
             }
             return
         }
+
+        // .task(id:) 在每次页面出现时都会重跑；同一个文件只庆祝一次，
+        // 避免切走再切回时重放 2.5 秒打勾动画
+        guard fileURL != lastCelebratedURL else { return }
+        lastCelebratedURL = fileURL
 
         withAnimation(.spring(duration: 0.4)) {
             showCheckmark = true
@@ -502,6 +509,8 @@ private struct FireflyScanFrame: View {
     let scanState: ScanState
     let showCheckmark: Bool
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private let trailCount: Int = 16
 
     private var fireflyColor: Color {
@@ -520,28 +529,44 @@ private struct FireflyScanFrame: View {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark)) { context in
-            let t = (context.date.timeIntervalSinceReferenceDate / orbitPeriod * 4)
-                .truncatingRemainder(dividingBy: 4)
-
+        if reduceMotion {
+            // 「减弱动态效果」下不跑 60fps 环绕动画，用静态描边表达同样的状态色
             ZStack {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(fireflyColor.opacity(0.18), lineWidth: 1)
+                    .stroke(fireflyColor.opacity(0.55), lineWidth: 1.5)
                     .frame(width: side, height: side)
-
-                if !showCheckmark {
-                    fireflySwarm(t: t)
-                }
-
-                if showCheckmark {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 72))
-                        .foregroundStyle(.green)
-                        .shadow(color: .green.opacity(0.6), radius: 10)
-                        .transition(.scale.combined(with: .opacity))
-                }
+                checkmarkOverlay
             }
             .frame(width: side, height: side)
+        } else {
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark)) { context in
+                let t = (context.date.timeIntervalSinceReferenceDate / orbitPeriod * 4)
+                    .truncatingRemainder(dividingBy: 4)
+
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(fireflyColor.opacity(0.18), lineWidth: 1)
+                        .frame(width: side, height: side)
+
+                    if !showCheckmark {
+                        fireflySwarm(t: t)
+                    }
+
+                    checkmarkOverlay
+                }
+                .frame(width: side, height: side)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var checkmarkOverlay: some View {
+        if showCheckmark {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 72))
+                .foregroundStyle(.green)
+                .shadow(color: .green.opacity(0.6), radius: 10)
+                .transition(.scale.combined(with: .opacity))
         }
     }
 
@@ -567,6 +592,8 @@ private struct FireflyScanFrame: View {
                 .offset(x: perimeterPoint(t: t).x,
                         y: perimeterPoint(t: t).y)
         }
+        // 16 个独立 blur 是 16 次离屏渲染；合并成单个 Metal 图层后一次完成
+        .drawingGroup()
     }
 
     private func perimeterPoint(t: Double) -> CGPoint {
