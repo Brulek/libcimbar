@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		021AD30CA6FEC927701E248E /* CimbReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 72523A31A545B291AC248582 /* CimbReader.cpp */; };
 		04FA19CB09D48A85CA4683F2 /* WirehairCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4F16E0AE342D3C578F359CD /* WirehairCodec.cpp */; };
-		0853640EBB56BD316CBFD3E2 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9372C120084DE71D9397228 /* opencv2.framework */; };
+		0853640EBB56BD316CBFD3E2 /* opencv2.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9372C120084DE71D9397228 /* opencv2.xcframework */; };
 		09C096FA60F5BD15E580D921 /* AppPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B3A3A71C9E9172263AD2F7 /* AppPreferences.swift */; };
 		0A80F26DF02315F1C369F470 /* WirehairTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A21482A3F21E44F49078C68 /* WirehairTools.cpp */; };
 		0C6AAF3DFAE1A2AFD72C7035 /* AdjacentCellFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02A48426A82837B3A282FE56 /* AdjacentCellFinder.cpp */; };
@@ -187,7 +187,7 @@
 		C5EAEAEEE0DEC8DE155360B9 /* CimbarTransfer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CimbarTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7E24733006E46DA00C1B1A4 /* zstd_ddict.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_ddict.h; sourceTree = "<group>"; };
 		C8E0D5F8E145F0FB492A10F5 /* xxhash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = xxhash.c; sourceTree = "<group>"; };
-		C9372C120084DE71D9397228 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = ../ThirdParty/opencv2.framework; sourceTree = "<group>"; };
+		C9372C120084DE71D9397228 /* opencv2.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = opencv2.xcframework; path = ../ThirdParty/opencv2.xcframework; sourceTree = "<group>"; };
 		CC42F884939B398D5EDEC442 /* ExtractorPlus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtractorPlus.h; sourceTree = "<group>"; };
 		CF128EE5BFD4CC7859D7FC74 /* CimbarTransferApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CimbarTransferApp.swift; sourceTree = "<group>"; };
 		D17EA83F95F2BDE4AFD3DD05 /* fse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fse.h; sourceTree = "<group>"; };
@@ -221,7 +221,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0853640EBB56BD316CBFD3E2 /* opencv2.framework in Frameworks */,
+				0853640EBB56BD316CBFD3E2 /* opencv2.xcframework in Frameworks */,
 				622DFDA8F5411C26E3F78378 /* Accelerate.framework in Frameworks */,
 				538454A57BB5AE6137C72ACE /* AVFoundation.framework in Frameworks */,
 				12103AD4A454501B36422704 /* CoreGraphics.framework in Frameworks */,
@@ -256,7 +256,7 @@
 				BE7663E30DD0913469292028 /* CoreMedia.framework */,
 				EC06CB99E561AED4D88C487F /* CoreVideo.framework */,
 				F3D7D1ECBD95FC110CF0AB72 /* libz.tbd */,
-				C9372C120084DE71D9397228 /* opencv2.framework */,
+				C9372C120084DE71D9397228 /* opencv2.xcframework */,
 				908CD9DCCB1609B3EB111D0C /* QuartzCore.framework */,
 			);
 			name = Frameworks;
@@ -702,7 +702,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DF24DNZFWX;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]" = huf_decompress_amd64.S;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -720,7 +719,6 @@
 					"$(SRCROOT)/../../src/third_party_lib",
 					"$(SRCROOT)/../../src/third_party_lib/wirehair/include",
 					"$(SRCROOT)/../../src/third_party_lib/libcorrect/include",
-					"$(SRCROOT)/../ThirdParty/opencv2.framework/Headers",
 				);
 				INFOPLIST_FILE = Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -754,7 +752,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DF24DNZFWX;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]" = huf_decompress_amd64.S;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -773,7 +770,6 @@
 					"$(SRCROOT)/../../src/third_party_lib",
 					"$(SRCROOT)/../../src/third_party_lib/wirehair/include",
 					"$(SRCROOT)/../../src/third_party_lib/libcorrect/include",
-					"$(SRCROOT)/../ThirdParty/opencv2.framework/Headers",
 				);
 				INFOPLIST_FILE = Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

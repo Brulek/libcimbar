@@ -54,7 +54,8 @@ targets:
           - "*.h"
           - "*.S"
     dependencies:
-      - framework: ../ThirdParty/opencv2.framework
+      # xcframework：ios-arm64（原设备切片原字节）+ ios-arm64-simulator（自建 core+imgproc）
+      - framework: ../ThirdParty/opencv2.xcframework
         embed: false
       - sdk: Accelerate.framework
       - sdk: AVFoundation.framework
@@ -85,7 +86,6 @@ targets:
           - $(SRCROOT)/../../src/third_party_lib
           - $(SRCROOT)/../../src/third_party_lib/wirehair/include
           - $(SRCROOT)/../../src/third_party_lib/libcorrect/include
-          - $(SRCROOT)/../ThirdParty/opencv2.framework/Headers
         WARNING_CFLAGS:
           - $(inherited)
           - -Wno-deprecated-literal-operator
@@ -97,7 +97,6 @@ targets:
           - ZSTD_STATIC_LINKING_ONLY=1
           # iOS 不使用上游的调试帧和 stdout 输出，裁掉每帧整帧拷贝（720p 约 2.7MB/帧）
           - CIMBARD_NO_DEBUG=1
-        EXCLUDED_ARCHS[sdk=iphonesimulator*]: arm64
         EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]: huf_decompress_amd64.S
       configs:
         Debug:

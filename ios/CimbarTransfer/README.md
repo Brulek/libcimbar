@@ -56,10 +56,15 @@ xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
   -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
 ```
 
-> **模拟器限制**：捆绑的 opencv2.framework 是老式 fat framework，模拟器只有
-> x86_64 切片，而 Xcode 16+ 已移除 Rosetta 模拟器支持，因此当前无法在模拟器
-> 运行本 app。要支持模拟器需将 opencv2 升级为包含 ios-arm64-simulator 切片的
-> xcframework（官方源码 `platforms/apple/build_xcframework.py` 可构建）。
+```bash
+# 模拟器（arm64 原生，由 ../ThirdParty/opencv2.xcframework 的自建 sim 切片支持）
+xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build
+```
+
+> 模拟器切片的构建方法见 `../ThirdParty/README.md`。无签名证书的机器上若
+> CodeSign 报 “detritus not allowed”，对产物 `xattr -cr` 后手动 ad-hoc 签名即可。
 
 ## 说明
 
