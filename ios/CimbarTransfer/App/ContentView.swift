@@ -102,6 +102,12 @@ struct ContentView: View {
                 viewModel.stop()
             }
         }
+        .onChange(of: preferences.decodeMode) { newMode in
+            viewModel.setDecodeMode(newMode)
+        }
+        .onChange(of: preferences.highResolutionCapture) { enabled in
+            viewModel.setHighResolutionCapture(enabled)
+        }
         .onChange(of: scenePhase) { newPhase in
             // 回前台只在「扫码」页恢复相机，避免其他页面后台开启相机
             switch newPhase {

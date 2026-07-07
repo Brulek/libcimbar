@@ -29,6 +29,7 @@
     if (self) {
         _emittedFileIDs = [NSMutableSet set];
         _progressRegex = [NSRegularExpression regularExpressionWithPattern:@"([0-9]+(?:\\.[0-9]+)?)" options:0 error:nil];
+        _decodeMode = 68;
         [self reset];
     }
     return self;
@@ -36,7 +37,7 @@
 
 - (void)reset {
     cimbard_reset();
-    cimbard_configure_decode(68);
+    cimbard_configure_decode(_decodeMode);
 
     const int scanBufferSize = cimbard_get_bufsize();
     _scanBuffer.assign(MAX(scanBufferSize, 0), 0);

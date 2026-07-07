@@ -27,6 +27,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var isPaused = false
     // 被主线程（apply/resetScan）与 frameQueue（captureOutput）同时访问，必须加锁
     private let revisionState = OSAllocatedUnfairLock<UInt>(initialState: 0)
+    // 偏好的原子副本：主线程写入（onChange），sessionQueue/frameQueue 读取
+    private let decodeModeState = OSAllocatedUnfairLock<Int32>(
+        initialState: Int32(AppPreferences.shared.decodeMode)
+    )
+    private let highResCaptureState = OSAllocatedUnfairLock<Bool>(
+        initialState: AppPreferences.shared.highResolutionCapture
+    )
     private let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
     private let notificationGenerator = UINotificationFeedbackGenerator()
 
@@ -103,9 +110,36 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.revisionState.withLock { $0 &+= 1 }
             self.hasDetectedFirstFrame = false
             self.isPaused = false
-            self.decoder?.reset()
+            if let decoder = self.decoder {
+                decoder.decodeMode = self.decodeModeState.withLock { $0 }
+                decoder.reset()
+            }
             self.publishResetState()
         }
+    }
+
+    /// 主线程调用（偏好变更）。切换模式会清空当前解码进度重新扫描
+    func setDecodeMode(_ mode: Int) {
+        decodeModeState.withLock { $0 = Int32(mode) }
+        resetScan()
+    }
+
+    /// 主线程调用（偏好变更）。若会话已配置则立即切换采集分辨率
+    func setHighResolutionCapture(_ enabled: Bool) {
+        highResCaptureState.withLock { $0 = enabled }
+        sessionQueue.async { [weak self] in
+            self?.applyPreferredSessionPreset()
+        }
+    }
+
+    /// 仅在 sessionQueue 上调用
+    private func applyPreferredSessionPreset() {
+        guard isConfigured else { return }
+        let preset: AVCaptureSession.Preset = highResCaptureState.withLock { $0 } ? .hd1920x1080 : .hd1280x720
+        guard session.sessionPreset != preset, session.canSetSessionPreset(preset) else { return }
+        session.beginConfiguration()
+        session.sessionPreset = preset
+        session.commitConfiguration()
     }
 
     // MARK: - 相机控制（手电筒 / 变焦 / 对焦）
@@ -217,7 +251,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     private func configureSession() throws {
         session.beginConfiguration()
-        session.sessionPreset = .hd1280x720
+        session.sessionPreset = highResCaptureState.withLock { $0 } ? .hd1920x1080 : .hd1280x720
 
         defer {
             session.commitConfiguration()
@@ -395,7 +429,13 @@ extension NativeReceiverViewModel: AVCaptureVideoDataOutputSampleBufferDelegate 
         let revision = currentRevision
 
         if decoder == nil {
-            decoder = NativeCimbarDecoder()
+            let created = NativeCimbarDecoder()
+            let mode = decodeModeState.withLock { $0 }
+            if created.decodeMode != mode {
+                created.decodeMode = mode
+                created.reset()
+            }
+            decoder = created
             updateStatusIfCurrent("相机已启动，请将发送端动画码放入取景框", revision: revision)
             return
         }

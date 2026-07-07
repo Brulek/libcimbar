@@ -16,6 +16,22 @@ struct SettingsScreen: View {
 
     var body: some View {
         Form {
+            Section("扫码") {
+                Picker("解码模式", selection: $preferences.decodeMode) {
+                    Text("标准（Mode B）").tag(68)
+                    Text("兼容 4C（旧版）").tag(4)
+                    Text("兼容 8C（旧版）").tag(8)
+                    Text("Mini 小码").tag(67)
+                    Text("Micro 微码").tag(66)
+                }
+                Toggle(isOn: $preferences.highResolutionCapture) {
+                    Label("高精度采集（1080p）", systemImage: "camera.metering.center.weighted")
+                }
+                Text("解码模式需与发送端一致，cimbar.org 当前默认为标准 Mode B；切换模式会重置正在进行的扫码。1080p 采集可提高远距/大屏识别率，但更耗电。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("接收") {
                 Toggle(isOn: $preferences.soundEnabled) {
                     Label("接收完成提示音", systemImage: "speaker.wave.2.fill")

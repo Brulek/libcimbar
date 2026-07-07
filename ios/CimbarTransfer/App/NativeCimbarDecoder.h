@@ -15,6 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface NativeCimbarDecoder : NSObject
+/// 解码模式（cimbar mode_val）：68 标准 B（默认）、4 兼容 4C、8 兼容 8C、67 mini、66 micro。
+/// 修改后需调用 -reset 才会生效（会清空当前解码进度并重建缓冲区）。
+@property (nonatomic) int decodeMode;
 - (nullable NativeCimbarDecodeOutput *)processPixelBuffer:(CVPixelBufferRef)pixelBuffer;
 - (void)reset;
 @end
