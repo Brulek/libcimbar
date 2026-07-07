@@ -1790,6 +1790,26 @@
           }
         }
       }
+    },
+    "重命名失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename Failed"
+          }
+        }
+      }
+    },
+    "重命名失败，请换一个名称重试": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename failed. Try a different name."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

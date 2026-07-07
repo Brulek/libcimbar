@@ -12,6 +12,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSUInteger revision;
 // 本次扫码会话累计识别到的有效码帧数（0 表示该输出不携带计数）
 @property (nonatomic, assign) NSUInteger detectedFrameCount;
+// 存在锁存的落盘/解压错误（一次性失败且喷泉流不可重放，需用户重扫）
+@property (nonatomic, assign) BOOL hasStickyError;
+// 发送端原始文件名（未经 sanitize/去重），仅在 fileURL 非空时有意义
+@property (nonatomic, copy, nullable) NSString *originalFilename;
 @end
 
 @interface NativeCimbarDecoder : NSObject

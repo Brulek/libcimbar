@@ -32,6 +32,7 @@ struct LibraryScreen: View {
     @State private var selectedIDs: Set<String> = []
     @State private var bulkDeleteConfirm = false
     @State private var saveToast: SaveToast?
+    @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
 
     private var filteredFiles: [CachedReceivedFile] {
@@ -112,6 +113,12 @@ struct LibraryScreen: View {
             presentToast(SaveToast(message: feedback.message, style: .failure))
             store.clearFeedback()
         }
+        .alert("存到相册失败", isPresented: $photoPermissionAlert) {
+            Button("打开设置") { AppSettingsOpener.open() }
+            Button("好", role: .cancel) {}
+        } message: {
+            Text("未授予相册写入权限")
+        }
     }
 
     @ToolbarContentBuilder
@@ -165,7 +172,8 @@ struct LibraryScreen: View {
                         LibraryRow(
                             file: file,
                             isSelecting: isMultiSelect,
-                            isSelected: selectedIDs.contains(file.id)
+                            isSelected: selectedIDs.contains(file.id),
+                            onDetail: { detailTarget = file }
                         )
                     }
                     .buttonStyle(.plain)
@@ -256,7 +264,12 @@ struct LibraryScreen: View {
     private func commitRename() {
         defer { renameTarget = nil }
         guard let file = renameTarget else { return }
-        store.rename(file: file, to: renameText)
+        store.rename(file: file, to: renameText) { renamed in
+            // 空名/非法名/移动失败不能无声无息——弹窗已关，用 toast 告知
+            if renamed == nil {
+                presentToast(SaveToast(message: String(localized: "重命名失败，请换一个名称重试"), style: .failure))
+            }
+        }
     }
 
     private func commitSingleDelete() {
@@ -277,6 +290,11 @@ struct LibraryScreen: View {
             try await PhotoLibrarySaver.save(fileURL: file.url)
             presentToast(SaveToast(message: String(localized: "已保存到相册"), style: .success))
         } catch {
+            // 权限被拒用 alert 给「打开设置」补救入口；瞬时 toast 无法承载操作
+            if PhotoLibrarySaver.isPermissionDenied(error) {
+                photoPermissionAlert = true
+                return
+            }
             let message = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
             presentToast(SaveToast(message: message, style: .failure))
         }
@@ -326,6 +344,7 @@ private struct LibraryRow: View {
     let file: CachedReceivedFile
     let isSelecting: Bool
     let isSelected: Bool
+    var onDetail: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 14) {
@@ -348,10 +367,17 @@ private struct LibraryRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            if !isSelecting {
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+            if !isSelecting, let onDetail {
+                // 行点按是「预览」；详情页需要一个显式可见的入口，
+                // 不能只藏在长按菜单里（chevron 的导航语义与预览行为矛盾）
+                Button(action: onDetail) {
+                    Image(systemName: "info.circle")
+                        .font(.body)
+                        .foregroundStyle(.tint)
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("详情")
             }
         }
         .padding(.vertical, 4)

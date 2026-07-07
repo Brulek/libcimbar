@@ -523,7 +523,7 @@
 				};
 			};
 			buildConfigurationList = 9E5D55D0EEE58355C3B01FCC /* Build configuration list for PBXProject "CimbarTransfer" */;
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,

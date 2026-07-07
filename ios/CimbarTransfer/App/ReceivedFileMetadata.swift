@@ -86,6 +86,32 @@ final class ReceivedFileMetadataStore {
         }
     }
 
+    /// 接收完成时登记，携带发送端原始文件名（sanitize/去重之前的真名）。
+    /// 若懒注册已抢先建档（原始名等于磁盘名），用真名重建该条目。
+    func registerReceived(filename: String, originalName: String, fileSize: Int64) {
+        queue.sync {
+            ensureLoadedLocked()
+            if let existing = entries[filename] {
+                entries[filename] = ReceivedFileMetadata(
+                    id: existing.id,
+                    originalName: originalName,
+                    displayName: existing.displayName,
+                    receivedAt: existing.receivedAt,
+                    fileSize: fileSize,
+                    sha256: existing.sha256
+                )
+            } else {
+                entries[filename] = ReceivedFileMetadata(
+                    originalName: originalName,
+                    displayName: filename,
+                    receivedAt: Date(),
+                    fileSize: fileSize
+                )
+            }
+            persistLocked()
+        }
+    }
+
     func register(filename: String, originalName: String? = nil, fileSize: Int64, receivedAt: Date = Date()) -> ReceivedFileMetadata {
         queue.sync {
             ensureLoadedLocked()

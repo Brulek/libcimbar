@@ -2,6 +2,8 @@ name: CimbarTransfer
 options:
   deploymentTarget:
     iOS: 16.0
+  # 与 String Catalog 的 sourceLanguage / Info.plist 的 CFBundleDevelopmentRegion 保持一致
+  developmentLanguage: zh-Hans
 targets:
   CimbarTransfer:
     type: application

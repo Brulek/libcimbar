@@ -27,7 +27,7 @@
 			</array>
 		</dict>
 		<dict>
-			<!-- 静态链接的 OpenCV 调用 mach_absolute_time（其自带隐私清单不会进包），需在主清单声明 -->
+			<!-- 静态链接的 OpenCV 调用 mach_absolute_time（其自带隐私清单不会进包）；应用自身也使用 ProcessInfo.systemUptime（停滞检测/ETA 估算/发布限流）。两者均属 System Boot Time 类受管 API，理由码 35F9.1（应用内测量事件间隔） -->
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategorySystemBootTime</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>

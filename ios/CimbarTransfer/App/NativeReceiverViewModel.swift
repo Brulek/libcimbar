@@ -12,6 +12,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var statsText: String?
     @Published private(set) var stallHint: String?
     @Published private(set) var receivedFileURL: URL?
+    @Published private(set) var scanErrorLatched = false
     @Published private(set) var cameraPermissionDenied = false
     @Published private(set) var torchAvailable = false
     @Published private(set) var torchActive = false
@@ -130,10 +131,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
     }
 
-    /// 主线程调用（偏好变更）。切换模式会清空当前解码进度重新扫描
+    /// 主线程调用（偏好变更）。切换模式会清空进行中的解码重新扫描；
+    /// 已完成的接收卡片保留（新模式会在用户点「继续扫码」时随 resetScan 生效）
     func setDecodeMode(_ mode: Int) {
         decodeModeState.withLock { $0 = Int32(mode) }
-        resetScan()
+        if receivedFileURL == nil {
+            resetScan()
+        }
     }
 
     /// 主线程调用（偏好变更）。若会话已配置则立即切换采集分辨率
@@ -336,6 +340,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             statusText = text
         }
 
+        if scanErrorLatched != result.hasStickyError {
+            scanErrorLatched = result.hasStickyError
+        }
+
         let preferences = AppPreferences.shared
 
         if let fraction = result.progressFraction {
@@ -356,6 +364,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
         if let fileURL = result.fileURL {
             receivedFileURL = fileURL
+            // 把发送端原始文件名写进元数据（磁盘名可能经过 sanitize/加序号）
+            let savedName = fileURL.lastPathComponent
+            let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
+            ReceivedFileMetadataStore.shared.registerReceived(
+                filename: savedName,
+                originalName: result.originalFilename ?? savedName,
+                fileSize: (attrs?[.size] as? NSNumber)?.int64Value ?? 0
+            )
             progressValue = result.progressFraction?.doubleValue ?? 1.0
             progressLabel = result.progressLabel ?? String(localized: "文件接收 100%")
             statsText = nil
@@ -476,6 +492,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private func publishResetState() {
         DispatchQueue.main.async {
             self.receivedFileURL = nil
+            self.scanErrorLatched = false
             self.progressValue = nil
             self.progressLabel = nil
             self.statsText = nil

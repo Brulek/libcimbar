@@ -133,6 +133,7 @@
             NativeCimbarDecodeOutput *idle = [NativeCimbarDecodeOutput new];
             idle.statusText = _stickyErrorText ?: NSLocalizedString(@"正在扫描，尚未识别到有效码帧", nil);
             idle.progressLabel = NSLocalizedString(@"请保持发送端动画码完整放入取景框", nil);
+            idle.hasStickyError = (_stickyErrorText != nil);
             return idle;
         }
         return nil;
@@ -157,6 +158,7 @@
     if (_stickyErrorText != nil && output.fileURL == nil) {
         output.statusText = _stickyErrorText;
     }
+    output.hasStickyError = (_stickyErrorText != nil);
 
     if (output.statusText == nil && output.progressFraction == nil && output.fileURL == nil) {
         return nil;
@@ -324,6 +326,7 @@
     _stickyErrorText = nil;
     [_emittedFileIDs addObject:boxedID];
     output.fileURL = fileURL;
+    output.originalFilename = filename;
     output.progressFraction = @(1.0);
     output.progressLabel = NSLocalizedString(@"文件接收 100%", nil);
 

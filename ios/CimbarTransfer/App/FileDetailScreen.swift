@@ -16,6 +16,8 @@ struct FileDetailScreen: View {
     @State private var renameText = ""
     @State private var deleteConfirm = false
     @State private var photoSaveMessage: String?
+    @State private var photoSaveNeedsSettings = false
+    @State private var renameFailed = false
     /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
     @State private var trackedFileName: String
 
@@ -134,12 +136,19 @@ struct FileDetailScreen: View {
                 store.rename(file: file, to: renameText) { renamed in
                     if let renamed {
                         trackedFileName = renamed.fileName
+                    } else {
+                        renameFailed = true
                     }
                 }
             }
             Button("取消", role: .cancel) {}
         } message: {
             Text("将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变")
+        }
+        .alert("重命名失败", isPresented: $renameFailed) {
+            Button("好", role: .cancel) {}
+        } message: {
+            Text("重命名失败，请换一个名称重试")
         }
         .alert("删除文件", isPresented: $deleteConfirm) {
             Button("删除", role: .destructive) {
@@ -154,6 +163,9 @@ struct FileDetailScreen: View {
             get: { photoSaveMessage != nil },
             set: { if !$0 { photoSaveMessage = nil } }
         )) {
+            if photoSaveNeedsSettings {
+                Button("打开设置") { AppSettingsOpener.open() }
+            }
             Button("好", role: .cancel) {}
         } message: {
             Text(photoSaveMessage ?? "")
@@ -244,8 +256,10 @@ struct FileDetailScreen: View {
     private func saveToPhotos() async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
+            photoSaveNeedsSettings = false
             photoSaveMessage = String(localized: "已保存到相册")
         } catch {
+            photoSaveNeedsSettings = PhotoLibrarySaver.isPermissionDenied(error)
             photoSaveMessage = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }
     }

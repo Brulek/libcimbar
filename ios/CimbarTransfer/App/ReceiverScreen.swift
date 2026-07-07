@@ -82,6 +82,7 @@ struct ReceiverScreen: View {
                 progressLabel: viewModel.progressLabel,
                 statsText: viewModel.statsText,
                 stallHint: viewModel.stallHint,
+                scanErrorLatched: viewModel.scanErrorLatched,
                 receivedFileURL: viewModel.receivedFileURL,
                 showCheckmark: showCheckmark,
                 onShare: onShare,
@@ -235,6 +236,7 @@ private struct ReceiverBottomPanel: View {
     let progressLabel: String?
     let statsText: String?
     let stallHint: String?
+    let scanErrorLatched: Bool
     let receivedFileURL: URL?
     let showCheckmark: Bool
     let onShare: (URL) -> Void
@@ -260,12 +262,25 @@ private struct ReceiverBottomPanel: View {
                     statsText: statsText,
                     stallHint: stallHint
                 )
+                if scanErrorLatched {
+                    // 错误文案让用户「点按继续扫码重试」，这里必须真的有这个按钮：
+                    // 喷泉流已在 sink 中标记完成、无法重放，只有重扫能恢复
+                    Button(action: onContinueScanning) {
+                        Label("继续扫码", systemImage: "arrow.counterclockwise")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .transition(.opacity)
+                }
             }
         }
         .padding(16)
         .frame(maxWidth: 560)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .animation(.easeInOut(duration: 0.25), value: receivedFileURL != nil)
+        .animation(.easeInOut(duration: 0.25), value: scanErrorLatched)
     }
 }
 
@@ -327,6 +342,7 @@ private struct CompletedTransferCard: View {
     @State private var photoSaving = false
     @State private var photoSaved = false
     @State private var photoSaveError: String?
+    @State private var photoSaveNeedsSettings = false
 
     private var canSaveToPhotos: Bool {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
@@ -417,6 +433,9 @@ private struct CompletedTransferCard: View {
             get: { photoSaveError != nil },
             set: { if !$0 { photoSaveError = nil } }
         )) {
+            if photoSaveNeedsSettings {
+                Button("打开设置") { AppSettingsOpener.open() }
+            }
             Button("好", role: .cancel) {}
         } message: {
             Text(photoSaveError ?? "")
@@ -431,6 +450,7 @@ private struct CompletedTransferCard: View {
             try await PhotoLibrarySaver.save(fileURL: fileURL)
             withAnimation { photoSaved = true }
         } catch {
+            photoSaveNeedsSettings = PhotoLibrarySaver.isPermissionDenied(error)
             photoSaveError = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }
     }

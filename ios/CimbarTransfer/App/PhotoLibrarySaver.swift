@@ -16,6 +16,15 @@ enum PhotoLibrarySaverError: LocalizedError {
     }
 }
 
+/// 跳转到系统设置里本 App 的页面（权限被拒后的补救入口）
+enum AppSettingsOpener {
+    @MainActor
+    static func open() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+}
+
 enum PhotoLibrarySaver {
     static let supportedExtensions: Set<String> = [
         "jpg", "jpeg", "png", "heic", "heif", "gif", "tiff", "bmp", "webp"
@@ -23,6 +32,14 @@ enum PhotoLibrarySaver {
 
     static func canSave(extension ext: String) -> Bool {
         supportedExtensions.contains(ext.lowercased())
+    }
+
+    /// 判定错误是否为「相册写入权限被拒」——需要给用户跳系统设置的入口
+    static func isPermissionDenied(_ error: Error) -> Bool {
+        if case PhotoLibrarySaverError.permissionDenied = error {
+            return true
+        }
+        return false
     }
 
     static func save(fileURL: URL) async throws {
