@@ -9,8 +9,8 @@ enum PhotoLibrarySaverError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unsupportedFormat: return "该文件不是支持的图片格式"
-        case .permissionDenied:  return "未授予相册写入权限"
+        case .unsupportedFormat: return String(localized: "该文件不是支持的图片格式")
+        case .permissionDenied:  return String(localized: "未授予相册写入权限")
         case .saveFailed(let m): return m
         }
     }

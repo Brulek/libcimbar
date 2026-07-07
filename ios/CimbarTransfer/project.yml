@@ -12,6 +12,10 @@ targets:
         buildPhase: resources
       - path: Support/PrivacyInfo.xcprivacy
         buildPhase: resources
+      - path: Support/Localizable.xcstrings
+        buildPhase: resources
+      - path: Support/InfoPlist.xcstrings
+        buildPhase: resources
       - path: ../../src/lib/cimb_translator
         includes:
           - "**/*.cpp"

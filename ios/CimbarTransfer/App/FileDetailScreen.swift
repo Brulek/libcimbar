@@ -189,7 +189,7 @@ struct FileDetailScreen: View {
             }
             .buttonStyle(.plain)
         } else if checksumFailed {
-            LabeledContent("SHA-256", value: "计算失败")
+            LabeledContent("SHA-256", value: String(localized: "计算失败"))
         } else {
             LabeledContent("SHA-256") {
                 ProgressView()
@@ -244,9 +244,9 @@ struct FileDetailScreen: View {
     private func saveToPhotos() async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
-            photoSaveMessage = "已保存到相册"
+            photoSaveMessage = String(localized: "已保存到相册")
         } catch {
-            photoSaveMessage = (error as? LocalizedError)?.errorDescription ?? "保存失败"
+            photoSaveMessage = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }
     }
 }

@@ -22,7 +22,7 @@ struct AboutScreen: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    InfoRow(label: "版本", value: appVersion)
+                    InfoRow(label: String(localized: "版本"), value: appVersion)
                     InfoRow(label: "Bundle", value: Bundle.main.bundleIdentifier ?? "—")
                 }
                 .padding(16)

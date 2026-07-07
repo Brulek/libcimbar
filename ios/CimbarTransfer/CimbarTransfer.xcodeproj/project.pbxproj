@@ -21,6 +21,7 @@
 		14B3405DB2417C2FD30CA4C9 /* FileDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B9430892758DB7E9A7DE4A /* FileDetailScreen.swift */; };
 		14FF77FB689796DE2AD74FE7 /* entropy_common.c in Sources */ = {isa = PBXBuildFile; fileRef = B7F4A868FBFC155368ECBA14 /* entropy_common.c */; };
 		178CC01F5143D0A911E4C1F1 /* CellPositions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EFBB96875F5D49F0E799DDCC /* CellPositions.cpp */; };
+		18C243C0AFAC1E23B8F71C5A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 356C47D18344D89963DEB338 /* InfoPlist.xcstrings */; };
 		21216AA086813B89B2CB8D4F /* gf256.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5AD2161C6358BBEA969E6A02 /* gf256.cpp */; };
 		214EA28BD748B4CD50ADEA4F /* wirehair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D66A68A9490520C2EDF637 /* wirehair.cpp */; };
 		22E259AE379E0C3344D36427 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 330060639CFF8856209B6265 /* CoreImage.framework */; };
@@ -49,6 +50,7 @@
 		67653260C76000D5DE94706E /* CellDrift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B0193543CD9029E6BF816C9C /* CellDrift.cpp */; };
 		689780980949DF2F3328F452 /* zstd_decompress_block.c in Sources */ = {isa = PBXBuildFile; fileRef = F57094A4D90BBAC925388177 /* zstd_decompress_block.c */; };
 		6CE6CBBF92F0CC3A09DCB664 /* error_private.c in Sources */ = {isa = PBXBuildFile; fileRef = A0108831E93117E36CB2F36F /* error_private.c */; };
+		7576400BADFE0F510FFBA232 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E78041B6B11E86826C41EA05 /* Localizable.xcstrings */; };
 		76B7EA5425E53957D8DF269F /* huf_decompress.c in Sources */ = {isa = PBXBuildFile; fileRef = 91F498291C18A154B7D1FCE8 /* huf_decompress.c */; };
 		7BF14C4DB200AC6A0F34DF01 /* FileThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2446F0A4CCB285870D04EC /* FileThumbnailView.swift */; };
 		7CF57D20BC69B57DECDCA8EA /* decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 38408673B808EB6C04EF1A16 /* decode.c */; };
@@ -103,6 +105,7 @@
 		3152FBCF1CD680187E5FD199 /* huf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = huf.h; sourceTree = "<group>"; };
 		330060639CFF8856209B6265 /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		33AAAB3343A7FB4950CB1D15 /* Midpoints.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Midpoints.h; sourceTree = "<group>"; };
+		356C47D18344D89963DEB338 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = InfoPlist.xcstrings; path = Support/InfoPlist.xcstrings; sourceTree = SOURCE_ROOT; };
 		37EED17D2B8E3C5737C94D54 /* LibraryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScreen.swift; sourceTree = "<group>"; };
 		38408673B808EB6C04EF1A16 /* decode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = decode.c; sourceTree = "<group>"; };
 		39C44D0D898A080E727BF878 /* bitmaps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bitmaps.h; sourceTree = "<group>"; };
@@ -196,6 +199,7 @@
 		E3BEA37D289AD9C388BE9E6C /* debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = debug.c; sourceTree = "<group>"; };
 		E4F16E0AE342D3C578F359CD /* WirehairCodec.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WirehairCodec.cpp; sourceTree = "<group>"; };
 		E647F32A1ABCE0562E301BC0 /* pool.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = pool.c; sourceTree = "<group>"; };
+		E78041B6B11E86826C41EA05 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = Support/Localizable.xcstrings; sourceTree = SOURCE_ROOT; };
 		EB1C82A602EB6F3733DB1D26 /* zstd_deps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zstd_deps.h; sourceTree = "<group>"; };
 		EB33C49D73F150537F3D5BF5 /* Common.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Common.cpp; sourceTree = "<group>"; };
 		EC06CB99E561AED4D88C487F /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
@@ -438,6 +442,8 @@
 			children = (
 				7566D65EF5544E1795DEEC0E /* Assets.xcassets */,
 				1F827998BB6A6BEE77172532 /* PrivacyInfo.xcprivacy */,
+				E78041B6B11E86826C41EA05 /* Localizable.xcstrings */,
+				356C47D18344D89963DEB338 /* InfoPlist.xcstrings */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -522,6 +528,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = D00BCB03B101E203E36BC693;
 			minimizedProjectReferenceProxies = 1;
@@ -542,6 +549,8 @@
 			files = (
 				25C00B8E15A0E6166E93D357 /* Assets.xcassets in Resources */,
 				1024BA0225BF72704413ACB4 /* PrivacyInfo.xcprivacy in Resources */,
+				7576400BADFE0F510FFBA232 /* Localizable.xcstrings in Resources */,
+				18C243C0AFAC1E23B8F71C5A /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

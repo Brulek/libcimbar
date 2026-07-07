@@ -54,7 +54,7 @@
 }
 
 - (void)latchError:(NSString *)message into:(NativeCimbarDecodeOutput *)output {
-    NSString *full = [message stringByAppendingString:@"。点按「继续扫码」可重试"];
+    NSString *full = [NSString stringWithFormat:NSLocalizedString(@"%@。点按「继续扫码」可重试", nil), message];
     _stickyErrorText = full;
     output.statusText = full;
 }
@@ -78,7 +78,7 @@
     }
 
     NativeCimbarDecodeOutput *failure = [NativeCimbarDecodeOutput new];
-    failure.statusText = @"解码遇到异常，已自动恢复，请继续保持取景";
+    failure.statusText = NSLocalizedString(@"解码遇到异常，已自动恢复，请继续保持取景", nil);
     return failure;
 }
 
@@ -131,8 +131,8 @@
     if (bytes <= 0) {
         if ((_processedFrameCount % 20) == 0) {
             NativeCimbarDecodeOutput *idle = [NativeCimbarDecodeOutput new];
-            idle.statusText = _stickyErrorText ?: @"正在扫描，尚未识别到有效码帧";
-            idle.progressLabel = @"请保持发送端动画码完整放入取景框";
+            idle.statusText = _stickyErrorText ?: NSLocalizedString(@"正在扫描，尚未识别到有效码帧", nil);
+            idle.progressLabel = NSLocalizedString(@"请保持发送端动画码完整放入取景框", nil);
             return idle;
         }
         return nil;
@@ -141,8 +141,8 @@
     _detectedFrameCount += 1;
     NativeCimbarDecodeOutput *output = [NativeCimbarDecodeOutput new];
     output.detectedFrameCount = _detectedFrameCount;
-    output.statusText = [NSString stringWithFormat:@"已识别到码帧，正在解码（%lu）", (unsigned long)_detectedFrameCount];
-    output.progressLabel = @"已检测到传输，正在重组数据";
+    output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已识别到码帧，正在解码（%lu）", nil), (unsigned long)_detectedFrameCount];
+    output.progressLabel = NSLocalizedString(@"已检测到传输，正在重组数据", nil);
 
     const int64_t decodeResult = cimbard_fountain_decode(_scanBuffer.data(), static_cast<unsigned>(bytes));
     [self fillProgressFromReportInto:output];
@@ -150,7 +150,7 @@
     if (decodeResult > 0) {
         [self recoverFileWithID:static_cast<uint32_t>(decodeResult) into:output];
     } else if (output.progressFraction == nil && output.progressLabel == nil) {
-        output.progressLabel = @"已检测到传输，正在重组数据";
+        output.progressLabel = NSLocalizedString(@"已检测到传输，正在重组数据", nil);
     }
 
     // 锁存的错误优先于逐帧状态文案，避免失败提示一闪而过
@@ -178,13 +178,13 @@
     }
 
     if (_progressRegex == nil) {
-        output.statusText = @"已识别到数据帧";
+        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
     NSArray<NSTextCheckingResult *> *matches = [_progressRegex matchesInString:report options:0 range:NSMakeRange(0, report.length)];
     if (matches.count == 0) {
-        output.statusText = @"已识别到数据帧";
+        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
@@ -200,14 +200,14 @@
     }
 
     if (count == 0) {
-        output.statusText = @"已识别到数据帧";
+        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
     double average = total / (double)count;
     output.progressFraction = @(average);
-    output.progressLabel = [NSString stringWithFormat:@"扫码解码 %ld%%", lround(average * 100.0)];
-    output.statusText = [NSString stringWithFormat:@"已接收喷泉流进度，继续保持取景（%lu 路）", (unsigned long)count];
+    output.progressLabel = [NSString stringWithFormat:NSLocalizedString(@"扫码解码 %ld%%", nil), lround(average * 100.0)];
+    output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已接收喷泉流进度，继续保持取景（%lu 路）", nil), (unsigned long)count];
 }
 
 - (NSString *)currentReport {
@@ -226,14 +226,14 @@
 - (void)recoverFileWithID:(uint32_t)fileID into:(NativeCimbarDecodeOutput *)output {
     NSNumber *boxedID = @(fileID);
     if ([_emittedFileIDs containsObject:boxedID]) {
-        output.statusText = @"文件已接收，可直接分享";
+        output.statusText = NSLocalizedString(@"文件已接收，可直接分享", nil);
         return;
     }
 
     char filenameBuffer[512] = {0};
     const int filenameLength = cimbard_get_filename(fileID, filenameBuffer, sizeof(filenameBuffer));
     if (filenameLength < 0) {
-        [self latchError:[NSString stringWithFormat:@"文件数据重组失败（错误 %d），可能是传输受损", filenameLength] into:output];
+        [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件数据重组失败（错误 %d），可能是传输受损", nil), filenameLength] into:output];
         return;
     }
 
@@ -249,14 +249,14 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *tmpURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]]];
     if (![fileManager createFileAtPath:tmpURL.path contents:nil attributes:nil]) {
-        [self latchError:@"无法写入接收文件" into:output];
+        [self latchError:NSLocalizedString(@"无法写入接收文件", nil) into:output];
         return;
     }
 
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:tmpURL.path];
     if (handle == nil) {
         [fileManager removeItemAtURL:tmpURL error:nil];
-        [self latchError:@"无法写入接收文件" into:output];
+        [self latchError:NSLocalizedString(@"无法写入接收文件", nil) into:output];
         return;
     }
 
@@ -287,9 +287,9 @@
     if (readSize < 0) {
         [fileManager removeItemAtURL:tmpURL error:nil];
         if (writeFailed) {
-            [self latchError:@"写入文件失败，请检查设备可用存储空间" into:output];
+            [self latchError:NSLocalizedString(@"写入文件失败，请检查设备可用存储空间", nil) into:output];
         } else {
-            [self latchError:[NSString stringWithFormat:@"接收的数据无法解压（错误 %d），可能是传输受损", readSize] into:output];
+            [self latchError:[NSString stringWithFormat:NSLocalizedString(@"接收的数据无法解压（错误 %d），可能是传输受损", nil), readSize] into:output];
         }
         return;
     }
@@ -316,7 +316,7 @@
     }
     if (fileURL == nil) {
         [fileManager removeItemAtURL:tmpURL error:nil];
-        [self latchError:(lastError.localizedDescription ?: @"无法保存接收文件") into:output];
+        [self latchError:(lastError.localizedDescription ?: NSLocalizedString(@"无法保存接收文件", nil)) into:output];
         return;
     }
     NSString *safeName = fileURL.lastPathComponent;
@@ -325,14 +325,14 @@
     [_emittedFileIDs addObject:boxedID];
     output.fileURL = fileURL;
     output.progressFraction = @(1.0);
-    output.progressLabel = @"文件接收 100%";
+    output.progressLabel = NSLocalizedString(@"文件接收 100%", nil);
 
     NSDictionary<NSFileAttributeKey, id> *attributes = [fileManager attributesOfItemAtPath:fileURL.path error:nil];
     NSNumber *fileSize = attributes[NSFileSize];
     if (fileSize != nil) {
-        output.statusText = [NSString stringWithFormat:@"解码完成: %@ (%@)", safeName, [NSByteCountFormatter stringFromByteCount:fileSize.longLongValue countStyle:NSByteCountFormatterCountStyleFile]];
+        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"解码完成: %@ (%@)", nil), safeName, [NSByteCountFormatter stringFromByteCount:fileSize.longLongValue countStyle:NSByteCountFormatterCountStyleFile]];
     } else {
-        output.statusText = [NSString stringWithFormat:@"解码完成: %@", safeName];
+        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"解码完成: %@", nil), safeName];
     }
 }
 

@@ -1,0 +1,57 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "萤传"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lumen"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要使用相机扫描 Cimbar 发送端画面以接收文件。该权限只在「扫码」页激活时使用，不会上传任何画面到服务器。"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera is used to scan the Cimbar sender's screen to receive files. It is only active on the Scan tab, and no imagery ever leaves your device."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅在您主动点击「存到相册」时，用于将接收到的图片保存到您的相册。本应用不会读取相册中的任何内容。"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used only when you tap “Save to Photos” to save a received image to your photo library. This app never reads your photos."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

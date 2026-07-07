@@ -10,10 +10,10 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .dateDescending: return "时间（最近）"
-        case .dateAscending:  return "时间（最早）"
-        case .nameAscending:  return "名称（A→Z）"
-        case .sizeDescending: return "体积（大→小）"
+        case .dateDescending: return String(localized: "时间（最近）")
+        case .dateAscending:  return String(localized: "时间（最早）")
+        case .nameAscending:  return String(localized: "名称（A→Z）")
+        case .sizeDescending: return String(localized: "体积（大→小）")
         }
     }
 }
@@ -275,9 +275,9 @@ struct LibraryScreen: View {
     private func saveImageToPhotos(_ file: CachedReceivedFile) async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
-            presentToast(SaveToast(message: "已保存到相册", style: .success))
+            presentToast(SaveToast(message: String(localized: "已保存到相册"), style: .success))
         } catch {
-            let message = (error as? LocalizedError)?.errorDescription ?? "保存失败"
+            let message = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
             presentToast(SaveToast(message: message, style: .failure))
         }
     }

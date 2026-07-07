@@ -155,7 +155,15 @@ struct OnboardingScreen: View {
 }
 
 struct OnboardingPage: Identifiable {
+    /// 页面语义标识，供视图做条件判断（不要用本地化后的 title 比较）
+    enum Role {
+        case welcome
+        case howToReceive
+        case ready
+    }
+
     let id = UUID()
+    let role: Role
     let symbol: String
     let symbolColor: Color
     let title: String
@@ -170,35 +178,38 @@ struct OnboardingPage: Identifiable {
 
     static let all: [OnboardingPage] = [
         OnboardingPage(
+            role: .welcome,
             symbol: "viewfinder.circle.fill",
             symbolColor: Color(red: 0.55, green: 0.85, blue: 1.0),
-            title: "欢迎使用萤传",
-            subtitle: "一款基于 libcimbar 协议的离线文件接收工具",
+            title: String(localized: "欢迎使用萤传"),
+            subtitle: String(localized: "一款基于 libcimbar 协议的离线文件接收工具"),
             bullets: [
-                Bullet(symbol: "wifi.slash", text: "无需网络，无需配对，全程离线"),
-                Bullet(symbol: "lock.shield.fill", text: "数据不上传服务器，文件只在你的设备上"),
-                Bullet(symbol: "doc.fill", text: "支持任意文件类型：图片、文档、压缩包等")
+                Bullet(symbol: "wifi.slash", text: String(localized: "无需网络，无需配对，全程离线")),
+                Bullet(symbol: "lock.shield.fill", text: String(localized: "数据不上传服务器，文件只在你的设备上")),
+                Bullet(symbol: "doc.fill", text: String(localized: "支持任意文件类型：图片、文档、压缩包等"))
             ]
         ),
         OnboardingPage(
+            role: .howToReceive,
             symbol: "iphone.gen3.radiowaves.left.and.right",
             symbolColor: Color(red: 0.65, green: 1.0, blue: 0.78),
-            title: "怎么收文件",
-            subtitle: "对方用支持 cimbar 的发送端，本机扫一扫即可",
+            title: String(localized: "怎么收文件"),
+            subtitle: String(localized: "对方用支持 cimbar 的发送端，本机扫一扫即可"),
             bullets: [
-                Bullet(symbol: "1.circle.fill", text: "发送方在另一台设备上打开 libcimbar 网页或客户端，选择要发送的文件，会显示一段彩色动画码"),
-                Bullet(symbol: "2.circle.fill", text: "本机切到「扫码」页，将取景框对准对方屏幕"),
-                Bullet(symbol: "3.circle.fill", text: "保持稳定数秒，进度条到 100% 即接收完成"),
-                Bullet(symbol: "4.circle.fill", text: "完成后可直接预览、分享，或在「我的文件」中再次打开")
+                Bullet(symbol: "1.circle.fill", text: String(localized: "发送方在另一台设备上打开 libcimbar 网页或客户端，选择要发送的文件，会显示一段彩色动画码")),
+                Bullet(symbol: "2.circle.fill", text: String(localized: "本机切到「扫码」页，将取景框对准对方屏幕")),
+                Bullet(symbol: "3.circle.fill", text: String(localized: "保持稳定数秒，进度条到 100% 即接收完成")),
+                Bullet(symbol: "4.circle.fill", text: String(localized: "完成后可直接预览、分享，或在「我的文件」中再次打开"))
             ]
         ),
         OnboardingPage(
+            role: .ready,
             symbol: "checkmark.seal.fill",
             symbolColor: Color(red: 0.65, green: 1.0, blue: 0.78),
-            title: "准备就绪",
-            subtitle: "请阅读以下提醒并勾选确认",
+            title: String(localized: "准备就绪"),
+            subtitle: String(localized: "请阅读以下提醒并勾选确认"),
             bullets: [
-                Bullet(symbol: "exclamationmark.shield.fill", text: "请勿传输、存储、处理任何涉密文件")
+                Bullet(symbol: "exclamationmark.shield.fill", text: String(localized: "请勿传输、存储、处理任何涉密文件"))
             ]
         )
     ]
@@ -215,10 +226,10 @@ private struct OnboardingPageView: View {
                 if !page.bullets.isEmpty {
                     content
                 }
-                if page.title == "怎么收文件" {
+                if page.role == .howToReceive {
                     senderLink
                 }
-                if page.title == "准备就绪" {
+                if page.role == .ready {
                     confirmationToggle
                 }
                 Spacer(minLength: 16)

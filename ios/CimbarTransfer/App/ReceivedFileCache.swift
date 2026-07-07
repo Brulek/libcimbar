@@ -28,9 +28,9 @@ enum ReceivedFileRetentionPolicy: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .keepAll: return "永久保留"
-        case .days30: return "保留 30 天"
-        case .days7:  return "保留 7 天"
+        case .keepAll: return String(localized: "永久保留")
+        case .days30: return String(localized: "保留 30 天")
+        case .days7:  return String(localized: "保留 7 天")
         }
     }
 
@@ -67,7 +67,7 @@ enum ReceivedFileCache {
 
     static func summaryText(for count: Int, totalBytes: Int64) -> String {
         let size = ByteCountFormatter.string(fromByteCount: totalBytes, countStyle: .file)
-        return "\(count) 个文件 · \(size)"
+        return String(localized: "\(count) 个文件 · \(size)")
     }
 
     @discardableResult
@@ -217,7 +217,7 @@ enum ReceivedFileCache {
     static func renameFile(_ file: CachedReceivedFile, newDisplayName: String) throws -> CachedReceivedFile {
         let trimmed = newDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            throw NSError(domain: "ReceivedFileCache", code: 1, userInfo: [NSLocalizedDescriptionKey: "新文件名不能为空"])
+            throw NSError(domain: "ReceivedFileCache", code: 1, userInfo: [NSLocalizedDescriptionKey: String(localized: "新文件名不能为空")])
         }
 
         var targetName = trimmed

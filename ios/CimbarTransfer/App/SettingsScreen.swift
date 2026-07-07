@@ -113,7 +113,7 @@ struct SettingsScreen: View {
                 NavigationLink {
                     AboutScreen()
                 } label: {
-                    LabeledContent("应用信息", value: "萤传")
+                    LabeledContent("应用信息", value: String(localized: "萤传"))
                 }
                 NavigationLink {
                     OpenSourceLicensesScreen()
@@ -164,11 +164,11 @@ struct SettingsScreen: View {
     private var retentionHint: String {
         switch store.retentionPolicy {
         case .keepAll:
-            return "默认设置。文件不会被自动删除，需要手动清理。"
+            return String(localized: "默认设置。文件不会被自动删除，需要手动清理。")
         case .days30:
-            return "接收超过 30 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。"
+            return String(localized: "接收超过 30 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。")
         case .days7:
-            return "接收超过 7 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。"
+            return String(localized: "接收超过 7 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。")
         }
     }
 }

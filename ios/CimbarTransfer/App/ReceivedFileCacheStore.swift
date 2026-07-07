@@ -13,7 +13,7 @@ struct CacheActionFeedback: Identifiable, Equatable {
 
 @MainActor
 final class ReceivedFileCacheStore: ObservableObject {
-    @Published private(set) var cacheSummary: String = "扫描中..."
+    @Published private(set) var cacheSummary: String = String(localized: "扫描中...")
     @Published private(set) var cachedFiles: [CachedReceivedFile] = []
     @Published private(set) var feedback: CacheActionFeedback?
     @Published var retentionPolicy: ReceivedFileRetentionPolicy = ReceivedFileCache.retentionPolicy
@@ -31,7 +31,7 @@ final class ReceivedFileCacheStore: ObservableObject {
             } catch {
                 self?.onMain {
                     $0.cachedFiles = []
-                    $0.cacheSummary = "存储目录不可用"
+                    $0.cacheSummary = String(localized: "存储目录不可用")
                 }
             }
         }
@@ -120,8 +120,8 @@ final class ReceivedFileCacheStore: ObservableObject {
     nonisolated private func publishFeedbackIfFailed(_ failedCount: Int, source: CacheActionFeedback.Source) {
         guard failedCount > 0 else { return }
         let message = source == .clear
-            ? "有 \(failedCount) 个文件未能清除，请稍后重试"
-            : "有 \(failedCount) 个文件删除失败，请稍后重试"
+            ? String(localized: "有 \(failedCount) 个文件未能清除，请稍后重试")
+            : String(localized: "有 \(failedCount) 个文件删除失败，请稍后重试")
         onMain {
             $0.feedback = CacheActionFeedback(source: source, message: message)
         }

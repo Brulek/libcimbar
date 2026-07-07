@@ -6,7 +6,7 @@ import os
 import UIKit
 
 final class NativeReceiverViewModel: NSObject, ObservableObject {
-    @Published private(set) var statusText: String = "准备中..."
+    @Published private(set) var statusText: String = String(localized: "准备中...")
     @Published private(set) var progressValue: Double?
     @Published private(set) var progressLabel: String?
     @Published private(set) var statsText: String?
@@ -55,7 +55,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     func start() {
         impactGenerator.prepare()
         notificationGenerator.prepare()
-        updateStatusIfIdle("启动相机中...")
+        updateStatusIfIdle(String(localized: "启动相机中..."))
         publishCameraPermissionDenied(false)
         startStallTimerIfNeeded()
 
@@ -63,7 +63,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         case .authorized:
             configureAndStartSession()
         case .notDetermined:
-            updateStatus("请求相机权限...")
+            updateStatus(String(localized: "请求相机权限..."))
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 guard let self else { return }
                 if granted {
@@ -75,7 +75,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         case .denied, .restricted:
             handlePermissionDenied()
         @unknown default:
-            updateStatus("相机权限状态未知")
+            updateStatus(String(localized: "相机权限状态未知"))
         }
     }
 
@@ -254,7 +254,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
                     try self.configureSession()
                     self.isConfigured = true
                 } catch {
-                    self.updateStatus("相机初始化失败: \(error.localizedDescription)")
+                    self.updateStatus(String(localized: "相机初始化失败: \(error.localizedDescription)"))
                     return
                 }
             }
@@ -264,7 +264,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             }
             // 接收过程用户全程无触摸，扫码期间禁用自动锁屏，避免长传输被打断
             self.setIdleTimerDisabled(true)
-            self.updateStatusIfIdle("相机已启动，正在初始化解码器...")
+            self.updateStatusIfIdle(String(localized: "相机已启动，正在初始化解码器..."))
         }
     }
 
@@ -357,7 +357,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         if let fileURL = result.fileURL {
             receivedFileURL = fileURL
             progressValue = result.progressFraction?.doubleValue ?? 1.0
-            progressLabel = result.progressLabel ?? "文件接收 100%"
+            progressLabel = result.progressLabel ?? String(localized: "文件接收 100%")
             statsText = nil
             stallHint = nil
             progressSamples.removeAll()
@@ -405,9 +405,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         let elapsed = ProcessInfo.processInfo.systemUptime - lastAdvanceUptime
         let newHint: String?
         if elapsed > 12 {
-            newHint = "仍无新数据：试试靠近一点、调整角度避免反光，或调高发送端屏幕亮度"
+            newHint = String(localized: "仍无新数据：试试靠近一点、调整角度避免反光，或调高发送端屏幕亮度")
         } else if elapsed > 5 {
-            newHint = "进度停滞了？请确保动画码完整、无遮挡地处于取景框内"
+            newHint = String(localized: "进度停滞了？请确保动画码完整、无遮挡地处于取景框内")
         } else {
             newHint = nil
         }
@@ -430,14 +430,14 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
         var parts: [String] = []
         if frameCount > 0 {
-            parts.append("已识别 \(frameCount) 帧")
+            parts.append(String(localized: "已识别 \(Int(frameCount)) 帧"))
         }
         if let first = progressSamples.first,
            now - first.time >= 1.5,
            fraction > first.fraction {
             let rate = (fraction - first.fraction) / (now - first.time)
             if rate > 0.0005 {
-                parts.append("预计还需\(Self.formatRemainingTime((1.0 - fraction) / rate))")
+                parts.append(String(localized: "预计还需 \(Self.formatRemainingTime((1.0 - fraction) / rate))"))
             }
         }
         statsText = parts.isEmpty ? nil : parts.joined(separator: " · ")
@@ -446,10 +446,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private static func formatRemainingTime(_ seconds: Double) -> String {
         let clamped = max(1, Int(seconds.rounded(.up)))
         if clamped < 90 {
-            return " \(clamped) 秒"
+            return String(localized: "\(clamped) 秒")
         }
         let minutes = Int((Double(clamped) / 60.0).rounded())
-        return " \(minutes) 分钟"
+        return String(localized: "\(minutes) 分钟")
     }
 
     private func updateStatus(_ text: String) {
@@ -482,7 +482,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.stallHint = nil
             self.progressSamples.removeAll()
             self.lastAdvanceFraction = -1
-            self.statusText = "相机已启动，请将发送端动画码放入取景框"
+            self.statusText = String(localized: "相机已启动，请将发送端动画码放入取景框")
         }
     }
 
@@ -494,7 +494,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     private func handlePermissionDenied() {
         setIdleTimerDisabled(false)
-        updateStatus("未授予相机权限，请到系统设置中开启")
+        updateStatus(String(localized: "未授予相机权限，请到系统设置中开启"))
         publishCameraPermissionDenied(true)
     }
 }
@@ -521,7 +521,7 @@ extension NativeReceiverViewModel: AVCaptureVideoDataOutputSampleBufferDelegate 
                 created.reset()
             }
             decoder = created
-            updateStatusIfCurrent("相机已启动，请将发送端动画码放入取景框", revision: revision)
+            updateStatusIfCurrent(String(localized: "相机已启动，请将发送端动画码放入取景框"), revision: revision)
             return
         }
 
@@ -561,11 +561,11 @@ private enum ReceiverError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .cameraUnavailable:
-            return "未找到可用后置相机"
+            return String(localized: "未找到可用后置相机")
         case .cannotAddInput:
-            return "无法添加相机输入"
+            return String(localized: "无法添加相机输入")
         case .cannotAddOutput:
-            return "无法添加视频输出"
+            return String(localized: "无法添加视频输出")
         }
     }
 }

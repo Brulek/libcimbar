@@ -286,7 +286,7 @@ private struct ProgressCard: View {
                     .progressViewStyle(.linear)
                     .opacity(progressLabel == nil ? 0.45 : 0.7)
             }
-            Text(progressLabel ?? "等待识别动画码")
+            Text(progressLabel ?? String(localized: "等待识别动画码"))
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(.primary)
                 .lineLimit(2)
@@ -308,7 +308,7 @@ private struct ProgressCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.25), value: stallHint)
         .accessibilityElement(children: .combine)
-        .accessibilityValue([progressLabel ?? "等待识别", statsText, stallHint].compactMap { $0 }.joined(separator: "，"))
+        .accessibilityValue([progressLabel ?? String(localized: "等待识别"), statsText, stallHint].compactMap { $0 }.joined(separator: String(localized: "，")))
     }
 }
 
@@ -355,7 +355,7 @@ private struct CompletedTransferCard: View {
                     Text(fileURL.lastPathComponent)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
-                    Text(fileSize ?? "已接收")
+                    Text(fileSize ?? String(localized: "已接收"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -431,7 +431,7 @@ private struct CompletedTransferCard: View {
             try await PhotoLibrarySaver.save(fileURL: fileURL)
             withAnimation { photoSaved = true }
         } catch {
-            photoSaveError = (error as? LocalizedError)?.errorDescription ?? "保存失败"
+            photoSaveError = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }
     }
 }
