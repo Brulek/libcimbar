@@ -131,16 +131,23 @@ struct ContentView: View {
             }
         }
         .sheet(item: $shareRequest, onDismiss: {
-            viewModel.resumeProcessing()
+            resumeScanIfAppropriate()
         }) { request in
             ShareSheet(fileURL: request.url)
         }
         .sheet(item: $previewRequest, onDismiss: {
-            viewModel.resumeProcessing()
+            resumeScanIfAppropriate()
         }) { request in
             QuickLookPreview(fileURL: request.url)
                 .ignoresSafeArea()
         }
+    }
+
+    private func resumeScanIfAppropriate() {
+        // 接收完成后解码链已刻意停住（省电），关闭分享/预览面板不应重新拉起；
+        // 用户点「继续扫码」时 resetScan 会恢复
+        guard viewModel.receivedFileURL == nil else { return }
+        viewModel.resumeProcessing()
     }
 
     private func presentShare(for fileURL: URL) {
