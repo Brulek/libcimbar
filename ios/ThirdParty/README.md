@@ -2,6 +2,12 @@
 
 ## opencv2.xcframework (4.12.0)
 
+> **获取方式（2026-07-12 起框架不入 git）**：GitHub 100MB 单文件限制，二进制已从 git 历史剥离。
+> 新机克隆后任选其一恢复本目录：
+> 1. 从本仓库 GitHub Release `frameworks-v1` 下载 `opencv2.xcframework.zip`，解压到 `ios/ThirdParty/`；
+> 2. 按下文构建方法自建。
+> 重写前的完整历史备份：`~/dev/libcimbar-share/libcimbar-pre-rewrite-20260712.bundle`（仅 MBP 本机）。
+
 - `ios-arm64`：设备切片。二进制来自原始 opencv2.framework（官方 iOS 包）的 arm64 切片
   （`lipo -thin arm64`），字节与替换前完全一致；Headers/Resources 原样保留（全模块头）。
 - `ios-arm64-simulator`：自建切片，仅含 app 实际依赖的 core + imgproc（及内建 3rdparty）。

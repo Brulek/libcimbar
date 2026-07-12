@@ -4,3 +4,6 @@ xcuserdata/
 __pycache__/
 build/
 DerivedData/
+
+# 第三方大二进制不入 git(GitHub 100MB 限制),从本仓库 Release 下载或按 ios/ThirdParty/README.md 自建
+ios/ThirdParty/opencv2.xcframework/
