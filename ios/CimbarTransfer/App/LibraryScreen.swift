@@ -141,7 +141,8 @@ struct LibraryScreen: View {
                 var index: [String: String] = [:]
                 for file in files {
                     if Task.isCancelled { break }
-                    index[file.name] = known[file.name] ?? TextClipboard.readText(file.url)
+                    // 每个文件只索引开头 10 万字：过滤在主线程上、每敲一个字跑一遍，几十个大日志全文会卡
+                    index[file.name] = known[file.name] ?? TextClipboard.readText(file.url).map { String($0.prefix(100_000)) }
                 }
                 return index
             }.value
@@ -335,6 +336,7 @@ struct LibraryScreen: View {
                 isSelected: selectedIDs.contains(file.id),
                 dayShownInHeader: sortOption.isByDate && trimmedSearch.isEmpty,
                 contentMatch: contentMatch(for: file),
+                searchQuery: trimmedSearch,
                 referenceDay: dayStamp,
                 onDetail: { showDetail(file) }
             )

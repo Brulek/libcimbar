@@ -50,8 +50,19 @@ struct LibraryRow: View {
     let isSelected: Bool
     /// 列表按日期分组时，「昨天」已经写在分组标题上
     var dayShownInHeader = false
-    /// 按内容搜到时命中的那一行
+    /// 按内容搜到时命中的那一行，和搜索词（在行里加粗）
     var contentMatch: String?
+    var searchQuery = ""
+
+    private var highlightedMatch: AttributedString {
+        var text = AttributedString(contentMatch ?? "")
+        if !searchQuery.isEmpty,
+           let range = text.range(of: searchQuery, options: [.caseInsensitive, .diacriticInsensitive]) {
+            text[range].font = .footnote.weight(.semibold)
+            text[range].foregroundColor = .primary
+        }
+        return text
+    }
     /// 「今天/昨天」相对哪一天算：由列表传入，过了午夜会换，行跟着重画
     var referenceDay = Date()
     var onDetail: (() -> Void)?
@@ -147,7 +158,7 @@ struct LibraryRow: View {
             if let contentMatch {
                 HStack(spacing: 4) {
                     Image(systemName: "text.magnifyingglass")
-                    Text(verbatim: contentMatch)
+                    Text(highlightedMatch)
                 }
                 .font(.footnote)
                 .foregroundStyle(.secondary)
