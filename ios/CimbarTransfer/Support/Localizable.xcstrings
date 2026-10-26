@@ -1989,6 +1989,16 @@
         }
       }
     },
+    "没有相册权限" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Access to Photos"
+          }
+        }
+      }
+    },
     "没有相机权限" : {
       "localizations" : {
         "en" : {

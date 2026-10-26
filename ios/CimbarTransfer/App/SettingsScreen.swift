@@ -8,6 +8,7 @@ struct SettingsScreen: View {
     @State private var showingOnboarding = false
     @State private var showingSenderHelp = false
     @State private var clearFeedbackMessage: String?
+    @State private var photoAccessDenied = false
 
     var body: some View {
         Form {
@@ -139,6 +140,21 @@ struct SettingsScreen: View {
             Button("好", role: .cancel) {}
         } message: {
             Text(clearFeedbackMessage ?? "")
+        }
+        .onChange(of: preferences.autoSaveToPhotos) { enabled in
+            guard enabled else { return }
+            Task { @MainActor in
+                if !(await PhotoLibrarySaver.requestAddAccess()) {
+                    preferences.autoSaveToPhotos = false
+                    photoAccessDenied = true
+                }
+            }
+        }
+        .alert("没有相册权限", isPresented: $photoAccessDenied) {
+            Button("去设置") { AppSettingsOpener.open() }
+            Button("好", role: .cancel) {}
+        } message: {
+            Text("请在设置中允许萤传添加照片")
         }
         .onChange(of: store.feedback) { feedback in
             guard let feedback, feedback.source == .clear else { return }

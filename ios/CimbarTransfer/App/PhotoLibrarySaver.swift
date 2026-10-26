@@ -67,6 +67,12 @@ enum PhotoLibrarySaver {
         }
     }
 
+    /// 打开「自动存到相册」时先要权限，免得在接收中途才弹系统框
+    static func requestAddAccess() async -> Bool {
+        let status = await requestAddAuthorization()
+        return status == .authorized || status == .limited
+    }
+
     private static func requestAddAuthorization() async -> PHAuthorizationStatus {
         await withCheckedContinuation { continuation in
             PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
