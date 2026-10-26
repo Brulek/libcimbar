@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		153EDC69F293BD7C345CBD94 /* SearchableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */; };
 		531CD4E26D5D9E0A76F22F97 /* LibrarySorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C573EF68338BA4504EBFAABE /* LibrarySorting.swift */; };
 		197C3E737B4F942E3C4E01C3 /* FrameReplayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B074C63579908B261F87F6BA /* FrameReplayer.swift */; };
 		25EA1170BCA01910A4C2887F /* FilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588BAD622E288E2713C8AA18 /* FilesExport.swift */; };
@@ -94,6 +95,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableText.swift; sourceTree = "<group>"; };
 		C573EF68338BA4504EBFAABE /* LibrarySorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySorting.swift; sourceTree = "<group>"; };
 		B074C63579908B261F87F6BA /* FrameReplayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameReplayer.swift; sourceTree = "<group>"; };
 		588BAD622E288E2713C8AA18 /* FilesExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesExport.swift; sourceTree = "<group>"; };
@@ -423,6 +425,7 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */,
 				C573EF68338BA4504EBFAABE /* LibrarySorting.swift */,
 				B074C63579908B261F87F6BA /* FrameReplayer.swift */,
 				588BAD622E288E2713C8AA18 /* FilesExport.swift */,
@@ -599,6 +602,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				153EDC69F293BD7C345CBD94 /* SearchableText.swift in Sources */,
 				531CD4E26D5D9E0A76F22F97 /* LibrarySorting.swift in Sources */,
 				197C3E737B4F942E3C4E01C3 /* FrameReplayer.swift in Sources */,
 				25EA1170BCA01910A4C2887F /* FilesExport.swift in Sources */,

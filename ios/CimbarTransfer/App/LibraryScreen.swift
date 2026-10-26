@@ -133,7 +133,10 @@ struct LibraryScreen: View {
         .task(id: textIndexKey) {
             guard !trimmedSearch.isEmpty else { return }
             let files = store.cachedFiles
-                .filter { TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize) }
+                .filter {
+                    TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize)
+                        || SearchableText.canIndexPDF(fileExtension: $0.fileExtension, size: $0.fileSize)
+                }
                 .map { (name: $0.fileName, url: $0.url) }
             let known = textIndex
             // 读文件、猜编码放后台；已经读过的不再读
@@ -141,8 +144,7 @@ struct LibraryScreen: View {
                 var index: [String: String] = [:]
                 for file in files {
                     if Task.isCancelled { break }
-                    // 每个文件只索引开头 10 万字：过滤在主线程上、每敲一个字跑一遍，几十个大日志全文会卡
-                    index[file.name] = known[file.name] ?? TextClipboard.readText(file.url).map { String($0.prefix(100_000)) }
+                    index[file.name] = known[file.name] ?? SearchableText.read(file.url)
                 }
                 return index
             }.value
