@@ -348,6 +348,10 @@ struct LibraryScreen: View {
         .accessibilityAddTraits(isOpenInSplit(file) ? .isSelected : [])
         .accessibilityHint(isSelecting ? "轻点切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "轻点查看简介" : "轻点预览")
         .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
+        // 行里的 ⓘ 嵌在行按钮里，VoiceOver 不一定能单独聚焦到；给一个具名操作（左滑的分享/删除系统会自动列出）
+        .accessibilityAction(named: Text("简介")) {
+            if !isSelecting { showDetail(file) }
+        }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             if !isSelecting {
                 Button(role: .destructive) {
