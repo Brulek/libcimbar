@@ -14,6 +14,8 @@
 - 底部面板一次只说一件事：等待 → 接收中（百分比、剩余时间、已识别帧数）→ 动画码离开取景框 → 出错重扫 → 完成
 - 码离开取景框时进度保留；停滞 5s/12s 分级提示
 - 完成卡片：预览 / 存相册 / 分享 / 继续接收，显示用时；接收完成即暂停解码链省电
+- 同一次传输再收一遍（点「继续接收」时发送端还在放同一个文件）不另存副本，复用已保存的文件
+- 空闲自动暂停：90 秒没扫到码（传输中断 5 分钟、收完 45 秒）关相机、恢复自动锁屏，点「继续扫描」恢复
 - 「怎么发送文件」说明页，可复制或分享 cimbar.org 网址
 - 相机被其他 App 占用、设备过热时在面板上说明原因；媒体服务重置后自动重启
 - 适配「减弱动态效果」、动态字体（大字号下按钮改竖排）、VoiceOver（每 25% 播报一次进度）
@@ -98,11 +100,11 @@ python3 scripts/l10n_sync.py --apply en.json --prune
 
 ## 测试与调试
 
-- **端到端解码自测**：`scripts/run_decode_selftest.sh`（需要一台已启动的模拟器）。用 libcimbar 自带的编码器把 24 KB 数据编成每种模式的动画码，套进 720×1280 的相机画布，交给 `NativeCimbarDecoder` 解码并逐字节核对；覆盖自动识别四种模式、手动模式和模式不匹配。`--dump-frame out.png` 可导出一帧真实动画码。
+- **端到端解码自测**：`scripts/run_decode_selftest.sh`（需要一台已启动的模拟器）。用 libcimbar 自带的编码器把 24 KB 数据编成每种模式的动画码，套进 720×1280 的相机画布，交给 `NativeCimbarDecoder` 解码并逐字节核对；覆盖自动识别四种模式、手动模式、模式不匹配，以及同一文件收两遍不存副本。`--dump-frame out.png` 可导出一帧真实动画码。
 - **Debug 启动参数**（只在 Debug 构建里生效）：
   - `-InitialTab library|settings`：初始标签
   - `-SeedDemoFiles YES`：往接收目录写几份示例文件；`-DemoNow 09:41` 让它们按今天 9:41 往前排
-  - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
+  - `-DemoScan waiting|receiving|lost|stalled|error|paused|done`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
   - `-DemoDetail YES`：直接打开最新文件的简介页
   - `-DemoUndoWindow 30`：把删除后的撤销窗口拉长到 30 秒（手动点测时用）
 - **新增源文件**：`python3 scripts/add_swift_file.py Foo.swift` 把 `App/Foo.swift` 挂进工程；`--resource` 挂 `Support/` 下的资源，`--localized` 挂 `Support/<语言>.lproj/` 下的本地化文件。不要用 `xcodegen generate` 重建：会丢掉 knownRegions 里的 en，英文本地化失效。
