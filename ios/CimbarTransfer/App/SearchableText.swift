@@ -67,18 +67,22 @@ enum OfficeText {
         let parts: (ZipArchive.Entry) -> Bool
         /// 文字所在的标签（如 w:t），以及一段结束的标签（如 w:p）
         let textTag: String
-        let breakTag: String
+        let breakTags: [String]
     }
 
     private static func kind(for fileExtension: String) -> Kind? {
         switch fileExtension.lowercased() {
         case "docx":
-            return Kind(parts: { $0.name == "word/document.xml" }, textTag: "w:t", breakTag: "w:p")
+            return Kind(parts: { $0.name == "word/document.xml" }, textTag: "w:t", breakTags: ["w:p"])
         case "pptx":
             return Kind(parts: { $0.name.hasPrefix("ppt/slides/slide") && $0.name.hasSuffix(".xml") },
-                        textTag: "a:t", breakTag: "a:p")
+                        textTag: "a:t", breakTags: ["a:p"])
         case "xlsx":
-            return Kind(parts: { $0.name == "xl/sharedStrings.xml" }, textTag: "t", breakTag: "si")
+            // 文字一般在共享字符串表里；有些工具（WPS、程序导出）直接写在单元格里（inlineStr），工作表也读
+            return Kind(parts: {
+                $0.name == "xl/sharedStrings.xml"
+                    || ($0.name.hasPrefix("xl/worksheets/sheet") && $0.name.hasSuffix(".xml"))
+            }, textTag: "t", breakTags: ["si", "c"])
         default:
             return nil
         }
@@ -132,9 +136,9 @@ enum OfficeText {
 
     private static func extract(_ xml: String, kind: Kind) -> String {
         let text = NSRegularExpression.escapedPattern(for: kind.textTag)
-        let paragraph = NSRegularExpression.escapedPattern(for: kind.breakTag)
+        let paragraph = kind.breakTags.map(NSRegularExpression.escapedPattern(for:)).joined(separator: "|")
         // <w:t>文字</w:t> 或 <w:t xml:space="preserve">文字</w:t>；</w:p> 换行
-        guard let regex = try? NSRegularExpression(pattern: "<\(text)(?:\\s[^>]*)?>([^<]*)</\(text)>|</\(paragraph)>") else { return "" }
+        guard let regex = try? NSRegularExpression(pattern: "<\(text)(?:\\s[^>]*)?>([^<]*)</\(text)>|</(?:\(paragraph))>") else { return "" }
         var output = ""
         let ns = xml as NSString
         regex.enumerateMatches(in: xml, range: NSRange(location: 0, length: ns.length)) { match, _, _ in
