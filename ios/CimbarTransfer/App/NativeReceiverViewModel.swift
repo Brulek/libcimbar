@@ -507,7 +507,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         if let fileURL = result.fileURL {
             receivedDuplicate = result.isDuplicate
             receivedFileURL = fileURL
-            if !result.isDuplicate {
+            if result.isDuplicate {
+                ReceivedFileMetadataStore.shared.markReceivedAgain(filename: fileURL.lastPathComponent)
+            } else {
                 // 把发送端原始文件名写进元数据（磁盘名可能经过 sanitize/加序号）
                 let savedName = fileURL.lastPathComponent
                 let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
