@@ -154,7 +154,7 @@ struct LibraryEmptyState: View {
             Text("还没有收到文件")
                 .font(.title3.weight(.semibold))
                 .padding(.top, 6)
-            Text("扫描别人屏幕上的动画码，收到的文件会出现在这里。")
+            Text("扫描屏幕上的动画码，收到的文件会出现在这里。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

@@ -1335,12 +1335,12 @@
         }
       }
     },
-    "扫描别人屏幕上的动画码，收到的文件会出现在这里。" : {
+    "扫描屏幕上的动画码，收到的文件会出现在这里。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan an animated code on another screen. Received files show up here."
+            "value" : "Scan an animated code on a screen. Received files show up here."
           }
         }
       }
