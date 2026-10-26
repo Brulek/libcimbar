@@ -149,6 +149,9 @@ struct ReceiverScreen: View {
                     onContinueScanning: resetScan,
                     onShowSenderHelp: { showingSenderHelp = true }
                 )
+                // 底部卡片和取景框挤在一屏里、不能滚动：最大的几档字号下文件名只剩两个字，
+                // 封顶在辅助功能第二档（仍远大于默认），保证名字和按钮读得全
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 .padding(.horizontal)
                 .padding(.bottom, 8)
             }
