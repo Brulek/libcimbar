@@ -294,6 +294,9 @@ private struct ReceiverTopBar: View {
                 .frame(height: buttonSide)
                 .glassChrome(in: Capsule())
                 .contentShape(Capsule())
+                // iPad 接触控板/鼠标时，自绘的玻璃按钮也要有指针高亮
+                .contentShape(.hoverEffect, Capsule())
+                .hoverEffect(.highlight)
             }
             .accessibilityLabel("解码模式")
             .accessibilityValue(modeTitle)
@@ -309,6 +312,8 @@ private struct ReceiverTopBar: View {
                         .padding(.horizontal, isZoomed && zoomText.count > 2 ? 6 : 0)
                         .glassChrome(in: Capsule())
                         .contentTransition(.numericText())
+                        .contentShape(.hoverEffect, Capsule())
+                        .hoverEffect(.highlight)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("变焦 \(zoomText)")
@@ -322,6 +327,8 @@ private struct ReceiverTopBar: View {
                         .foregroundStyle(torchActive ? Brand.glow : .white)
                         .frame(width: buttonSide, height: buttonSide)
                         .glassChrome(in: Circle())
+                        .contentShape(.hoverEffect, Circle())
+                        .hoverEffect(.highlight)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(torchActive ? "关闭手电筒" : "打开手电筒")

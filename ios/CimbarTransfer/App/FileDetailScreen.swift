@@ -384,6 +384,8 @@ private struct DetailActionButton: View {
             .padding(.vertical, 10)
             .foregroundStyle(.tint)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .contentShape(.hoverEffect, RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .hoverEffect(.highlight)
         }
         .buttonStyle(.plain)
     }
