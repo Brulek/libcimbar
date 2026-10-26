@@ -98,6 +98,8 @@ struct LibraryScreen: View {
     @State private var batchSaving = false
     /// 多选「存到文件」时要导出的文件；非空即弹出系统的存储位置选择器
     @State private var filesExportURLs: [URL] = []
+    /// 过了午夜「今天/昨天」要重新分组：系统在跨天、改时区时发通知，换个值让列表重算
+    @State private var dayStamp = Date()
 
     private var trimmedSearch: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -153,6 +155,7 @@ struct LibraryScreen: View {
             return [LibrarySection(id: "all", title: nil, files: files)]
         }
         let calendar = Calendar.current
+        _ = dayStamp // 跨天时由通知更新，让分组跟着重算
         let startOfToday = calendar.startOfDay(for: Date())
         let weekAgo = calendar.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
 
@@ -277,6 +280,9 @@ struct LibraryScreen: View {
             let present = Set(files.map(\.id))
             selectedIDs.formIntersection(present)
             if files.isEmpty { isSelecting = false }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+            dayStamp = Date()
         }
         .filesExport(urls: $filesExportURLs) { count in
             presentToast(SaveToast(message: String(localized: "已存 \(count) 个到「文件」"), style: .success))
