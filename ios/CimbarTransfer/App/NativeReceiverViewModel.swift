@@ -475,6 +475,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
         if codeUnreadable != result.codeUnreadable {
             codeUnreadable = result.codeUnreadable
+            // 看不到屏幕的人只能靠播报知道「码在框里，但读不出来」，只在变成这个状态时说一次
+            if codeUnreadable, UIAccessibility.isVoiceOverRunning {
+                UIAccessibility.post(notification: .announcement, argument: String(localized: "看到了动画码，但读不出来"))
+            }
         }
 
         if result.isIdle {
