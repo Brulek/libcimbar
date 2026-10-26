@@ -18,11 +18,9 @@ targets:
         buildPhase: resources
       - path: Support/InfoPlist.xcstrings
         buildPhase: resources
-      # iOS 16 不支持 AppShortcuts.xcstrings，Siri 短语用传统 .lproj/AppShortcuts.strings
-      - path: Support/en.lproj
-        buildPhase: resources
-      - path: Support/zh-Hans.lproj
-        buildPhase: resources
+      # iOS 16 不支持 AppShortcuts.xcstrings，Siri 短语用 Support/<语言>.lproj/AppShortcuts.strings。
+      # 注意：XcodeGen 2.46 重新生成工程会丢掉这两个本地化文件和 knownRegions 里的 en，
+      # 已提交的 xcodeproj 才是准的；新增文件用 scripts/add_swift_file.py（--localized）挂接
       - path: ../../src/lib/cimb_translator
         includes:
           - "**/*.cpp"
