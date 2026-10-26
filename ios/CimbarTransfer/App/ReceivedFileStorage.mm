@@ -130,7 +130,8 @@ static NSString * const kLegacyCachesRelativeDirectory = @"CimbarTransfer/Receiv
         return NO;
     }
     NSString *number = [stem substringWithRange:NSMakeRange(prefix.length, stem.length - prefix.length - 1)];
-    return [number rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet].invertedSet].location == NSNotFound;
+    NSCharacterSet *asciiDigits = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
+    return [number rangeOfCharacterFromSet:asciiDigits.invertedSet].location == NSNotFound;
 }
 
 + (NSURL * _Nullable)storedFileMatchingContentsOf:(NSURL *)fileURL filename:(NSString *)filename {

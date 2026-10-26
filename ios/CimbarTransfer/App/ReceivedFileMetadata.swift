@@ -112,19 +112,29 @@ final class ReceivedFileMetadataStore {
         }
     }
 
-    /// 又收到一遍、复用了已有文件：接收时间改成现在，排到「今天」，自动清理也从现在重新算
-    func markReceivedAgain(filename: String) {
+    /// 又收到一遍、复用了已有文件：接收时间改成现在，排到「今天」，自动清理也从现在重新算。
+    /// 沿用它接收时间的标注版一起挪，仍然挨着原文件；一分钟内重复收到（发送端循环播放）不再重写
+    func markReceivedAgain(filename: String, fileSize: Int64) {
         queue.sync {
             ensureLoadedLocked()
-            guard let existing = entries[filename] else { return }
-            entries[filename] = ReceivedFileMetadata(
-                id: existing.id,
-                originalName: existing.originalName,
-                displayName: existing.displayName,
-                receivedAt: Date(),
-                fileSize: existing.fileSize,
-                sha256: existing.sha256
-            )
+            let now = Date()
+            guard let existing = entries[filename] else {
+                entries[filename] = ReceivedFileMetadata(originalName: filename, receivedAt: now, fileSize: fileSize)
+                persistLocked()
+                return
+            }
+            guard now.timeIntervalSince(existing.receivedAt) > 60 else { return }
+            for (name, entry) in entries where name == filename
+                || (entry.originalName == filename && entry.receivedAt == existing.receivedAt) {
+                entries[name] = ReceivedFileMetadata(
+                    id: entry.id,
+                    originalName: entry.originalName,
+                    displayName: entry.displayName,
+                    receivedAt: now,
+                    fileSize: entry.fileSize,
+                    sha256: entry.sha256
+                )
+            }
             persistLocked()
         }
     }

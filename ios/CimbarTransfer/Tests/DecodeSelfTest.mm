@@ -250,7 +250,10 @@ bool runRepeatTest() {
 // 重开 App（换一个解码器）后再收同一个文件：收件目录里已有内容相同的，复用它，不另存「 (1)」
 bool runStoredRepeatTest() {
     const std::string payload = makePayload(12 * 1024);
+    std::string changed = payload;
+    changed[0] ^= 0x5A;
     std::vector<CVPixelBufferRef> frames = cameraFrames(encodeFrames(68, "stored.bin", payload, 60, 92));
+    std::vector<CVPixelBufferRef> changedFrames = cameraFrames(encodeFrames(68, "stored.bin", changed, 60, 93));
 
     bool ok = false;
     std::thread worker([&] {
@@ -261,16 +264,20 @@ bool runStoredRepeatTest() {
             NSURL *numbered = [a.fileURL.URLByDeletingLastPathComponent URLByAppendingPathComponent:@"stored (3).bin"];
             [[NSFileManager defaultManager] moveItemAtURL:a.fileURL toURL:numbered error:nil];
             NativeCimbarDecodeOutput *c = feedUntilFile([NativeCimbarDecoder new], frames);
+            // 同名、内容不同：照常另存
+            NativeCimbarDecodeOutput *d = feedUntilFile([NativeCimbarDecoder new], changedFrames);
             NSArray<NSString *> *copies = [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:
                 a.fileURL.URLByDeletingLastPathComponent.path error:nil]
                 filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF BEGINSWITH 'stored'"]];
-            ok = a != nil && b != nil && c != nil && !a.isDuplicate && b.isDuplicate && c.isDuplicate
-                && [a.fileURL isEqual:b.fileURL] && [c.fileURL.lastPathComponent isEqualToString:@"stored (3).bin"]
-                && copies.count == 1;
-            printf("%s  stored-repeat first=%s second=%s (dup=%d) numbered=%s (dup=%d) copies=%lu\n", ok ? "PASS" : "FAIL",
-                   a.fileURL.lastPathComponent.UTF8String ?: "-",
+            ok = a != nil && b != nil && c != nil && d != nil && !a.isDuplicate && b.isDuplicate && c.isDuplicate
+                && !d.isDuplicate && [a.fileURL isEqual:b.fileURL]
+                && [c.fileURL.lastPathComponent isEqualToString:@"stored (3).bin"] && ![d.fileURL isEqual:c.fileURL]
+                && copies.count == 2;
+            printf("%s  stored-repeat first=%s second=%s (dup=%d) numbered=%s (dup=%d) changed=%s (dup=%d) copies=%lu\n",
+                   ok ? "PASS" : "FAIL", a.fileURL.lastPathComponent.UTF8String ?: "-",
                    b.fileURL.lastPathComponent.UTF8String ?: "-", b.isDuplicate,
-                   c.fileURL.lastPathComponent.UTF8String ?: "-", c.isDuplicate, (unsigned long)copies.count);
+                   c.fileURL.lastPathComponent.UTF8String ?: "-", c.isDuplicate,
+                   d.fileURL.lastPathComponent.UTF8String ?: "-", d.isDuplicate, (unsigned long)copies.count);
             for (NSString *name in copies) {
                 [[NSFileManager defaultManager] removeItemAtURL:[a.fileURL.URLByDeletingLastPathComponent
                     URLByAppendingPathComponent:name] error:nil];
@@ -279,6 +286,7 @@ bool runStoredRepeatTest() {
     });
     worker.join();
     for (CVPixelBufferRef buffer : frames) CVPixelBufferRelease(buffer);
+    for (CVPixelBufferRef buffer : changedFrames) CVPixelBufferRelease(buffer);
     return ok;
 }
 
