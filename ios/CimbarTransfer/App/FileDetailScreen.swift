@@ -11,6 +11,8 @@ struct FileDetailScreen: View {
     let onPreview: (URL) -> Void
     /// iPad 分栏时简介页不在导航栈里，dismiss() 什么也不做，由外面清掉选中项
     var onClose: (() -> Void)?
+    /// 重命名后文件名（也是 id）变了，分栏里的选中项要跟着换，左边的高亮才不会丢
+    var onRenamed: ((CachedReceivedFile) -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -38,13 +40,15 @@ struct FileDetailScreen: View {
         initialFile: CachedReceivedFile,
         onShare: @escaping (URL) -> Void,
         onPreview: @escaping (URL) -> Void,
-        onClose: (() -> Void)? = nil
+        onClose: (() -> Void)? = nil,
+        onRenamed: ((CachedReceivedFile) -> Void)? = nil
     ) {
         self.store = store
         self.initialFile = initialFile
         self.onShare = onShare
         self.onPreview = onPreview
         self.onClose = onClose
+        self.onRenamed = onRenamed
         _trackedFileName = State(initialValue: initialFile.fileName)
     }
 
@@ -160,6 +164,7 @@ struct FileDetailScreen: View {
                 store.rename(file: file, to: renameText) { renamed in
                     if let renamed {
                         trackedFileName = renamed.fileName
+                        onRenamed?(renamed)
                     } else {
                         renameFailed = true
                     }

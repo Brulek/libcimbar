@@ -238,7 +238,8 @@ struct ContentView: View {
                             initialFile: file,
                             onShare: { presentShare(for: [$0]) },
                             onPreview: { presentPreview(for: [$0], at: 0) },
-                            onClose: { libraryDetail = nil }
+                            onClose: { libraryDetail = nil },
+                            onRenamed: { libraryDetail = $0 }
                         )
                         .id(file.id)
                     } else {
