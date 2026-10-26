@@ -49,6 +49,7 @@ struct LibraryScreen: View {
     }
 
     /// 过滤和「命中的那一行」用同一种比较，两边结论才一致
+    fileprivate static let contentIndexBudget = 24 * 1024 * 1024
     fileprivate static let contentSearchOptions: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]
 
     private var filteredFiles: [CachedReceivedFile] {
@@ -157,15 +158,21 @@ struct LibraryScreen: View {
                 .map { (name: $0.fileName, url: $0.url, stamp: $0.modifiedAt) }
             let known = textIndex
             // 读文件、猜编码放后台；已经读过且没改过的不再读，读不出的也记下（空文字），免得每次重读
+            // 总量封顶（UTF-8 约 24 MB）：几百个大文本也不至于把内存吃满。列表新的在前，先顾最近收到的；
+            // 超出的不记入，下次还会试
             let built = await Task.detached(priority: .userInitiated) { () -> [String: IndexedText] in
                 var index: [String: IndexedText] = [:]
+                var budget = Self.contentIndexBudget
                 for file in files {
-                    if Task.isCancelled { break }
+                    if Task.isCancelled || budget <= 0 { break }
+                    let entry: IndexedText
                     if let old = known[file.name], old.stamp == file.stamp {
-                        index[file.name] = old
+                        entry = old
                     } else {
-                        index[file.name] = IndexedText(stamp: file.stamp, text: SearchableText.read(file.url) ?? "")
+                        entry = IndexedText(stamp: file.stamp, text: SearchableText.read(file.url) ?? "")
                     }
+                    index[file.name] = entry
+                    budget -= entry.text.utf8.count
                 }
                 return index
             }.value
