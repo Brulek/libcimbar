@@ -72,6 +72,8 @@ struct FileThumbnailView: View {
         url.pathExtension.lowercased()
     }
 
+    private static let videoExtensions: Set<String> = ["mp4", "mov", "m4v"]
+
     /// 竖长的文档页裁成正方形时保留顶部：标题和第一段才认得出是哪份文件。
     /// 照片和视频仍然居中裁
     private func cropAlignment(for image: UIImage) -> Alignment {
@@ -100,6 +102,22 @@ struct FileThumbnailView: View {
             if image != nil {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+            }
+        }
+        // 视频的缩略图只是第一帧，和照片分不出来：中间放一个播放标记
+        .overlay {
+            if image != nil, Self.videoExtensions.contains(fileExtension) {
+                GeometryReader { proxy in
+                    let side = min(proxy.size.width, proxy.size.height) * 0.3
+                    Image(systemName: "play.fill")
+                        .font(.system(size: side * 0.45, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: side, height: side)
+                        .background(.black.opacity(0.4), in: Circle())
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
             }
         }
         .task(id: cacheKey) {
