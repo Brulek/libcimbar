@@ -49,12 +49,12 @@
         }
       }
     },
-    "**相册写入权限（可选）**：仅在您主动选择将接收到的图片保存到相册时使用。本应用不读取您相册中的任何内容。" : {
+    "**相册写入权限（可选）**：仅在您主动选择，或开启「照片和视频自动存到相册」后，将接收到的图片和视频保存到相册时使用。本应用不读取您相册中的任何内容。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Add to Photos (optional):** used only when you choose to save a received image to your photo library. The app never reads anything in your library."
+            "value" : "**Add to Photos (optional):** used only when you choose to save a received photo or video to your library, or turn on “Save Photos and Videos Automatically”. The app never reads anything in your library."
           }
         }
       }
@@ -2091,6 +2091,16 @@
         }
       }
     },
+    "照片和视频自动存到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Photos and Videos Automatically"
+          }
+        }
+      }
+    },
     "版本 %@" : {
       "localizations" : {
         "en" : {
@@ -2117,6 +2127,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "took %@"
+          }
+        }
+      }
+    },
+    "相册不支持这种文件格式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos doesn't support this file format."
           }
         }
       }
@@ -2477,16 +2497,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Move closer, avoid glare, or brighten the sender's screen"
-          }
-        }
-      }
-    },
-    "该文件不是支持的图片格式" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This file isn't a supported image format."
           }
         }
       }

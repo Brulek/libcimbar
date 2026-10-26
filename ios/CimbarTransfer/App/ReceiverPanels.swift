@@ -258,7 +258,9 @@ private struct CompletedTransferCard: View {
             }
             .buttonStyle(.bordered)
             .tint(photoSaved ? .green : nil)
-            .disabled(photoSaving || photoSaved)
+            // 存好后不再可点，但不用 disabled：灰掉的样子像出错，绿色对勾才像「完成了」
+            .disabled(photoSaving)
+            .allowsHitTesting(!photoSaved)
         }
 
         Button(action: onShare) {
@@ -335,8 +337,12 @@ private struct CompletedTransferCard: View {
             fileSize = info.size
             thumbnailKey = "completed-\(fileURL.lastPathComponent)-\(info.modified)"
             photoSaving = false
-            photoSaved = false
+            photoSaved = PhotoLibrarySaver.autoSavedPaths.contains(fileURL.path)
             photoSaveError = nil
+            if AppPreferences.shared.autoSaveToPhotos, canSaveToPhotos, !isDuplicate, !photoSaved {
+                PhotoLibrarySaver.autoSavedPaths.insert(fileURL.path)
+                await saveToPhotos()
+            }
         }
         .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveError != nil },

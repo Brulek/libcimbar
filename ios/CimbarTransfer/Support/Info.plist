@@ -29,7 +29,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>萤传用相机读取发送端屏幕上的动画码来接收文件。只在「扫码」页使用，画面不会上传。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>仅在你点「存到相册」时，把收到的图片存进相册。萤传不会读取相册里的内容。</string>
+	<string>仅在你点「存到相册」或打开了自动存相册时，把收到的图片和视频存进相册。萤传不会读取相册里的内容。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

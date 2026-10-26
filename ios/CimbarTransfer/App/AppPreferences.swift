@@ -12,6 +12,7 @@ final class AppPreferences: ObservableObject {
     private static let decodeModeKey = "org.cimbar.decode-mode"
     private static let highResolutionCaptureKey = "org.cimbar.high-resolution-capture"
     private static let libraryLastViewedKey = "org.cimbar.library-last-viewed"
+    private static let autoSaveToPhotosKey = "org.cimbar.auto-save-to-photos"
 
     /// cimbar mode_val 的合法取值，与 Config::temp_conf 对齐；0 为自动识别
     static let validDecodeModes: Set<Int> = Set(DecodeMode.allCases.map(\.rawValue))
@@ -44,6 +45,11 @@ final class AppPreferences: ObservableObject {
         didSet { UserDefaults.standard.set(highResolutionCapture, forKey: Self.highResolutionCaptureKey) }
     }
 
+    /// 收到照片/视频后自动存到相册（默认关）
+    @Published var autoSaveToPhotos: Bool {
+        didSet { UserDefaults.standard.set(autoSaveToPhotos, forKey: Self.autoSaveToPhotosKey) }
+    }
+
     /// 上次打开「我的文件」的时间；之后收到的文件在标签上计为新文件
     @Published var libraryLastViewed: Date {
         didSet { UserDefaults.standard.set(libraryLastViewed.timeIntervalSince1970, forKey: Self.libraryLastViewedKey) }
@@ -70,6 +76,7 @@ final class AppPreferences: ObservableObject {
         let storedMode = defaults.integer(forKey: Self.decodeModeKey)
         self.decodeMode = Self.validDecodeModes.contains(storedMode) ? storedMode : DecodeMode.auto.rawValue
         self.highResolutionCapture = defaults.bool(forKey: Self.highResolutionCaptureKey)
+        self.autoSaveToPhotos = defaults.bool(forKey: Self.autoSaveToPhotosKey)
         // 首次运行（含从旧版升级）时把已有文件视为已读，不要一上来就挂一个大数字
         if defaults.object(forKey: Self.libraryLastViewedKey) == nil {
             defaults.set(Date().timeIntervalSince1970, forKey: Self.libraryLastViewedKey)

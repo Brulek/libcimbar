@@ -213,7 +213,8 @@ struct FileDetailScreen: View {
                 ) {
                     Task { await saveToPhotos() }
                 }
-                .disabled(photoSaved)
+                .tint(photoSaved ? .green : nil)
+                .allowsHitTesting(!photoSaved)
             }
             DetailActionButton(title: "重命名", systemImage: "pencil") {
                 renameText = file.renameStem

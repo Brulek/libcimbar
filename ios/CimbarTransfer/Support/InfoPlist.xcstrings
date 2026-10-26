@@ -41,13 +41,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "仅在你点「存到相册」时，把收到的图片存进相册。萤传不会读取相册里的内容。"
+            "value" : "仅在你点「存到相册」或打开了自动存相册时，把收到的图片和视频存进相册。萤传不会读取相册里的内容。"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Used only when you tap Save to Photos, to add a received image to your library. Lumen never reads your photos."
+            "value" : "Used only when you tap Save or turn on auto-save, to add received photos and videos to your library. Lumen never reads your photos."
           }
         }
       }

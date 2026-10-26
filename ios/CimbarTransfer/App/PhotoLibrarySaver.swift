@@ -9,7 +9,7 @@ enum PhotoLibrarySaverError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unsupportedFormat: return String(localized: "该文件不是支持的图片格式")
+        case .unsupportedFormat: return String(localized: "相册不支持这种文件格式")
         case .permissionDenied:  return String(localized: "请在设置中允许萤传添加照片")
         case .saveFailed(let m): return m
         }
@@ -29,10 +29,15 @@ enum PhotoLibrarySaver {
     static let supportedExtensions: Set<String> = [
         "jpg", "jpeg", "png", "heic", "heif", "gif", "tiff", "bmp", "webp"
     ]
+    static let supportedVideoExtensions: Set<String> = ["mov", "mp4", "m4v"]
 
     static func canSave(extension ext: String) -> Bool {
-        supportedExtensions.contains(ext.lowercased())
+        let ext = ext.lowercased()
+        return supportedExtensions.contains(ext) || supportedVideoExtensions.contains(ext)
     }
+
+    /// 本次运行里已自动存过的文件：完成卡片每次出现都会跑 .task，不能重复存
+    @MainActor static var autoSavedPaths: Set<String> = []
 
     /// 判定错误是否为「相册写入权限被拒」——需要给用户跳系统设置的入口
     static func isPermissionDenied(_ error: Error) -> Bool {
@@ -44,7 +49,8 @@ enum PhotoLibrarySaver {
 
     static func save(fileURL: URL) async throws {
         let ext = fileURL.pathExtension.lowercased()
-        guard supportedExtensions.contains(ext) else {
+        let isVideo = supportedVideoExtensions.contains(ext)
+        guard isVideo || supportedExtensions.contains(ext) else {
             throw PhotoLibrarySaverError.unsupportedFormat
         }
 
@@ -57,7 +63,7 @@ enum PhotoLibrarySaver {
             let request = PHAssetCreationRequest.forAsset()
             let options = PHAssetResourceCreationOptions()
             options.shouldMoveFile = false
-            request.addResource(with: .photo, fileURL: fileURL, options: options)
+            request.addResource(with: isVideo ? .video : .photo, fileURL: fileURL, options: options)
         }
     }
 
