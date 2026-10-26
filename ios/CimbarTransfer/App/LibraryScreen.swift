@@ -143,23 +143,24 @@ struct LibraryScreen: View {
                 fileList
             }
         }
-        .overlay(alignment: .top) {
-            if let toast = saveToast {
-                ToastView(toast: toast)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .padding(.top, 8)
+        // 结果提示和「撤销」都放在底部，两个同时出现时叠在一起
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 8) {
+                if let toast = saveToast {
+                    ToastView(toast: toast)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                if let pending = store.pendingDeletion {
+                    UndoBar(message: pending.message) {
+                        withAnimation { store.undoPendingDeletion() }
+                    }
+                    .id(pending.id)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .padding(.bottom, 8)
         }
         .animation(.spring(duration: 0.3), value: saveToast?.id)
-        .safeAreaInset(edge: .bottom) {
-            if let pending = store.pendingDeletion {
-                UndoBar(message: pending.message) {
-                    withAnimation { store.undoPendingDeletion() }
-                }
-                .id(pending.id)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
         .animation(.spring(duration: 0.3), value: store.pendingDeletion?.id)
         .navigationTitle("我的文件")
         .navigationBarTitleDisplayMode(.large)

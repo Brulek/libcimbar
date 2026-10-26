@@ -218,7 +218,6 @@ struct UndoBar: View {
         .background(.regularMaterial, in: Capsule())
         .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
         .padding(.horizontal, 16)
-        .padding(.bottom, 8)
         .frame(maxWidth: 560)
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: Text("撤销"), onUndo)
