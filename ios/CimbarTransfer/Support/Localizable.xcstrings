@@ -2701,6 +2701,16 @@
         }
       }
     },
+    "轻点查看简介" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to show info"
+          }
+        }
+      }
+    },
     "轻点预览" : {
       "localizations" : {
         "en" : {

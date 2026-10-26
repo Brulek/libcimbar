@@ -185,6 +185,9 @@ struct FileDetailScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("预览")
+            // 压缩包没有可看的预览：图标只作展示，不变灰
+            .allowsHitTesting(!FilesExport.isArchive(file.fileExtension))
+            .accessibilityHidden(FilesExport.isArchive(file.fileExtension))
 
             Text(file.displayName)
                 .font(.title3.weight(.semibold))
@@ -209,8 +212,10 @@ struct FileDetailScreen: View {
     @ViewBuilder
     private var actionButtons: some View {
         Group {
-            DetailActionButton(title: "预览", systemImage: "eye") {
-                onPreview(file.url)
+            if !FilesExport.isArchive(file.fileExtension) {
+                DetailActionButton(title: "预览", systemImage: "eye") {
+                    onPreview(file.url)
+                }
             }
             DetailActionButton(title: "分享", systemImage: "square.and.arrow.up") {
                 onShare(file.url)
