@@ -8,7 +8,7 @@ enum ScanState: Equatable {
     case received
 }
 
-/// 收完后放进取景框的文件（只给缩略图一定出得来的类型，以及能直接显示文字的小文本）
+/// 收完后放进取景框的文件：照片/视频/PDF 的缩略图、小文本的文字，其余类型画类型图标
 struct RevealedFile: Equatable {
     let url: URL
     let cacheKey: String
@@ -17,11 +17,11 @@ struct RevealedFile: Equatable {
     /// 编码认不出来时为 nil
     let textSnippet: String?
 
-    init?(url: URL) {
+    init(url: URL) {
         let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
         let size = (attrs?[.size] as? NSNumber)?.int64Value ?? 0
         isText = TextClipboard.canCopy(fileExtension: url.pathExtension, size: size)
-        guard isText || ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
+        // 其他类型（压缩包、Office 等）画大号类型图标：每次收完取景框里都有「收到的东西」
         // 最多 512 KB，收完一个文件才读一次
         // 只有空白的文件和认不出编码的一样处理，显示类型图标而不是一张白纸
         textSnippet = isText
@@ -85,6 +85,13 @@ struct ScanFrameOverlay: View {
                         Group {
                             if reveal.isText {
                                 TextRevealPage(snippet: reveal.textSnippet, fileExtension: reveal.url.pathExtension, side: side)
+                            } else if !ThumbnailLoader.supports(fileExtension: reveal.url.pathExtension) {
+                                // 没有缩略图的类型：深色底上摆一个正常大小的类型图标，像一个文件放在框里
+                                Color(white: 0.1)
+                                    .overlay {
+                                        FileKindIcon(fileExtension: reveal.url.pathExtension, cornerRadius: side * 0.09)
+                                            .frame(width: side * 0.4, height: side * 0.4)
+                                    }
                             } else {
                                 FileThumbnailView(
                                     url: reveal.url,
@@ -95,6 +102,8 @@ struct ScanFrameOverlay: View {
                             }
                         }
                         .frame(width: side, height: side)
+                        // 缩略图生成失败时退回的类型图标是半透明的，垫一层不透明的底，别透出后面的相机画面
+                        .background(Color(white: 0.1))
                         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -103,7 +112,12 @@ struct ScanFrameOverlay: View {
                         .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("预览 \(reveal.url.lastPathComponent)")
+                    // 压缩包的预览只有图标和大小，点了没用
+                    .allowsHitTesting(!FilesExport.isArchive(reveal.url.pathExtension))
+                    .accessibilityLabel(FilesExport.isArchive(reveal.url.pathExtension)
+                        ? Text(verbatim: reveal.url.lastPathComponent)
+                        : Text("预览 \(reveal.url.lastPathComponent)"))
+                    .accessibilityRemoveTraits(FilesExport.isArchive(reveal.url.pathExtension) ? .isButton : [])
                     .accessibilityValue(Text(verbatim: reveal.textSnippet.map { String($0.prefix(300)) } ?? ""))
                     .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }
