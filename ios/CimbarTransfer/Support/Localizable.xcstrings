@@ -2643,12 +2643,12 @@
         }
       }
     },
-    "萤传是第三方开发的非官方客户端，与 libcimbar 及 cimbar.org 无隶属关系。解码部分基于 libcimbar（MPL-2.0），针对 iOS 修改过的源文件依 MPL-2.0 提供源代码，详见「开源许可」。" : {
+    "萤传是独立开发的客户端，与 cimbar.org 无隶属关系。解码基于开源的 libcimbar，见「开源许可」。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lumen is an unofficial third-party client, not affiliated with libcimbar or cimbar.org. Decoding is based on libcimbar (MPL-2.0); source for the files modified for iOS is available under MPL-2.0. See Open Source Licenses."
+            "value" : "Lumen is an independent app, not affiliated with cimbar.org. Decoding is built on the open-source libcimbar; see Open Source Licenses."
           }
         }
       }

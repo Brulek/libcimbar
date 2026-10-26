@@ -38,7 +38,8 @@ struct AboutScreen: View {
                     ExternalLinkRow(title: "反馈问题", detail: "GitHub", systemImage: "exclamationmark.bubble")
                 }
             } footer: {
-                Text("萤传是第三方开发的非官方客户端，与 libcimbar 及 cimbar.org 无隶属关系。解码部分基于 libcimbar（MPL-2.0），针对 iOS 修改过的源文件依 MPL-2.0 提供源代码，详见「开源许可」。")
+                // MPL-2.0 要求的源代码说明和仓库地址在「开源许可」页，这里只说清两件事
+                Text("萤传是独立开发的客户端，与 cimbar.org 无隶属关系。解码基于开源的 libcimbar，见「开源许可」。")
                     .padding(.top, 4)
             }
         }
