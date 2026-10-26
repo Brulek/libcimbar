@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E930FAA396112CB0C86CE70F /* ZipListing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FF1F0F865C9E98D8DEAA55 /* ZipListing.swift */; };
 		153EDC69F293BD7C345CBD94 /* SearchableText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */; };
 		531CD4E26D5D9E0A76F22F97 /* LibrarySorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C573EF68338BA4504EBFAABE /* LibrarySorting.swift */; };
 		197C3E737B4F942E3C4E01C3 /* FrameReplayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B074C63579908B261F87F6BA /* FrameReplayer.swift */; };
@@ -95,6 +96,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		16FF1F0F865C9E98D8DEAA55 /* ZipListing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipListing.swift; sourceTree = "<group>"; };
 		6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableText.swift; sourceTree = "<group>"; };
 		C573EF68338BA4504EBFAABE /* LibrarySorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySorting.swift; sourceTree = "<group>"; };
 		B074C63579908B261F87F6BA /* FrameReplayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameReplayer.swift; sourceTree = "<group>"; };
@@ -425,6 +427,7 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				16FF1F0F865C9E98D8DEAA55 /* ZipListing.swift */,
 				6278DDDD991F0F82A1F5E9C0 /* SearchableText.swift */,
 				C573EF68338BA4504EBFAABE /* LibrarySorting.swift */,
 				B074C63579908B261F87F6BA /* FrameReplayer.swift */,
@@ -602,6 +605,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E930FAA396112CB0C86CE70F /* ZipListing.swift in Sources */,
 				153EDC69F293BD7C345CBD94 /* SearchableText.swift in Sources */,
 				531CD4E26D5D9E0A76F22F97 /* LibrarySorting.swift in Sources */,
 				197C3E737B4F942E3C4E01C3 /* FrameReplayer.swift in Sources */,

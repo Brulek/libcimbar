@@ -521,6 +521,16 @@
         }
       }
     },
+    "共 %lld 个文件，解压后约 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Files: %lld · about %@ unzipped"
+          }
+        }
+      }
+    },
     "关于" : {
       "localizations" : {
         "en" : {
@@ -687,6 +697,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Archives"
+          }
+        }
+      }
+    },
+    "压缩包里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In This Archive"
           }
         }
       }
@@ -3039,6 +3059,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Returns the most recent file Lumen received so a shortcut can pass it on."
+          }
+        }
+      }
+    },
+    "还有 %lld 个文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And %lld more"
           }
         }
       }

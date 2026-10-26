@@ -153,7 +153,7 @@ struct LibraryScreen: View {
             let files = store.cachedFiles
                 .filter {
                     TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize)
-                        || SearchableText.canIndexPDF(fileExtension: $0.fileExtension, size: $0.fileSize)
+                        || SearchableText.canIndexDocument(fileExtension: $0.fileExtension, size: $0.fileSize)
                 }
                 .map { (name: $0.fileName, url: $0.url, stamp: $0.modifiedAt) }
             let known = textIndex

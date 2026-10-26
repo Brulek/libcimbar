@@ -35,6 +35,8 @@ struct FileDetailScreen: View {
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
     @State private var mediaDetail: MediaDetail?
+    /// zip 里的文件列表：存到「文件」之前先看看里面有什么
+    @State private var zipListing: ZipListing?
     /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
     @State private var trackedFileName: String
 
@@ -90,6 +92,31 @@ struct FileDetailScreen: View {
                         .font(.callout)
                         .lineLimit(8)
                         .textSelection(.enabled)
+                }
+            }
+
+            if let zipListing, zipListing.fileCount > 0 {
+                Section {
+                    ForEach(zipListing.names, id: \.self) { name in
+                        Label {
+                            Text((name as NSString).lastPathComponent)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        } icon: {
+                            Image(systemName: "doc")
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.callout)
+                    }
+                    if zipListing.fileCount > zipListing.names.count {
+                        Text("还有 \(zipListing.fileCount - zipListing.names.count) 个文件")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("压缩包里")
+                } footer: {
+                    Text("共 \(zipListing.fileCount) 个文件，解压后约 \(ByteCountFormatter.string(fromByteCount: zipListing.totalSize, countStyle: .file))")
                 }
             }
 
@@ -150,6 +177,14 @@ struct FileDetailScreen: View {
         }
         .task(id: file.fileName) {
             mediaDetail = await MediaDetail.load(for: file.url)
+        }
+        .task(id: file.fileName) {
+            guard file.fileExtension.lowercased() == "zip" else {
+                zipListing = nil
+                return
+            }
+            let url = file.url
+            zipListing = await Task.detached(priority: .userInitiated) { ZipListing.read(url) }.value
         }
         .task(id: file.fileName) {
             guard TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) else {
