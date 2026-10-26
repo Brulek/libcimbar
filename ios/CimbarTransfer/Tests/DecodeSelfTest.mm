@@ -485,6 +485,14 @@ int main(int argc, char **argv) {
                 text += "第 " + std::to_string(i) + " 条：备注内容，用来看文字很多时取景框里怎么显示。\n";
             }
             for (int mode : {68, 67, 66, 4}) {
+                // 只有一个网址的极小文件：只记录、不算失败。发送端（含 cimbar.org）把不足一块的
+                // 数据用全 0 填充，画面几乎是同一种格子，解码器难以对齐，Bu 模式基本收不到。
+                // 这是 libcimbar 编码端的问题，接收端修不了
+                Result r = runDecode(mode, 0, "https://www.apple.com/iphone/\n", @"link.txt");
+                printf("INFO  tiny link auto<-%d received=%d detected=%d frames=%d\n",
+                       mode, r.received, r.detectedMode, r.framesFed);
+            }
+            for (int mode : {68, 67, 66, 4}) {
                 Result r = runDecode(mode, 0, text, @"note.txt");
                 const bool ok = r.received && r.contentMatches && r.detectedMode == mode;
                 if (!ok) {

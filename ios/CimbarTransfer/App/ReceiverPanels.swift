@@ -220,6 +220,9 @@ private struct CompletedTransferCard: View {
     @State private var photoSaveNeedsSettings = false
     @State private var canCopyText = false
     @State private var textCopied = false
+    /// 收到的文本只是一个网址：第一个按钮改成「打开链接」（文字已经显示在取景框里，预览没有新东西）
+    @State private var webLink: URL?
+    @Environment(\.openURL) private var openURL
     @State private var filesExportURLs: [URL] = []
     @State private var savedToFiles = false
 
@@ -247,7 +250,18 @@ private struct CompletedTransferCard: View {
 
     @ViewBuilder
     private var actionButtons: some View {
-        if !isArchive {
+        if let webLink {
+            Button {
+                openURL(webLink)
+            } label: {
+                Label("打开链接", systemImage: "safari")
+                    .frame(maxWidth: .infinity, minHeight: 34)
+            }
+            .buttonStyle(.bordered)
+            // 英文按钮上只放得下 Open，由 Safari 图标表示打开的是网页；读屏读全称和网站
+            .accessibilityLabel("打开网址")
+            .accessibilityHint(Text(verbatim: webLink.host ?? ""))
+        } else if !isArchive {
             Button(action: onPreview) {
                 Label("预览", systemImage: "eye")
                     .frame(maxWidth: .infinity, minHeight: 34)
@@ -370,6 +384,10 @@ private struct CompletedTransferCard: View {
             photoSaveError = nil
             canCopyText = TextClipboard.canCopy(fileURL)
             textCopied = false
+            let url = fileURL
+            webLink = canCopyText
+                ? await Task.detached(priority: .userInitiated) { TextClipboard.singleWebLink(url) }.value
+                : nil
             savedToFiles = false
             if AppPreferences.shared.autoSaveToPhotos, canSaveToPhotos, !isDuplicate, !photoSaved {
                 await saveToPhotos()

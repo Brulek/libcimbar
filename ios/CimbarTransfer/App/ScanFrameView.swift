@@ -307,11 +307,19 @@ private struct TextRevealPage: View {
 
     private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
 
+    private var baseSize: CGFloat {
+        min(max(side * 0.043, 15), 22)
+    }
+
     private var font: Font {
-        let size = min(max(side * 0.043, 15), 22)
-        return Self.codeExtensions.contains(url.pathExtension.lowercased())
-            ? .system(size: size - 2, design: .monospaced)
-            : .system(size: size)
+        Self.codeExtensions.contains(url.pathExtension.lowercased())
+            ? .system(size: baseSize - 2, design: .monospaced)
+            : .system(size: baseSize)
+    }
+
+    /// 一行短文字（一个网址、一串口令）：放大摆在页面中间，不孤零零缩在左上角
+    private func isShortLine(_ text: String) -> Bool {
+        text.count <= 140 && !text.contains("\n")
     }
 
     var body: some View {
@@ -325,7 +333,14 @@ private struct TextRevealPage: View {
     private var page: some View {
         Color(white: 0.97)
             .overlay {
-                if let snippet {
+                if let snippet, isShortLine(snippet) {
+                    Text(snippet)
+                        .font(.system(size: baseSize * 1.35, weight: .medium))
+                        .foregroundStyle(Color(white: 0.12))
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .padding(side * 0.08)
+                } else if let snippet {
                     // 从第一行开始排，放不下的在最后一行以省略号结束
                     VStack(alignment: .leading, spacing: 0) {
                         Text(snippet)
@@ -342,7 +357,9 @@ private struct TextRevealPage: View {
             .task(id: url) {
                 let url = url
                 snippet = await Task.detached(priority: .userInitiated) {
-                    TextClipboard.readText(url).map { String($0.prefix(1500)) }
+                    TextClipboard.readText(url).map {
+                        String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500))
+                    }
                 }.value
                 unreadable = snippet == nil
             }

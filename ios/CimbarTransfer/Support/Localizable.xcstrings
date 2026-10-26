@@ -1387,6 +1387,16 @@
         }
       }
     },
+    "打开网址" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Link"
+          }
+        }
+      }
+    },
     "打开网页菜单，点 Find File 选择文件，也可以直接把文件拖进网页" : {
       "localizations" : {
         "en" : {
@@ -1403,6 +1413,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opens the Lumen scanner so you can point it at the code on the sender's screen."
+          }
+        }
+      }
+    },
+    "打开链接" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open"
           }
         }
       }

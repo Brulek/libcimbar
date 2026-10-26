@@ -33,6 +33,17 @@ enum TextClipboard {
         return String(data: data, encoding: gb18030)
     }
 
+    /// 整个文件只是一个网址（常见用法：把电脑上的链接送到手机）时返回它
+    static func singleWebLink(_ url: URL) -> URL? {
+        guard let text = readText(url)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty, text.count <= 2048,
+              text.rangeOfCharacter(from: .whitespacesAndNewlines) == nil,
+              let link = URL(string: text),
+              let scheme = link.scheme?.lowercased(), scheme == "http" || scheme == "https",
+              link.host?.isEmpty == false else { return nil }
+        return link
+    }
+
     /// 复制成功返回 true（文件读不出来或编码不认识时返回 false）
     @discardableResult
     static func copy(_ url: URL) -> Bool {
