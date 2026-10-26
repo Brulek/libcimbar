@@ -44,6 +44,9 @@ final class ReceivedFileCacheStore: ObservableObject {
     private var deletingIDs: Set<String> = []
     private var pendingCommitTask: Task<Void, Never>?
 
+    /// 所有实例里还没真正删掉的文件（快捷指令取「最近收到的文件」时要跳过）
+    static private(set) var pendingDeletionIDs: Set<String> = []
+
     func refresh(cleanup: Bool) {
         workerQueue.async { [weak self] in
             do {
@@ -178,6 +181,7 @@ final class ReceivedFileCacheStore: ObservableObject {
 
     private func applyVisibleFiles() {
         let hidden = deletingIDs.union(pendingDeletion?.ids ?? [])
+        Self.pendingDeletionIDs = hidden
         let visible = hidden.isEmpty ? diskFiles : diskFiles.filter { !hidden.contains($0.id) }
         let totalBytes = visible.reduce(Int64(0)) { $0 + $1.fileSize }
         cachedFiles = visible

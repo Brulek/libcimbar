@@ -318,6 +318,7 @@ struct FileDetailScreen: View {
     private func saveToPhotos() async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
+            PhotoLibrarySaver.savedPaths.insert(file.url.path)
             withAnimation { photoSaved = true }
         } catch {
             photoSaveNeedsSettings = PhotoLibrarySaver.isPermissionDenied(error)

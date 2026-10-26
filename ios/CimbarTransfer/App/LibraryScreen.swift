@@ -55,6 +55,7 @@ struct LibraryScreen: View {
     @State private var saveToast: SaveToast?
     @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
+    @State private var batchSaving = false
 
     private var trimmedSearch: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -145,6 +146,8 @@ struct LibraryScreen: View {
         }
         // 结果提示和「撤销」都放在底部，两个同时出现时叠在一起
         .safeAreaInset(edge: .bottom) {
+            // 没有提示时不占位，免得列表底部凭空多出一截内边距
+            if saveToast != nil || store.pendingDeletion != nil {
             VStack(spacing: 8) {
                 if let toast = saveToast {
                     ToastView(toast: toast)
@@ -159,6 +162,7 @@ struct LibraryScreen: View {
                 }
             }
             .padding(.bottom, 8)
+            }
         }
         .animation(.spring(duration: 0.3), value: saveToast?.id)
         .animation(.spring(duration: 0.3), value: store.pendingDeletion?.id)
@@ -242,6 +246,7 @@ struct LibraryScreen: View {
                         Image(systemName: "photo.on.rectangle")
                     }
                     .accessibilityLabel("把所选照片和视频存到相册")
+                    .disabled(batchSaving)
                 }
 
                 Spacer()
@@ -438,11 +443,15 @@ struct LibraryScreen: View {
     /// 多选里只存图片/视频，其余类型跳过；一次权限申请，逐个写入
     @MainActor
     private func saveSelectedToPhotos() async {
+        guard !batchSaving else { return }
+        batchSaving = true
+        defer { batchSaving = false }
         let media = selectedFiles.filter { PhotoLibrarySaver.canSave(extension: $0.fileExtension) }
         var saved = 0
         for file in media {
             do {
                 try await PhotoLibrarySaver.save(fileURL: file.url)
+                PhotoLibrarySaver.savedPaths.insert(file.url.path)
                 saved += 1
             } catch {
                 if PhotoLibrarySaver.isPermissionDenied(error) {
@@ -465,6 +474,7 @@ struct LibraryScreen: View {
     private func saveImageToPhotos(_ file: CachedReceivedFile) async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
+            PhotoLibrarySaver.savedPaths.insert(file.url.path)
             presentToast(SaveToast(message: String(localized: "已存到相册"), style: .success))
         } catch {
             // 权限被拒用 alert 给「去设置」补救入口；瞬时 toast 无法承载操作

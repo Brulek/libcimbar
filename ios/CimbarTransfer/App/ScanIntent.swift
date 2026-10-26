@@ -32,8 +32,11 @@ struct LatestReceivedFileIntent: AppIntent {
     static var title: LocalizedStringResource = "最近收到的文件"
     static var description = IntentDescription("返回萤传最近收到的一个文件，可在快捷指令里继续处理。")
 
+    @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
-        let files = try ReceivedFileCache.listFiles()
+        // 刚删、还在「撤销」窗口里的文件界面上已经不见了，这里也不该交出去
+        let hidden = ReceivedFileCacheStore.pendingDeletionIDs
+        let files = try ReceivedFileCache.listFiles().filter { !hidden.contains($0.id) }
         guard let latest = files.max(by: { $0.receivedAt < $1.receivedAt }) else {
             throw LatestFileError.noFiles
         }

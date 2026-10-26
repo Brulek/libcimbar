@@ -20,7 +20,8 @@ enum TextClipboard {
     static func readText(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url), !data.isEmpty else { return nil }
         if let text = String(data: data, encoding: .utf8) {
-            return text
+            // Windows 记事本「UTF-8 带 BOM」会留下一个看不见的 U+FEFF，粘贴网址/口令时会出错
+            return text.hasPrefix("\u{FEFF}") ? String(text.dropFirst()) : text
         }
         if data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF]),
            let text = String(data: data, encoding: .utf16) {
