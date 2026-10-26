@@ -113,7 +113,7 @@ python3 scripts/l10n_sync.py --apply en.json --prune
   - `-DemoSearch 关键词`：「我的文件」直接带上搜索词
   - `-DemoSelect YES`：「我的文件」直接进入多选并选中前两个
   - `-DemoFrames <目录>[:<目录>…]`：模拟相机。先用 `scripts/run_decode_selftest.sh --dump-transfer <目录> <模式值> <文件>` 把一个文件导出成整段动画码帧，App 按 15 fps 回放给真实的解码链，进度、完成、重复文件、发送端换模式都能在模拟器里走一遍；`-DemoFramesFPS 3` 调慢回放
-  - `-DemoDetail YES`：直接打开最新文件的简介页
+  - `-DemoDetail YES|文件名`：直接打开最新文件的简介页
   - `-DemoUndoWindow 30`：把删除后的撤销窗口拉长到 30 秒（手动点测时用）
 - **新增源文件**：`python3 scripts/add_swift_file.py Foo.swift` 把 `App/Foo.swift` 挂进工程；`--resource` 挂 `Support/` 下的资源，`--localized` 挂 `Support/<语言>.lproj/` 下的本地化文件。不要用 `xcodegen generate` 重建：会丢掉 knownRegions 里的 en，英文本地化失效。
 

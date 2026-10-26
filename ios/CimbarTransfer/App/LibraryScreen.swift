@@ -164,7 +164,8 @@ struct LibraryScreen: View {
         #if DEBUG
         .onChange(of: store.cachedFiles.first?.id) { _ in
             if DemoContent.opensDetail, detailTarget == nil, splitDetail?.wrappedValue == nil {
-                if let first = sorted(store.cachedFiles).first { showDetail(first) }
+                let target = DemoContent.detailFileName.flatMap { name in store.cachedFiles.first { $0.fileName == name } }
+                if let file = target ?? sorted(store.cachedFiles).first { showDetail(file) }
             }
             if let query = DemoContent.searchQuery, searchText.isEmpty {
                 searchText = query

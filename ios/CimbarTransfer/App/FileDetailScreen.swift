@@ -28,6 +28,8 @@ struct FileDetailScreen: View {
     @State private var textCopied = false
     /// 文件内容只是一个网址：第一个按钮改成「打开链接」
     @State private var webLink: URL?
+    /// 小文本的开头几行：简介页上直接给看，不用再点预览
+    @State private var textSnippet: String?
     @State private var filesExportURLs: [URL] = []
     @State private var savedToFiles = false
     @State private var photoSaveNeedsSettings = false
@@ -79,6 +81,16 @@ struct FileDetailScreen: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+            }
+
+            // 只有一个网址时也显示：点「打开链接」之前先看清要去哪
+            if let textSnippet {
+                Section("内容") {
+                    Text(textSnippet)
+                        .font(.callout)
+                        .lineLimit(8)
+                        .textSelection(.enabled)
+                }
             }
 
             Section("信息") {
@@ -142,10 +154,15 @@ struct FileDetailScreen: View {
         .task(id: file.fileName) {
             guard TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) else {
                 webLink = nil
+                textSnippet = nil
                 return
             }
             let url = file.url
-            webLink = await Task.detached(priority: .userInitiated) { TextClipboard.singleWebLink(url) }.value
+            let (link, snippet) = await Task.detached(priority: .userInitiated) {
+                (TextClipboard.singleWebLink(url), TextClipboard.snippet(url))
+            }.value
+            webLink = link
+            textSnippet = snippet
         }
         .onChange(of: store.cachedFiles) { files in
             // 文件被外部删除/清空后自动退出，避免变成预览分享全是死链的僵尸页。

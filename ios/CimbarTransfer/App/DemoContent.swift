@@ -41,7 +41,14 @@ enum DemoContent {
 
     /// `-DemoDetail YES`：「我的文件」打开后直接进入最新文件的简介页
     static var opensDetail: Bool {
-        UserDefaults.standard.bool(forKey: "DemoDetail")
+        detailFileName != nil || UserDefaults.standard.bool(forKey: "DemoDetail")
+    }
+
+    /// `-DemoDetail 文件名`：打开指定文件的简介页（写 YES 时打开最新的）
+    static var detailFileName: String? {
+        guard let value = UserDefaults.standard.string(forKey: "DemoDetail"),
+              !["YES", "yes", "1", "true"].contains(value) else { return nil }
+        return value
     }
 
     /// 演示状态下放进取景框里的「发送端屏幕」（Library/Caches/demo-screen.png，截图前拷进容器；
