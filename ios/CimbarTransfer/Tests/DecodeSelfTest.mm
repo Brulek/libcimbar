@@ -42,7 +42,8 @@ std::string makePayload(size_t size) {
 }
 
 // 编码器的 Config 是 thread_local：放到独立线程里跑，不污染解码线程的模式设置
-std::vector<cv::Mat> encodeFrames(int mode, const std::string &filename, const std::string &payload, int frameCount) {
+std::vector<cv::Mat> encodeFrames(int mode, const std::string &filename, const std::string &payload, int frameCount,
+                                  uint8_t encodeId = 77) {
     std::vector<cv::Mat> frames;
     std::thread worker([&] {
         cimbar::Config::update(mode);
@@ -58,13 +59,13 @@ std::vector<cv::Mat> encodeFrames(int mode, const std::string &filename, const s
         if (comp.size() < chunkSize) {
             comp.pad(chunkSize - comp.size() + 1);
         }
-        auto fes = fountain_encoder_stream::create(comp, chunkSize, 77);
+        auto fes = fountain_encoder_stream::create(comp, chunkSize, encodeId);
         if (!fes) {
             return;
         }
         for (int i = 0; i < frameCount; ++i) {
             Encoder enc;
-            enc.set_encode_id(77);
+            enc.set_encode_id(encodeId);
             std::optional<cv::Mat> frame = enc.encode_next(*fes);
             if (!frame) {
                 break;
@@ -159,6 +160,64 @@ Result runDecode(int senderMode, int receiverMode, const std::string &payload, N
     return result;
 }
 
+std::vector<CVPixelBufferRef> cameraFrames(const std::vector<cv::Mat> &frames) {
+    std::vector<CVPixelBufferRef> buffers;
+    for (const cv::Mat &frame : frames) {
+        if (CVPixelBufferRef buffer = makeCameraFrame(frame)) {
+            buffers.push_back(buffer);
+        }
+    }
+    return buffers;
+}
+
+NativeCimbarDecodeOutput *feedUntilFile(NativeCimbarDecoder *decoder, const std::vector<CVPixelBufferRef> &buffers) {
+    for (size_t i = 0; i < buffers.size() * 2; ++i) {
+        NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:buffers[i % buffers.size()]];
+        if (output.fileURL != nil) {
+            return output;
+        }
+    }
+    return nil;
+}
+
+// 「继续接收」时发送端还在放同一个文件：第二遍应复用已保存的文件；换一个文件则照常另存
+bool runRepeatTest() {
+    const std::string first = makePayload(16 * 1024);
+    std::string second = first;
+    second[0] ^= 0x5A;
+    std::vector<CVPixelBufferRef> firstFrames = cameraFrames(encodeFrames(68, "repeat.bin", first, 60, 90));
+    std::vector<CVPixelBufferRef> secondFrames = cameraFrames(encodeFrames(68, "repeat.bin", second, 60, 91));
+
+    bool ok = false;
+    std::thread worker([&] {
+        @autoreleasepool {
+            NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+            NativeCimbarDecodeOutput *a = feedUntilFile(decoder, firstFrames);
+            [decoder reset];
+            NativeCimbarDecodeOutput *b = feedUntilFile(decoder, firstFrames);
+            [decoder reset];
+            NativeCimbarDecodeOutput *c = feedUntilFile(decoder, secondFrames);
+            ok = a != nil && b != nil && c != nil
+                && !a.isDuplicate && b.isDuplicate && !c.isDuplicate
+                && [a.fileURL isEqual:b.fileURL] && ![c.fileURL isEqual:a.fileURL]
+                && [[NSFileManager defaultManager] fileExistsAtPath:a.fileURL.path];
+            printf("%s  repeat       first=%s second=%s (dup=%d) third=%s (dup=%d)\n", ok ? "PASS" : "FAIL",
+                   a.fileURL.lastPathComponent.UTF8String ?: "-",
+                   b.fileURL.lastPathComponent.UTF8String ?: "-", b.isDuplicate,
+                   c.fileURL.lastPathComponent.UTF8String ?: "-", c.isDuplicate);
+            for (NativeCimbarDecodeOutput *output in @[a ?: [NativeCimbarDecodeOutput new], c ?: [NativeCimbarDecodeOutput new]]) {
+                if (output.fileURL) {
+                    [[NSFileManager defaultManager] removeItemAtURL:output.fileURL error:nil];
+                }
+            }
+        }
+    });
+    worker.join();
+    for (CVPixelBufferRef buffer : firstFrames) CVPixelBufferRelease(buffer);
+    for (CVPixelBufferRef buffer : secondFrames) CVPixelBufferRelease(buffer);
+    return ok;
+}
+
 // 截图素材：把一帧 B 模式动画码存成 PNG（模拟器的 OpenCV 切片没有 imgcodecs，用 ImageIO 写）
 bool dumpFrame(const char *path) {
     std::vector<cv::Mat> frames = encodeFrames(68, "demo.bin", makePayload(64 * 1024), 4);
@@ -222,6 +281,9 @@ int main(int argc, char **argv) {
             }
             printf("%s  %-12s received=%d match=%d detected=%d frames=%d\n",
                    ok ? "PASS" : "FAIL", c.name, r.received, r.contentMatches, r.detectedMode, r.framesFed);
+        }
+        if (!runRepeatTest()) {
+            ++failures;
         }
         printf("%s (%d failure%s)\n", failures == 0 ? "ALL PASSED" : "FAILED", failures, failures == 1 ? "" : "s");
         return failures == 0 ? 0 : 1;

@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) NSString *originalFilename;
 // 自动模式下已锁定的发送端模式（mode_val）；0 表示尚未识别或非自动模式
 @property (nonatomic, assign) int detectedMode;
+// 与上一个收到的文件完全相同，fileURL 指向已保存的那份，没有另存
+@property (nonatomic, assign) BOOL isDuplicate;
 @end
 
 @interface NativeCimbarDecoder : NSObject

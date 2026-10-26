@@ -33,6 +33,10 @@ static const NSUInteger kAutoUnlockFrames = 150;
     int _lockedMode;
     NSUInteger _framesWithoutData;
     BOOL _hasProgress;
+    // 上一个收到的文件：不随 -reset 清空。点「继续接收」时发送端往往还在放同一个文件，
+    // 几秒内会再收一遍；内容一致就复用已保存的文件，不再存出「xxx (1).jpg」
+    uint32_t _lastFileID;
+    NSURL *_lastFileURL;
 }
 
 - (instancetype)init {
@@ -260,6 +264,26 @@ static const NSUInteger kAutoUnlockFrames = 150;
     return [[NSString alloc] initWithBytes:_reportBuffer.data() length:len encoding:NSUTF8StringEncoding] ?: @"";
 }
 
+// 同一次传输（喷泉 ID 相同）且内容逐字节一致时，删掉刚写的临时文件，交回上次保存的文件
+- (BOOL)reuseLastFileIfSame:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
+    if (_lastFileURL == nil || fileID != _lastFileID) {
+        return NO;
+    }
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if (![fileManager contentsEqualAtPath:tmpURL.path andPath:_lastFileURL.path]) {
+        return NO;
+    }
+    [fileManager removeItemAtURL:tmpURL error:nil];
+    _stickyErrorText = nil;
+    [_emittedFileIDs addObject:@(fileID)];
+    output.fileURL = _lastFileURL;
+    output.originalFilename = filename;
+    output.progressFraction = @(1.0);
+    output.isDuplicate = YES;
+    output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已收到 %@", nil), _lastFileURL.lastPathComponent];
+    return YES;
+}
+
 - (void)recoverFileWithID:(uint32_t)fileID into:(NativeCimbarDecodeOutput *)output {
     NSNumber *boxedID = @(fileID);
     if ([_emittedFileIDs containsObject:boxedID]) {
@@ -331,6 +355,10 @@ static const NSUInteger kAutoUnlockFrames = 150;
         return;
     }
 
+    if ([self reuseLastFileIfSame:fileID tmpURL:tmpURL originalName:filename into:output]) {
+        return;
+    }
+
     // 写入完成，移动到最终位置（同卷 rename，原子操作）。
     // uniqueDestinationURL 的存在性探测与 move 之间存在竞态窗口（启动迁移线程
     // 可能同时占用同名路径）；喷泉流此刻已在 sink 中标记完成、无法重放，
@@ -357,6 +385,8 @@ static const NSUInteger kAutoUnlockFrames = 150;
         return;
     }
     NSString *safeName = fileURL.lastPathComponent;
+    _lastFileID = fileID;
+    _lastFileURL = fileURL;
 
     _stickyErrorText = nil;
     [_emittedFileIDs addObject:boxedID];

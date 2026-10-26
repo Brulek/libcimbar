@@ -314,6 +314,7 @@ private struct ReceiverBottomPanel: View {
                 CompletedTransferCard(
                     fileURL: file,
                     duration: viewModel.transferDuration,
+                    isDuplicate: viewModel.receivedDuplicate,
                     highlightShareAction: showCheckmark,
                     onPreview: { onPreview(file) },
                     onShare: { onShare(file) },
@@ -506,6 +507,7 @@ private struct ScanErrorCard: View {
 private struct CompletedTransferCard: View {
     let fileURL: URL
     let duration: TimeInterval?
+    let isDuplicate: Bool
     let highlightShareAction: Bool
     let onPreview: () -> Void
     let onShare: () -> Void
@@ -528,7 +530,9 @@ private struct CompletedTransferCard: View {
     private var detailText: String {
         var parts: [String] = []
         if let fileSize { parts.append(fileSize) }
-        if let duration, duration >= 1 {
+        if isDuplicate {
+            parts.append(String(localized: "刚才已收到，没有重复保存"))
+        } else if let duration, duration >= 1 {
             let formatted = Duration.seconds(duration.rounded())
                 .formatted(.units(allowed: [.minutes, .seconds], width: .abbreviated))
             parts.append(String(localized: "用时 \(formatted)"))

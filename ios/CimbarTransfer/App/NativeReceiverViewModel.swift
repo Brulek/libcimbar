@@ -18,6 +18,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var receivedFileURL: URL?
     /// 从识别到首帧到文件落盘的用时
     @Published private(set) var transferDuration: TimeInterval?
+    /// 又收到一遍刚才那个文件（发送端还在放同一个），复用了已保存的那份
+    @Published private(set) var receivedDuplicate = false
     @Published private(set) var scanErrorLatched = false
     /// 相机无法启动的原因（模拟器、被其他 App 占用等）
     @Published private(set) var cameraErrorText: String?
@@ -459,15 +461,18 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
 
         if let fileURL = result.fileURL {
+            receivedDuplicate = result.isDuplicate
             receivedFileURL = fileURL
-            // 把发送端原始文件名写进元数据（磁盘名可能经过 sanitize/加序号）
-            let savedName = fileURL.lastPathComponent
-            let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
-            ReceivedFileMetadataStore.shared.registerReceived(
-                filename: savedName,
-                originalName: result.originalFilename ?? savedName,
-                fileSize: (attrs?[.size] as? NSNumber)?.int64Value ?? 0
-            )
+            if !result.isDuplicate {
+                // 把发送端原始文件名写进元数据（磁盘名可能经过 sanitize/加序号）
+                let savedName = fileURL.lastPathComponent
+                let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
+                ReceivedFileMetadataStore.shared.registerReceived(
+                    filename: savedName,
+                    originalName: result.originalFilename ?? savedName,
+                    fileSize: (attrs?[.size] as? NSNumber)?.int64Value ?? 0
+                )
+            }
             progressValue = 1.0
             remainingSeconds = nil
             stallHint = nil
@@ -587,6 +592,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private func publishResetState() {
         DispatchQueue.main.async {
             self.receivedFileURL = nil
+            self.receivedDuplicate = false
             self.transferDuration = nil
             self.transferStartUptime = nil
             self.scanErrorLatched = false
