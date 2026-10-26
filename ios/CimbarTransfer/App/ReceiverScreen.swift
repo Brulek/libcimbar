@@ -78,7 +78,9 @@ struct ReceiverScreen: View {
                 .overlay {
                     // 收完文件后自动暂停不用提示：卡片上的「继续接收」会重新打开相机
                     if viewModel.isIdlePaused && viewModel.receivedFileURL == nil {
+                        // 与取景框同样的上下预留，卡片才会落在取景框正中
                         IdlePausedCard { viewModel.start() }
+                            .padding(.top, topReservedHeight)
                             .padding(.bottom, bottomReservedHeight)
                             .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
