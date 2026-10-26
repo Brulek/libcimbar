@@ -16,6 +16,9 @@ struct LibraryScreen: View {
     @State private var contentHits: Set<String> = []
     /// 索引每重建一次加一，用作算命中的 task 的 id（比较整份索引太贵）
     @State private var textIndexVersion = 0
+    /// 内容索引或命中还在后台算：这时没结果不等于搜不到，别先说「没有找到」
+    @State private var isIndexing = false
+    @State private var isMatching = false
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""
     @State private var isSelecting: Bool = false
@@ -142,6 +145,8 @@ struct LibraryScreen: View {
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
         .task(id: textIndexKey) {
             guard !trimmedSearch.isEmpty else { return }
+            isIndexing = true
+            defer { isIndexing = false }
             let files = store.cachedFiles
                 .filter {
                     TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize)
@@ -173,6 +178,8 @@ struct LibraryScreen: View {
                 contentHits = []
                 return
             }
+            isMatching = true
+            defer { isMatching = false }
             let index = textIndex
             let hits = await Task.detached(priority: .userInitiated) { () -> Set<String> in
                 Set(index.compactMap { name, entry in
@@ -322,7 +329,16 @@ struct LibraryScreen: View {
         let files = filteredFiles
         let sections = sections(for: files)
         return List {
-            if files.isEmpty {
+            if files.isEmpty, isIndexing || isMatching {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text("正在搜索内容…")
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .listRowBackground(Color.clear)
+            } else if files.isEmpty {
                 SearchEmptyRow(query: trimmedSearch)
             }
             ForEach(sections) { section in

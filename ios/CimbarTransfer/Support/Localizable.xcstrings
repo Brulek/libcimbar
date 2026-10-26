@@ -2261,6 +2261,16 @@
         }
       }
     },
+    "正在搜索内容…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching contents…"
+          }
+        }
+      }
+    },
     "没有找到“%@”" : {
       "localizations" : {
         "en" : {
