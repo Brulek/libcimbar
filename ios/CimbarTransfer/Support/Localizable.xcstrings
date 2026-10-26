@@ -221,6 +221,16 @@
         }
       }
     },
+    "下次打开萤传时" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next time Lumen opens"
+          }
+        }
+      }
+    },
     "不联网、不配对，两台设备离得近就行" : {
       "localizations" : {
         "en" : {

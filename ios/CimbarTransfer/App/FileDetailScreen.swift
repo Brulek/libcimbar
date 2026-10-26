@@ -87,7 +87,11 @@ struct FileDetailScreen: View {
                 LabeledContent("接收时间", value: file.receivedAt.formatted(date: .abbreviated, time: .shortened))
                 // 开了「自动清理」时说清哪天删，免得文件莫名其妙不见了
                 if let maxAge = store.retentionPolicy.maxAgeSeconds {
-                    LabeledContent("自动清理", value: file.receivedAt.addingTimeInterval(maxAge).formatted(date: .abbreviated, time: .omitted))
+                    // 清理只在打开萤传时进行：已经过期还没删的，说「下次打开时」而不是写一个过去的日期
+                    let due = file.receivedAt.addingTimeInterval(maxAge)
+                    LabeledContent("自动清理", value: due > Date()
+                        ? due.formatted(date: .abbreviated, time: .omitted)
+                        : String(localized: "下次打开萤传时"))
                 }
                 // 发送端原名与当前文件名不同（重命名过/同名去重）时才值得展示
                 if file.originalName != file.fileName {

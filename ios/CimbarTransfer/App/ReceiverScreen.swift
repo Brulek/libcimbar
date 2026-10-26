@@ -197,7 +197,14 @@ struct ReceiverScreen: View {
     }
 
     private func updateCompletionState(for fileURL: URL?) async {
-        reveal = fileURL.flatMap(RevealedFile.init(url:))
+        // 小文本要整个读出来解码（最大 512 KB），放到后台，别卡住打勾动画
+        if let fileURL {
+            let revealed = await Task.detached(priority: .userInitiated) { RevealedFile(url: fileURL) }.value
+            guard !Task.isCancelled else { return }
+            reveal = revealed
+        } else {
+            reveal = nil
+        }
         guard let fileURL else {
             lastCelebratedURL = nil
             withAnimation {
