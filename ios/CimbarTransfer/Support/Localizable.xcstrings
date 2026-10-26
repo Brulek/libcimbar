@@ -1747,16 +1747,6 @@
         }
       }
     },
-    "搜索" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        }
-      }
-    },
     "撤销" : {
       "localizations" : {
         "en" : {
@@ -1833,6 +1823,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "File Name"
+          }
+        }
+      }
+    },
+    "文件名或内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name or Contents"
           }
         }
       }

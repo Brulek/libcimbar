@@ -9,7 +9,7 @@ struct LibrarySearchModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         if isEnabled {
-            content.searchable(text: $text, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "搜索")
+            content.searchable(text: $text, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "文件名或内容")
         } else {
             content
         }
