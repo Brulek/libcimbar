@@ -181,12 +181,12 @@
         }
       }
     },
-    "一段时间没有扫到动画码，已关闭相机省电。" : {
+    "一段时间没有扫到动画码，已关闭相机省电" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No code for a while, so the camera is off to save battery."
+            "value" : "No code for a while, so the camera is off to save battery"
           }
         }
       }

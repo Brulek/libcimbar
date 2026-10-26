@@ -468,7 +468,7 @@ struct IdlePausedCard: View {
                 .foregroundStyle(Brand.glow)
             Text("扫描已暂停")
                 .font(.headline)
-            Text("一段时间没有扫到动画码，已关闭相机省电。")
+            Text("一段时间没有扫到动画码，已关闭相机省电")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
