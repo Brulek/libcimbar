@@ -110,18 +110,25 @@ private struct ProgressCard: View {
         return String(localized: "还需约 \(minutes) 分钟")
     }
 
+    private var footnoteKind: Int {
+        guard isTracking else { return 0 }
+        guard let remainingSeconds else { return 1 }
+        return remainingSeconds < 90 ? 2 : 3
+    }
+
     private var headline: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             // 中等大小的文件每秒要跳好几个百分点，滚动数字动画一直播不完，
             // 看着总是糊的；直接换字最清楚
             Text(percentText)
                 .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
-                .transaction { $0.animation = nil }
             Text("正在接收")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
         }
         .fixedSize()
+        // 整行都不做动画：数字从 9% 跳到 10% 变宽时，旁边的字若还在滑动会和数字叠在一起
+        .transaction { $0.animation = nil }
     }
 
     var body: some View {
@@ -141,13 +148,17 @@ private struct ProgressCard: View {
                 Text(footnote)
                     .font(.footnote.monospacedDigit())
                     .foregroundStyle(.secondary)
+                    // 只有倒计时数字之间滚动；换成另一句话时整句淡入淡出，
+                    // 否则逐字变形，中途是一串糊掉的字
                     .contentTransition(.numericText(countsDown: true))
+                    .id(footnoteKind)
                     .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.25), value: stallHint)
         .animation(.easeInOut(duration: 0.25), value: isTracking)
+        .animation(.easeInOut(duration: 0.25), value: footnoteKind)
         .animation(.easeOut(duration: 0.2), value: progress)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("正在接收")
