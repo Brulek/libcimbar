@@ -435,10 +435,19 @@ struct LibraryScreen: View {
                 .tint(.pink)
             }
         }
+        // iPad 分屏时可以把文件直接拖进「文件」、邮件、备忘录等 App
+        .onDrag {
+            let provider = NSItemProvider(contentsOf: file.url) ?? NSItemProvider()
+            provider.suggestedName = file.displayName
+            return provider
+        }
         .modifier(FileContextMenu(file: file, isEnabled: !isSelecting) {
             Button {
                 onShareFiles([file.url])
             } label: { Label("分享", systemImage: "square.and.arrow.up") }
+            Button {
+                filesExportURLs = [file.url]
+            } label: { Label("存到「文件」", systemImage: "folder") }
             if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
                 Button {
                     Task { await saveImageToPhotos(file) }
