@@ -161,6 +161,16 @@
         }
       }
     },
+    "「文件」App 通常只能解压 zip；.%@ 压缩包可以用「分享」交给能解压的 App。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Files app usually unzips only .zip files. Use Share to open this .%@ archive in an app that can unpack it."
+          }
+        }
+      }
+    },
     "一、协议接受" : {
       "localizations" : {
         "en" : {

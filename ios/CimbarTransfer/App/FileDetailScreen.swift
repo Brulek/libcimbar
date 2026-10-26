@@ -96,6 +96,15 @@ struct FileDetailScreen: View {
                 }
             }
 
+            // 「存到文件」后能在「文件」App 里解压的只有 zip；rar、7z 得交给别的 App
+            if ["rar", "7z"].contains(file.fileExtension.lowercased()) {
+                Section {
+                    Label("「文件」App 通常只能解压 zip；.\(file.fileExtension.lowercased()) 压缩包可以用「分享」交给能解压的 App。", systemImage: "info.circle")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             if let zipListing, zipListing.fileCount > 0 {
                 Section {
                     // 同一个包里可能有重名的条目，用序号当标识
