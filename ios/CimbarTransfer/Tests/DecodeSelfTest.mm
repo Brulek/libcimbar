@@ -545,9 +545,10 @@ int main(int argc, char **argv) {
                 text += "第 " + std::to_string(i) + " 条：备注内容，用来看文字很多时取景框里怎么显示。\n";
             }
             for (int mode : {68, 67, 66, 4}) {
-                // 只有一个网址的极小文件：只记录、不算失败。结果受同一进程里前面测试的影响（这里多半能收到），
-                // 全新的解码器收不到不足一个喷泉块的文件——单独测用 --tiny <mode_val> [字节数]，每次一个新进程。
-                // 原因还没查清；试过把填充改成随机字节，没用
+                // 只有一个网址的极小文件：只记录、不算失败。结果受同一进程里前面测试的影响（这里多半能收到）。
+                // 全新的解码器收不到：编码端把不足一个喷泉块的文件用全 0 填满，画面绝大部分是同一种格子。
+                // 填充改成伪随机字节后四种模式 1–4 帧就收完（10-27 实测，见改版记录）——要改的是发送端，
+                // 接收端修不了。单独测用 --tiny <mode_val> [字节数]，每次一个新进程
                 Result r = runDecode(mode, 0, "https://www.apple.com/iphone/\n", @"link.txt");
                 printf("INFO  tiny link auto<-%d received=%d detected=%d frames=%d\n",
                        mode, r.received, r.detectedMode, r.framesFed);

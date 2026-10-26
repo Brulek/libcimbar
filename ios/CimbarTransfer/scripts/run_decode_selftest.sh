@@ -36,11 +36,13 @@ sources=(
 )
 
 objects=()
+# 头文件改了也要重编：只比 .cpp/.mm 的时间会漏掉（10-27 因此把一次实验的结论弄错了）
+newest_header=$(ls -t $SRC/lib/**/*.h(N) $SRC/lib/**/*.hpp(N) $APP_ROOT/App/*.h(N) 2>/dev/null | head -1)
 for src in $sources; do
   obj=$OUT/obj/${${src#$REPO/}//\//_}.o
   objects+=$obj
-  # 源文件没变就不重编
-  if [[ -f $obj && $obj -nt $src ]]; then continue; fi
+  # 源文件和头文件都没变就不重编
+  if [[ -f $obj && $obj -nt $src && ( -z $newest_header || $obj -nt $newest_header ) ]]; then continue; fi
   case $src in
     *.c)  xcrun clang -std=gnu11 $COMMON -c $src -o $obj ;;
     *.mm) xcrun clang++ -std=gnu++17 -fobjc-arc $COMMON -c $src -o $obj ;;
