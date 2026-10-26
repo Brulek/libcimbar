@@ -8,6 +8,7 @@ import UIKit
 /// - `-DemoSearch 关键词`：「我的文件」直接带上搜索词
 /// - `-DemoSelect YES`：「我的文件」直接进入多选并选中前两个
 /// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
+/// - `-DemoOnboardingPage 1`：引导页从第几页开始（0 起）；配合 `-org.cimbar.onboarding-completed-v1 NO`
 /// - `-DemoFrames <目录>[:<目录>…]`：回放 run_decode_selftest.sh --dump-transfer 导出的帧，代替相机；
 ///   `-DemoFramesFPS 4` 调慢回放
 /// - `-DemoScan waiting|receiving|lost|stalled|error|paused|done|done-text`：扫码页跳过相机，直接展示对应状态；
@@ -15,6 +16,11 @@ import UIKit
 enum DemoContent {
     static var scanState: String? {
         UserDefaults.standard.string(forKey: "DemoScan")
+    }
+
+    /// `-DemoOnboardingPage 1`：引导页直接停在某一页，不用滑（模拟器不让点时也能截图）
+    static var onboardingPage: Int {
+        UserDefaults.standard.integer(forKey: "DemoOnboardingPage")
     }
 
     /// `-DemoFrames <目录1>:<目录2>`：不开相机，回放预先导出的动画码帧（每个目录循环两遍再换下一个）

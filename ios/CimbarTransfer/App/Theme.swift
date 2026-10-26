@@ -30,9 +30,10 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
             .font(.headline)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .foregroundStyle(Brand.ink.opacity(isEnabled ? 1 : 0.45))
+            // 不可点时系统会把强调色压成灰色，深色字叠上去几乎看不见：改成浅色字 + 淡白底
+            .foregroundStyle(isEnabled ? AnyShapeStyle(Brand.ink) : AnyShapeStyle(Color.white.opacity(0.45)))
             .background(
-                Color.accentColor.opacity(isEnabled ? 1 : 0.35),
+                isEnabled ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.white.opacity(0.1)),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .opacity(configuration.isPressed ? 0.8 : 1)

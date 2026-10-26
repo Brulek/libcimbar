@@ -112,6 +112,7 @@ python3 scripts/l10n_sync.py --apply en.json --prune
   - `-DemoScan waiting|receiving|lost|stalled|error|paused|done|done-text`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
   - `-DemoSearch 关键词`：「我的文件」直接带上搜索词
   - `-DemoSelect YES`：「我的文件」直接进入多选并选中前两个
+  - `-DemoOnboardingPage 1`：引导页直接停在第几页（0 起），配合 `-org.cimbar.onboarding-completed-v1 NO`；不能点模拟器时也能截每一页
   - `-DemoFrames <目录>[:<目录>…]`：模拟相机。先用 `scripts/run_decode_selftest.sh --dump-transfer <目录> <模式值> <文件>` 把一个文件导出成整段动画码帧，App 按 15 fps 回放给真实的解码链，进度、完成、重复文件、发送端换模式都能在模拟器里走一遍；`-DemoFramesFPS 3` 调慢回放
   - `-DemoDetail YES|文件名`：直接打开最新文件的简介页
   - `-DemoUndoWindow 30`：把删除后的撤销窗口拉长到 30 秒（手动点测时用）

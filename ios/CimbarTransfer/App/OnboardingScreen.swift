@@ -5,7 +5,13 @@ struct OnboardingScreen: View {
     var isHelpMode: Bool = false
     let onFinished: () -> Void
 
-    @State private var pageIndex: Int = 0
+    @State private var pageIndex: Int = {
+        #if DEBUG
+        return DemoContent.onboardingPage
+        #else
+        return 0
+        #endif
+    }()
     @State private var confidentialAcknowledged: Bool = false
 
     private let pages: [OnboardingPage] = OnboardingPage.all
@@ -217,10 +223,12 @@ private struct OnboardingPageView: View {
     var body: some View {
         // 内容放不满时上下居中（iPad、短页面），放不下时可滚动（大字号）
         GeometryReader { proxy in
+            // iPhone SE 这类矮屏：图标和间距缩小，二维码和「发给发送方」不用滚动就能看到
+            let compact = proxy.size.height < 560
             // 大字号下内容超出一屏：滚动条在出现时闪一下，提示下面还有（放得下的页面不会显示）
             ScrollView(showsIndicators: true) {
-                VStack(spacing: 32) {
-                    hero
+                VStack(spacing: compact ? 20 : 32) {
+                    hero(compact: compact)
                     content
                     if page.role == .howToReceive {
                         senderLink
@@ -229,7 +237,7 @@ private struct OnboardingPageView: View {
                         confirmationToggle
                     }
                 }
-                .padding(.vertical, 24)
+                .padding(.vertical, compact ? 12 : 24)
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.85)
             }
@@ -274,28 +282,30 @@ private struct OnboardingPageView: View {
     }
 
     @ViewBuilder
-    private var heroImage: some View {
+    private func heroImage(compact: Bool) -> some View {
+        let side: CGFloat = compact ? 84 : 120
+        let radius: CGFloat = compact ? 20 : 28
         switch page.hero {
         case .brandMark:
             Image("BrandMark")
                 .resizable()
                 .scaledToFit()
                 .accessibilityIgnoresInvertColors()
-                .frame(width: 120, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .frame(width: side, height: side)
+                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
                 .shadow(color: Brand.glow.opacity(0.45), radius: 30, y: 8)
         case .symbol(let name):
             Image(systemName: name)
-                .font(.system(size: 52, weight: .regular))
+                .font(.system(size: compact ? 38 : 52, weight: .regular))
                 .foregroundStyle(Brand.glow)
-                .frame(width: 120, height: 120)
-                .background(Brand.glow.opacity(0.12), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .frame(width: side, height: side)
+                .background(Brand.glow.opacity(0.12), in: RoundedRectangle(cornerRadius: radius, style: .continuous))
         }
     }
 
-    private var hero: some View {
-        VStack(spacing: 18) {
-            heroImage
+    private func hero(compact: Bool) -> some View {
+        VStack(spacing: compact ? 12 : 18) {
+            heroImage(compact: compact)
                 .accessibilityHidden(true)
             VStack(spacing: 8) {
                 Text(page.title)
@@ -311,7 +321,7 @@ private struct OnboardingPageView: View {
             }
             .padding(.horizontal, 8)
         }
-        .padding(.top, 24)
+        .padding(.top, compact ? 4 : 24)
     }
 
     private var content: some View {
