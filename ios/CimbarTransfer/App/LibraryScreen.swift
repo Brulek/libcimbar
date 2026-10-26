@@ -349,6 +349,15 @@ struct LibraryScreen: View {
                 } header: {
                     if let title = section.title {
                         Text(title)
+                    } else if let sortTitle = flatSortTitle {
+                        // 按名称、大小排时列表没有分组标题，看不出排过序（设置页「已用空间」进来会改成按大小）
+                        HStack {
+                            Text(sortTitle)
+                            Spacer()
+                            Button("按日期") { sortOption = .dateDescending }
+                                .font(.footnote.weight(.semibold))
+                                .textCase(nil)
+                        }
                     }
                 } footer: {
                     if section.id == sections.last?.id, trimmedSearch.isEmpty {
@@ -362,6 +371,16 @@ struct LibraryScreen: View {
         .listStyle(.insetGrouped)
         .animation(.default, value: sortOption)
         .readableListWidth()
+    }
+
+    /// 不分组的排序（名称、大小）在列表顶上写明排法；搜索时按相关度不显示
+    private var flatSortTitle: String? {
+        guard trimmedSearch.isEmpty else { return nil }
+        switch sortOption {
+        case .nameAscending: return String(localized: "按名称排列")
+        case .sizeDescending: return String(localized: "从大到小排列")
+        case .dateDescending, .dateAscending, .kind: return nil
+        }
     }
 
     private func row(for file: CachedReceivedFile, in files: [CachedReceivedFile]) -> some View {

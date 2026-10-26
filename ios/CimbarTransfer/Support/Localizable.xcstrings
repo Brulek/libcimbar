@@ -331,6 +331,16 @@
         }
       }
     },
+    "从大到小排列" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Largest First"
+          }
+        }
+      }
+    },
     "传输侵犯他人知识产权的文件" : {
       "localizations" : {
         "en" : {
@@ -1647,12 +1657,32 @@
         }
       }
     },
+    "按名称排列" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By Name"
+          }
+        }
+      }
+    },
     "按大小查看文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Shows files by size"
+          }
+        }
+      }
+    },
+    "按日期" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By Date"
           }
         }
       }
