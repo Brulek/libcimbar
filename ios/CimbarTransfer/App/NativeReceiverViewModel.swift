@@ -12,7 +12,6 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var progressValue: Double?
     /// 最近的帧里是否识别到了码
     @Published private(set) var isTracking = false
-    @Published private(set) var detectedFrameCount = 0
     @Published private(set) var remainingSeconds: Int?
     @Published private(set) var stallHint: String?
     @Published private(set) var receivedFileURL: URL?
@@ -482,7 +481,6 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         } else if result.detectedFrameCount > 0 {
             lastActivityUptime = ProcessInfo.processInfo.systemUptime
             if !isTracking { isTracking = true }
-            detectedFrameCount = Int(result.detectedFrameCount)
             if transferStartUptime == nil {
                 transferStartUptime = ProcessInfo.processInfo.systemUptime
             }
@@ -665,7 +663,6 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.scanErrorLatched = false
             self.progressValue = nil
             self.isTracking = false
-            self.detectedFrameCount = 0
             self.detectedMode = 0
             self.remainingSeconds = nil
             self.stallHint = nil
@@ -801,18 +798,15 @@ extension NativeReceiverViewModel {
             case "receiving":
                 self.progressValue = 0.62
                 self.isTracking = true
-                self.detectedFrameCount = 214
                 self.remainingSeconds = 9
                 self.detectedMode = 68
             case "lost":
                 self.progressValue = 0.62
                 self.isTracking = false
-                self.detectedFrameCount = 214
                 self.detectedMode = 68
             case "stalled":
                 self.progressValue = 0.41
                 self.isTracking = true
-                self.detectedFrameCount = 133
                 self.detectedMode = 68
                 self.stallHint = String(localized: "试试靠近些、避开反光，或调亮发送端屏幕")
             case "error":

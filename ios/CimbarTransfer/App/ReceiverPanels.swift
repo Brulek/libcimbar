@@ -30,7 +30,6 @@ struct ReceiverBottomPanel: View {
                     progress: progress,
                     cameraError: viewModel.cameraErrorText,
                     isTracking: viewModel.isTracking,
-                    frameCount: viewModel.detectedFrameCount,
                     remainingSeconds: viewModel.remainingSeconds,
                     stallHint: viewModel.stallHint
                 )
@@ -93,7 +92,6 @@ private struct ProgressCard: View {
     /// 传输中途相机被占用/过热，优先于停滞提示展示
     let cameraError: String?
     let isTracking: Bool
-    let frameCount: Int
     let remainingSeconds: Int?
     let stallHint: String?
 
@@ -101,8 +99,10 @@ private struct ProgressCard: View {
         progress.formatted(.percent.precision(.fractionLength(0)))
     }
 
-    private var remainingText: String? {
-        guard isTracking, let remainingSeconds else { return nil }
+    /// 进度条下面只放一句当前最该知道的：剩余时间，或者该怎么做
+    private var footnote: String {
+        guard isTracking else { return String(localized: "暂时读不到动画码，保持对准") }
+        guard let remainingSeconds else { return String(localized: "保持对准") }
         if remainingSeconds < 90 {
             return String(localized: "还需约 \(remainingSeconds) 秒")
         }
@@ -112,9 +112,11 @@ private struct ProgressCard: View {
 
     private var headline: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
+            // 中等大小的文件每秒要跳好几个百分点，滚动数字动画一直播不完，
+            // 看着总是糊的；直接换字最清楚
             Text(percentText)
                 .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
-                .contentTransition(.numericText())
+                .transaction { $0.animation = nil }
             Text("正在接收")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
@@ -122,38 +124,9 @@ private struct ProgressCard: View {
         .fixedSize()
     }
 
-    @ViewBuilder
-    private var remaining: some View {
-        if let remainingText {
-            Text(remainingText)
-                .font(.footnote.monospacedDigit())
-                .foregroundStyle(.secondary)
-                .fixedSize()
-                .transition(.opacity)
-        }
-    }
-
-    private var footnote: String {
-        if !isTracking {
-            return String(localized: "暂时读不到动画码，保持对准")
-        }
-        return String(localized: "已识别 \(frameCount) 帧")
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // 大字号下一行放不下时，剩余时间换到下一行
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) {
-                    headline
-                    Spacer()
-                    remaining
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    headline
-                    remaining
-                }
-            }
+            headline
 
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
@@ -168,6 +141,7 @@ private struct ProgressCard: View {
                 Text(footnote)
                     .font(.footnote.monospacedDigit())
                     .foregroundStyle(.secondary)
+                    .contentTransition(.numericText(countsDown: true))
                     .transition(.opacity)
             }
         }
@@ -177,7 +151,7 @@ private struct ProgressCard: View {
         .animation(.easeOut(duration: 0.2), value: progress)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("正在接收")
-        .accessibilityValue([percentText, remainingText, cameraError ?? stallHint ?? footnote].compactMap { $0 }.joined(separator: String(localized: "，")))
+        .accessibilityValue([percentText, cameraError ?? stallHint ?? footnote].joined(separator: String(localized: "，")))
         .accessibilityAddTraits(.updatesFrequently)
     }
 }

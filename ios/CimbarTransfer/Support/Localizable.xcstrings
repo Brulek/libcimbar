@@ -411,6 +411,16 @@
         }
       }
     },
+    "保持对准" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep it in view"
+          }
+        }
+      }
+    },
     "信息" : {
       "localizations" : {
         "en" : {
@@ -1141,28 +1151,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Storage Used"
-          }
-        }
-      }
-    },
-    "已识别 %lld 帧" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld frame read"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld frames read"
-                }
-              }
-            }
           }
         }
       }
