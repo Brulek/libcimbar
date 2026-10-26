@@ -77,7 +77,7 @@ struct PrivacyPolicyScreen: View {
 }
 
 struct PolicySection<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -93,9 +93,9 @@ struct PolicySection<Content: View>: View {
 }
 
 struct PolicyBullet: View {
-    let text: String
+    let text: LocalizedStringKey
 
-    init(_ text: String) {
+    init(_ text: LocalizedStringKey) {
         self.text = text
     }
 
@@ -103,7 +103,7 @@ struct PolicyBullet: View {
         HStack(alignment: .top, spacing: 8) {
             Text("•")
                 .foregroundStyle(.secondary)
-            Text(.init(text))
+            Text(text)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
