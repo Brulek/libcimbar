@@ -410,14 +410,15 @@ private struct DetailActionButton: View {
     let title: LocalizedStringKey
     let systemImage: String
     let action: () -> Void
+    /// 各图标高矮不一（doc.on.doc 比 eye 高），统一图标区高度让下面的字对齐；随字号放大
+    @ScaledMetric(relativeTo: .title3) private var iconHeight: CGFloat = 28
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 6) {
                 Image(systemName: systemImage)
                     .font(.title3)
-                    // 只定最小高度：大字号下图标变大，固定 24 会压到下面的字
-                    .frame(minHeight: 24)
+                    .frame(height: iconHeight)
                 Text(title)
                     .font(.caption.weight(.medium))
                     .lineLimit(1)
