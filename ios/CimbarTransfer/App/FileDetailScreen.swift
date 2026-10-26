@@ -15,6 +15,7 @@ struct FileDetailScreen: View {
     var onRenamed: ((CachedReceivedFile) -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.openURL) private var openURL
 
     @State private var sha256: String?
@@ -222,12 +223,18 @@ struct FileDetailScreen: View {
         .frame(maxWidth: .infinity)
     }
 
+    @ViewBuilder
     private var actions: some View {
-        // 大字号下四个并排放不下，改成两列
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 10) { actionButtons }
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                actionButtons
+        if dynamicTypeSize.isAccessibilitySize {
+            // 辅助功能字号下两列也放不下（按钮文字不折行，会被截掉），一行一个
+            VStack(spacing: 10) { actionButtons }
+        } else {
+            // 大字号下四个并排放不下，改成两列
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) { actionButtons }
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                    actionButtons
+                }
             }
         }
     }
@@ -391,7 +398,8 @@ private struct DetailActionButton: View {
             VStack(spacing: 6) {
                 Image(systemName: systemImage)
                     .font(.title3)
-                    .frame(height: 24)
+                    // 只定最小高度：大字号下图标变大，固定 24 会压到下面的字
+                    .frame(minHeight: 24)
                 Text(title)
                     .font(.caption.weight(.medium))
                     .lineLimit(1)

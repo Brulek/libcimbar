@@ -76,56 +76,90 @@ struct LibraryRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            if isSelecting {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
-                    .font(.title3)
-                    .transition(.move(edge: .leading).combined(with: .opacity))
-            }
-            FileThumbnailView(
-                url: file.url,
-                cacheKey: "row-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
-                cornerRadius: 10
-            )
-            .frame(width: thumbnailSide, height: thumbnailSide)
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
-                    if isNew {
-                        Circle()
-                            .fill(Color.accentColor)
-                            .frame(width: 8, height: 8)
-                            .accessibilityLabel("新")
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                // 辅助功能字号下缩略图和 ⓘ 放上面一行，名字和信息独占整行宽度，
+                // 否则放大后的缩略图把名字挤成一行一个字（「邮件」「文件」也这样排）
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        selectionMark
+                        thumbnail
+                        Spacer(minLength: 0)
+                        detailButton
                     }
-                    // 中间截断：长文件名也能看到扩展名。辅助功能字号下一行只剩几个字，允许折行
-                    Text(file.displayName)
-                        .font(.body)
-                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
-                        .truncationMode(.middle)
+                    details
                 }
-                Text("\(file.sizeDescription) · \(dateText)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-            }
-            Spacer(minLength: 0)
-            if !isSelecting, let onDetail {
-                // 行点按是「预览」；简介页需要一个显式可见的入口，
-                // 不能只藏在长按菜单里（chevron 的导航语义与预览行为矛盾）
-                Button(action: onDetail) {
-                    Image(systemName: "info.circle")
-                        .font(.title3)
-                        .foregroundStyle(.tint)
-                        .frame(width: 36, height: 36)
-                        .contentShape(Rectangle())
+            } else {
+                HStack(spacing: 12) {
+                    selectionMark
+                    thumbnail
+                    details
+                    Spacer(minLength: 0)
+                    detailButton
                 }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("简介")
             }
         }
         .padding(.vertical, 2)
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.2), value: isSelecting)
+    }
+
+    @ViewBuilder
+    private var selectionMark: some View {
+        if isSelecting {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+                .font(.title3)
+                .transition(.move(edge: .leading).combined(with: .opacity))
+        }
+    }
+
+    private var thumbnail: some View {
+        FileThumbnailView(
+            url: file.url,
+            cacheKey: "row-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
+            cornerRadius: 10
+        )
+        .frame(width: thumbnailSide, height: thumbnailSide)
+    }
+
+    private var details: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 6) {
+                if isNew {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 8, height: 8)
+                        .accessibilityLabel("新")
+                }
+                // 中间截断：长文件名也能看到扩展名。辅助功能字号下一行只剩几个字，允许折行
+                Text(file.displayName)
+                    .font(.body)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
+                    .truncationMode(.middle)
+            }
+            Text("\(file.sizeDescription) · \(dateText)")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+        }
+    }
+
+    @ViewBuilder
+    private var detailButton: some View {
+        if !isSelecting, let onDetail {
+            // 行点按是「预览」；简介页需要一个显式可见的入口，
+            // 不能只藏在长按菜单里（chevron 的导航语义与预览行为矛盾）
+            Button(action: onDetail) {
+                Image(systemName: "info.circle")
+                    .font(.title3)
+                    .foregroundStyle(.tint)
+                    .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("简介")
+        }
     }
 }
 
