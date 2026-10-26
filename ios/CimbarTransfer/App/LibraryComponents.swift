@@ -317,7 +317,8 @@ struct FileContextMenu<MenuItems: View>: ViewModifier {
         if !isEnabled {
             content
         } else if ThumbnailLoader.supportsLargePreview(fileExtension: file.fileExtension)
-                    || TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
+                    || TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize)
+                    || FileContextPreview.isZip(file) {
             content.contextMenu {
                 menuItems()
             } preview: {
@@ -340,10 +341,15 @@ private struct FileContextPreview: View {
         TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize)
     }
 
+    /// zip 的大图预览是包里的文件列表：比一个压缩包图标有用
+    static func isZip(_ file: CachedReceivedFile) -> Bool {
+        file.fileExtension.lowercased() == "zip"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Group {
-                if isText {
+                if isText || Self.isZip(file) {
                     if loaded {
                         TextRevealPage(snippet: snippet, fileExtension: file.fileExtension, side: 300)
                     } else {
@@ -373,8 +379,21 @@ private struct FileContextPreview: View {
         .frame(width: 300)
         .task(id: file.id) {
             // 最大 512 KB、可能要猜编码，放后台读
-            guard isText else { return }
             let url = file.url
+            if Self.isZip(file) {
+                snippet = await Task.detached(priority: .userInitiated) { () -> String? in
+                    guard let listing = ZipListing.read(url, maxNames: 9), listing.fileCount > 0 else { return nil }
+                    // 一屏放得下十行左右：列 9 个，多出来的留一行写总数
+                    var lines = listing.names
+                    if listing.fileCount > lines.count {
+                        lines.append(String(localized: "共 \(listing.fileCount) 个文件"))
+                    }
+                    return lines.joined(separator: "\n")
+                }.value
+                loaded = true
+                return
+            }
+            guard isText else { return }
             snippet = await Task.detached(priority: .userInitiated) { TextClipboard.snippet(url) }.value
             loaded = true
         }

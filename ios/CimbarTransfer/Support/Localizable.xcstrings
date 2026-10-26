@@ -561,6 +561,16 @@
         }
       }
     },
+    "共 %lld 个文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Files: %lld"
+          }
+        }
+      }
+    },
     "共 %lld 个文件，解压后约 %@" : {
       "localizations" : {
         "en" : {
