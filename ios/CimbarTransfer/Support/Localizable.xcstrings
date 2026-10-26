@@ -286,7 +286,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No internet, no pairing. Just point and receive."
+            "value" : "No internet or pairing. The two devices only need to be near each other."
           }
         }
       }
