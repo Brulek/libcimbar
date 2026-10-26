@@ -16,6 +16,9 @@ static const int kAutoDetectModes[] = {68, 67, 66, 4};
 static const NSUInteger kAutoDetectModeCount = sizeof(kAutoDetectModes) / sizeof(kAutoDetectModes[0]);
 // 锁定后连续这么多帧（约 5 秒）解不出数据、且传输从未产生进度，视为误锁，重新轮换
 static const NSUInteger kAutoUnlockFrames = 150;
+// 已有进度后连续这么多帧（约 3 秒）解不出数据，开始每隔几帧用别的模式试一帧：
+// 发送端中途换了模式时能跟上。试探不动喷泉流，原来的进度不受影响
+static const NSUInteger kStuckFramesBeforeProbe = 90;
 
 @implementation NativeCimbarDecoder {
     std::vector<unsigned char> _scanBuffer;
@@ -33,6 +36,8 @@ static const NSUInteger kAutoUnlockFrames = 150;
     int _lockedMode;
     NSUInteger _framesWithoutData;
     BOOL _hasProgress;
+    NSUInteger _stuckFrames;
+    NSUInteger _probeCursor;
     // 上一个收到的文件：不随 -reset 清空。点「继续接收」时发送端往往还在放同一个文件，
     // 几秒内会再收一遍；内容一致就复用已保存的文件，不再存出「xxx (1).jpg」
     uint32_t _lastFileID;
@@ -83,6 +88,7 @@ static const NSUInteger kAutoUnlockFrames = 150;
     _lockedMode = 0;
     _framesWithoutData = 0;
     _hasProgress = NO;
+    _stuckFrames = 0;
 }
 
 - (void)latchError:(NSString *)message into:(NativeCimbarDecodeOutput *)output {
@@ -153,9 +159,16 @@ static const NSUInteger kAutoUnlockFrames = 150;
 
 - (NativeCimbarDecodeOutput *)decodeCurrentFrame {
     int probingMode = 0;
+    int switchProbeMode = 0;
     if (self.isAutoMode && _lockedMode == 0) {
         probingMode = kAutoDetectModes[_processedFrameCount % kAutoDetectModeCount];
         cimbard_configure_decode(probingMode);
+    } else if (self.isAutoMode && _hasProgress && _stuckFrames > kStuckFramesBeforeProbe
+               && (_processedFrameCount % 3) == 0) {
+        do {
+            switchProbeMode = kAutoDetectModes[_probeCursor++ % kAutoDetectModeCount];
+        } while (switchProbeMode == _lockedMode);
+        cimbard_set_decode_mode_keep_sink(switchProbeMode);
     }
 
     const int bytes = cimbard_scan_extract_decode(
@@ -167,6 +180,21 @@ static const NSUInteger kAutoUnlockFrames = 150;
         static_cast<unsigned>(_scanBuffer.size())
     );
     _processedFrameCount += 1;
+
+    if (switchProbeMode != 0) {
+        cimbard_set_decode_mode_keep_sink(_lockedMode);
+        if (bytes > 0) {
+            // 发送端换了模式：旧传输按原模式已经接不上，按新模式从头收
+            cimbard_reset();
+            cimbard_configure_decode(switchProbeMode);
+            _lockedMode = switchProbeMode;
+            _hasProgress = NO;
+            _stuckFrames = 0;
+        }
+    }
+    if (self.isAutoMode && _hasProgress) {
+        _stuckFrames = bytes > 0 ? 0 : _stuckFrames + 1;
+    }
 
     if (bytes <= 0) {
         if (self.isAutoMode && _lockedMode != 0 && !_hasProgress

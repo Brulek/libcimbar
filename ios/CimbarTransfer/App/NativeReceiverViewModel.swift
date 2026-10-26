@@ -590,6 +590,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     // 主线程调用。用最近一段时间的进度斜率估算剩余时间，避免瞬时抖动
     private func updateStats(fraction: Double) {
         let now = ProcessInfo.processInfo.systemUptime
+        // 进度明显回落 = 解码器按新模式从头收（发送端中途换了模式）：所有基线重来
+        if lastAdvanceFraction >= 0, fraction + 0.02 < lastAdvanceFraction {
+            lastAdvanceFraction = -1
+            progressSamples.removeAll()
+            announcedProgressStep = 0
+            transferStartUptime = now
+        }
         progressSamples.append((time: now, fraction: fraction))
         progressSamples.removeAll { now - $0.time > 12 }
 

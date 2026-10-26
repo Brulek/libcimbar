@@ -247,6 +247,90 @@ bool runRepeatTest() {
     return ok;
 }
 
+// 发送端中途换模式：先收到一部分 B，再全部换成 Bm。自动模式应跟上，最终收到 Bm 那份文件
+bool runModeSwitchTest() {
+    const std::string first = makePayload(24 * 1024);
+    std::string second = makePayload(12 * 1024);
+    second[1] ^= 0x33;
+    std::vector<CVPixelBufferRef> bFrames = cameraFrames(encodeFrames(68, "switch.bin", first, 2, 92));
+    std::vector<CVPixelBufferRef> bmFrames = cameraFrames(encodeFrames(67, "switch.bin", second, 60, 93));
+    bool ok = false;
+    int framesToFinish = 0;
+    std::thread worker([&] {
+        @autoreleasepool {
+            NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+            bool hadProgress = false;
+            for (CVPixelBufferRef buffer : bFrames) {
+                NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:buffer];
+                hadProgress = hadProgress || output.progressFraction.doubleValue > 0;
+            }
+            NativeCimbarDecodeOutput *done = nil;
+            for (int i = 0; i < 600 && done == nil; ++i) {
+                NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:bmFrames[i % bmFrames.size()]];
+                framesToFinish = i + 1;
+                if (output.fileURL) done = output;
+            }
+            NSData *data = done ? [NSData dataWithContentsOfURL:done.fileURL] : nil;
+            ok = hadProgress && done && done.detectedMode == 67 && data.length == second.size()
+                && memcmp(data.bytes, second.data(), second.size()) == 0;
+            if (done.fileURL) [[NSFileManager defaultManager] removeItemAtURL:done.fileURL error:nil];
+        }
+    });
+    worker.join();
+    for (CVPixelBufferRef buffer : bFrames) CVPixelBufferRelease(buffer);
+    for (CVPixelBufferRef buffer : bmFrames) CVPixelBufferRelease(buffer);
+    printf("%s  mode switch  B partial -> Bm, finished after %d Bm frames\n", ok ? "PASS" : "FAIL", framesToFinish);
+    return ok;
+}
+
+// 传输中途码离开取景框很久（会触发换模式试探），再回来：应接着原来的进度收完，不能从头来
+bool runLostAndBackTest() {
+    const std::string payload = makePayload(24 * 1024);
+    std::vector<CVPixelBufferRef> frames = cameraFrames(encodeFrames(68, "back.bin", payload, 60, 94));
+    std::vector<CVPixelBufferRef> empty;
+    cv::RNG rng(11);
+    for (int i = 0; i < 20; ++i) {
+        cv::Mat scene(kCanvasHeight / 2, kCanvasWidth / 2, CV_8UC3);
+        rng.fill(scene, cv::RNG::UNIFORM, cv::Scalar::all(0), cv::Scalar::all(255));
+        cv::GaussianBlur(scene, scene, cv::Size(0, 0), 3);
+        empty.push_back(makeCameraFrame(scene));
+    }
+    bool ok = false;
+    double progressBefore = 0, progressAfterFirst = 0;
+    int framesAfterReturn = 0;
+    std::thread worker([&] {
+        @autoreleasepool {
+            NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+            for (int i = 0; i < 2; ++i) {
+                NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:frames[i]];
+                if (output.progressFraction) progressBefore = output.progressFraction.doubleValue;
+            }
+            for (int i = 0; i < 300; ++i) {
+                [decoder processPixelBuffer:empty[i % empty.size()]];
+            }
+            NativeCimbarDecodeOutput *done = nil;
+            for (size_t i = 2; i < frames.size() && done == nil; ++i) {
+                NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:frames[i]];
+                framesAfterReturn += 1;
+                if (framesAfterReturn == 1 && output.progressFraction) {
+                    progressAfterFirst = output.progressFraction.doubleValue;
+                }
+                if (output.fileURL) done = output;
+            }
+            NSData *data = done ? [NSData dataWithContentsOfURL:done.fileURL] : nil;
+            ok = done && progressAfterFirst > progressBefore && data.length == payload.size()
+                && memcmp(data.bytes, payload.data(), payload.size()) == 0;
+            if (done.fileURL) [[NSFileManager defaultManager] removeItemAtURL:done.fileURL error:nil];
+        }
+    });
+    worker.join();
+    for (CVPixelBufferRef buffer : frames) CVPixelBufferRelease(buffer);
+    for (CVPixelBufferRef buffer : empty) CVPixelBufferRelease(buffer);
+    printf("%s  lost & back  progress %.0f%% -> %.0f%% after return, done in %d frames\n", ok ? "PASS" : "FAIL",
+           progressBefore * 100, progressAfterFirst * 100, framesAfterReturn);
+    return ok;
+}
+
 // 取景框里没有码（拍的是噪点和渐变）：自动模式绝不能误锁某个模式、更不能产出文件
 bool runNoCodeTest() {
     std::vector<CVPixelBufferRef> buffers;
@@ -356,6 +440,12 @@ int main(int argc, char **argv) {
         }
         gDegrade = false;
         if (!runRepeatTest()) {
+            ++failures;
+        }
+        if (!runModeSwitchTest()) {
+            ++failures;
+        }
+        if (!runLostAndBackTest()) {
             ++failures;
         }
         gDegrade = true;

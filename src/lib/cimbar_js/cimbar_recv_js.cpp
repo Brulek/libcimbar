@@ -335,6 +335,19 @@ int cimbard_configure_decode(int mode_val)
 	return 0;
 }
 
+// Switch the per-frame decode mode but keep the fountain sink. Used by mode
+// autodetect to probe other modes while a transfer is in progress: the sink is
+// only valid for the mode it was created with, so a probe that finds data must
+// be followed by cimbard_reset() + cimbard_configure_decode() before decoding it.
+int cimbard_set_decode_mode_keep_sink(int mode_val)
+{
+	if (mode_val <= 0)
+		mode_val = 68;
+	_modeVal = mode_val;
+	sync_thread_config();
+	return 0;
+}
+
 int cimbard_reset()
 {
 	_sink.reset();

@@ -35,6 +35,7 @@ int cimbard_get_decompress_bufsize();
 int cimbard_decompress_read(uint32_t id, unsigned char* buffer, unsigned size);
 
 int cimbard_configure_decode(int mode_val);
+int cimbard_set_decode_mode_keep_sink(int mode_val);
 
 // drop all decode state: in-progress fountain streams, completed file ids,
 // and any reassembled file contents. Configuration (mode) is preserved.
