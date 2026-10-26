@@ -51,6 +51,7 @@ with zipfile.ZipFile('sheets.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
 with zipfile.ZipFile('inline.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('xl/worksheets/sheet1.xml', '<worksheet><sheetData><row><c t="inlineStr"><is><t>导出的名单</t></is></c>'
                '<c><v>42</v></c><c t="inlineStr"><is><t>第二格</t></is></c></row></sheetData></worksheet>')
+    z.writestr('xl/worksheets/sheet2.xml', '<worksheet><sheetData><row><c t="inlineStr"><is><t>第二张表</t></is></c></row></sheetData></worksheet>')
 # 磁盘上 0.5 MB、解开 500 MB 的幻灯片
 with zipfile.ZipFile('bomb.pptx', 'w', zipfile.ZIP_DEFLATED) as z:
     filler = ' ' * (10 * 1024 * 1024)

@@ -50,7 +50,7 @@ enum ParserSelfTest {
         check("xlsx", xlsx == "客户名称\n北京 分行\n中文&符号", xlsx.debugDescription)
 
         let inline = OfficeText.read(file("inline.xlsx")) ?? ""
-        check("xlsx inline strings", inline == "导出的名单\n第二格", inline.debugDescription)
+        check("xlsx inline strings", inline == "导出的名单\n第二格\n第二张表", inline.debugDescription)
 
         let pptx = OfficeText.read(file("deck.pptx")) ?? ""
         check("pptx order", pptx.components(separatedBy: "\n").filter { $0.hasPrefix("第") || $0.hasPrefix("封") } == ["封面标题", "第二页", "第十页"],

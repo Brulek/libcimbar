@@ -95,11 +95,18 @@ enum OfficeText {
         let parts = entries.filter(kind.parts).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         var text = ""
         var budget = maxTotalBytes
+        var sharedStringsHadText = false
         for part in parts.prefix(maxParts) {
+            // Excel：共享字符串表里有字就够了，工作表多半是一大堆数字，不再逐个解
+            if sharedStringsHadText, part.name.hasPrefix("xl/worksheets/") { break }
             guard budget > 0,
                   let data = ZipArchive.data(of: part, in: url, maxSize: min(maxXMLBytes, budget)) else { continue }
             budget -= data.count
-            text += extract(String(decoding: data, as: UTF8.self), kind: kind)
+            let partText = extract(String(decoding: data, as: UTF8.self), kind: kind)
+            if part.name == "xl/sharedStrings.xml" {
+                sharedStringsHadText = !partText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }
+            text += partText
             if text.count >= SearchableText.maxCharacters { break }
         }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)

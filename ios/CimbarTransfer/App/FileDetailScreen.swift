@@ -184,9 +184,6 @@ struct FileDetailScreen: View {
         .task(id: file.fileName) {
             mediaDetail = await MediaDetail.load(for: file.url)
         }
-        .onDisappear {
-            if zipListing != nil { ZipListing.cleanUpPreviews() }
-        }
         .task(id: file.fileName) {
             guard file.fileExtension.lowercased() == "zip" else {
                 zipListing = nil
@@ -640,8 +637,20 @@ extension ZipListing {
         FileManager.default.temporaryDirectory.appendingPathComponent("ZipPreview", isDirectory: true)
     }
 
-    static func cleanUpPreviews() {
-        try? FileManager.default.removeItem(at: previewDirectory)
+    /// 解出来超过 10 分钟的删掉：正在看的预览不受影响（推入下一页、全屏预览时简介页也会「消失」，
+    /// 不能在那时清），剩下的系统清临时目录时也会清
+    private static func removeStalePreviews() {
+        let fileManager = FileManager.default
+        guard let folders = try? fileManager.contentsOfDirectory(
+            at: previewDirectory, includingPropertiesForKeys: [.creationDateKey]
+        ) else { return }
+        let cutoff = Date().addingTimeInterval(-10 * 60)
+        for folder in folders {
+            let created = (try? folder.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? .distantPast
+            if created < cutoff {
+                try? fileManager.removeItem(at: folder)
+            }
+        }
     }
 
     /// 简介页上能点开预览的：类型预览得了、没加密、解出来不太大
@@ -657,7 +666,8 @@ extension ZipListing {
     static func extractForPreview(_ entry: ZipArchive.Entry, from url: URL) -> URL? {
         guard canPreview(entry),
               let data = ZipArchive.data(of: entry, in: url, maxSize: Int(maxPreviewBytes)) else { return nil }
-        // 每次解到新的子目录：上一个预览可能还没关；简介页关掉时整个目录一起清（cleanUpPreviews）
+        // 每次解到新的子目录：上一个预览可能还没关
+        removeStalePreviews()
         let folder = previewDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let name = ReceivedFileStorage.sanitizedFilename((entry.name as NSString).lastPathComponent)
         let destination = folder.appendingPathComponent(name)
