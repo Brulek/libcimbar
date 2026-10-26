@@ -51,8 +51,8 @@ struct LibraryScreen: View {
     }
 
     /// 过滤和「命中的那一行」用同一种比较，两边结论才一致
-    fileprivate static let contentIndexBudget = 24 * 1024 * 1024
-    fileprivate static let contentSearchOptions: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]
+    fileprivate nonisolated static let contentIndexBudget = 24 * 1024 * 1024
+    fileprivate nonisolated static let contentSearchOptions: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]
 
     private var filteredFiles: [CachedReceivedFile] {
         let query = trimmedSearch

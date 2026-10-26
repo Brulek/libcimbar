@@ -705,8 +705,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 extension NativeReceiverViewModel {
     fileprivate func startReplay(_ directories: [URL]) {
         // 和相机一样不动 isPaused：收完文件后切页再回来，解码链仍停着，等「继续接收」
-        frameQueue.async {
-            guard self.replayer == nil else { return }
+        frameQueue.async { [weak self] in
+            guard let self, self.replayer == nil else { return }
             let replayer = FrameReplayer(directories: directories)
             self.replayer = replayer
             replayer.start(on: self.frameQueue) { [weak self] pixelBuffer, image in
