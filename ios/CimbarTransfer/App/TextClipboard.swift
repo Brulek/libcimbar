@@ -16,7 +16,8 @@ enum TextClipboard {
         return canCopy(fileExtension: url.pathExtension, size: size)
     }
 
-    /// UTF-8 → 带 BOM 的 UTF-16 → GB18030（中文 Windows 记事本存的 txt 常是 GBK）
+    /// UTF-8 → 带 BOM 的 UTF-16 → 系统猜编码（优先 GB18030，其次 Big5、Shift-JIS）→ GB18030。
+    /// 只按 GB18030 读的话，台湾/香港的 Big5 记事本、日文 Shift-JIS 会变成一串错字，西文 Latin-1 直接读不出
     static func readText(_ url: URL) -> String? {
         guard let data = try? Data(contentsOf: url), !data.isEmpty else { return nil }
         if let text = String(data: data, encoding: .utf8) {
@@ -27,11 +28,24 @@ enum TextClipboard {
            let text = String(data: data, encoding: .utf16) {
             return text
         }
-        let gb18030 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(
-            CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)
-        ))
+        var converted: NSString?
+        var usedLossy: ObjCBool = false
+        let detected = NSString.stringEncoding(for: data, encodingOptions: [
+            .suggestedEncodingsKey: [gb18030, big5, String.Encoding.shiftJIS].map(\.rawValue),
+            .allowLossyKey: false,
+        ], convertedString: &converted, usedLossyConversion: &usedLossy)
+        if detected != 0, let converted {
+            return converted as String
+        }
         return String(data: data, encoding: gb18030)
     }
+
+    private static let gb18030 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(
+        CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue)
+    ))
+    private static let big5 = String.Encoding(rawValue: CFStringConvertEncodingToNSStringEncoding(
+        CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue)
+    ))
 
     /// 整个文件只是一个网址（常见用法：把电脑上的链接送到手机）时返回它
     static func singleWebLink(_ url: URL) -> URL? {
