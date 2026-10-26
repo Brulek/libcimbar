@@ -1013,6 +1013,16 @@
         }
       }
     },
+    "已复制文字" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Copied"
+          }
+        }
+      }
+    },
     "已复制网址" : {
       "localizations" : {
         "en" : {

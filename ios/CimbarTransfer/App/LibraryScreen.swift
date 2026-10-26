@@ -353,6 +353,13 @@ struct LibraryScreen: View {
                     Task { await saveImageToPhotos(file) }
                 } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
             }
+            if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
+                Button {
+                    if TextClipboard.copy(file.url) {
+                        presentToast(SaveToast(message: String(localized: "已复制文字"), style: .success))
+                    }
+                } label: { Label("复制文字", systemImage: "doc.on.doc") }
+            }
             Button {
                 beginRename(file)
             } label: { Label("重命名", systemImage: "pencil") }
