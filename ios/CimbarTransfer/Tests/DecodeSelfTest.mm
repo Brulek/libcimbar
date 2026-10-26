@@ -77,10 +77,33 @@ std::vector<cv::Mat> encodeFrames(int mode, const std::string &filename, const s
     return frames;
 }
 
+// 「拍出来」的帧：开启后加透视倾斜、缩小、模糊、偏暗和噪点，近似手持拍屏幕
+bool gDegrade = false;
+uint64_t gFrameSeed = 1;
+
+cv::Mat degradeFrame(const cv::Mat &bgra) {
+    cv::RNG rng(gFrameSeed++);
+    const float w = bgra.cols, h = bgra.rows;
+    const float jitter = 0.025f * w;
+    auto j = [&] { return rng.uniform(-jitter, jitter); };
+    const cv::Point2f src[4] = {{0, 0}, {w, 0}, {w, h}, {0, h}};
+    const cv::Point2f dst[4] = {{j(), j()}, {w + j(), j()}, {w + j(), h + j()}, {j(), h + j()}};
+    cv::Mat warped;
+    cv::warpPerspective(bgra, warped, cv::getPerspectiveTransform(src, dst), bgra.size(),
+                        cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(60, 60, 60, 255));
+    cv::GaussianBlur(warped, warped, cv::Size(0, 0), 0.8);
+    warped.convertTo(warped, -1, 0.82, 6); // 偏暗、对比度略降
+    cv::Mat noise(warped.size(), warped.type());
+    rng.fill(noise, cv::RNG::NORMAL, cv::Scalar::all(0), cv::Scalar(6, 6, 6, 0));
+    cv::Mat out;
+    cv::add(warped, noise, out, cv::noArray(), warped.type());
+    return out;
+}
+
 // 把编码帧缩放后居中放进灰底竖屏画布，近似手机对着屏幕拍到的样子
 CVPixelBufferRef makeCameraFrame(const cv::Mat &rgbFrame) {
     cv::Mat canvas(kCanvasHeight, kCanvasWidth, CV_8UC4, cv::Scalar(60, 60, 60, 255));
-    const int side = 660;
+    const int side = gDegrade ? 640 : 660;
     const double scale = std::min(side / double(rgbFrame.cols), side / double(rgbFrame.rows));
     cv::Mat scaled;
     cv::resize(rgbFrame, scaled, cv::Size(), scale, scale, cv::INTER_AREA);
@@ -89,6 +112,9 @@ CVPixelBufferRef makeCameraFrame(const cv::Mat &rgbFrame) {
     const int x = (kCanvasWidth - bgra.cols) / 2;
     const int y = (kCanvasHeight - bgra.rows) / 2;
     bgra.copyTo(canvas(cv::Rect(x, y, bgra.cols, bgra.rows)));
+    if (gDegrade) {
+        canvas = degradeFrame(canvas);
+    }
 
     CVPixelBufferRef buffer = nullptr;
     NSDictionary *attrs = @{(id)kCVPixelBufferIOSurfacePropertiesKey: @{}};
@@ -221,6 +247,38 @@ bool runRepeatTest() {
     return ok;
 }
 
+// 取景框里没有码（拍的是噪点和渐变）：自动模式绝不能误锁某个模式、更不能产出文件
+bool runNoCodeTest() {
+    std::vector<CVPixelBufferRef> buffers;
+    cv::RNG rng(7);
+    for (int i = 0; i < 60; ++i) {
+        cv::Mat scene(kCanvasHeight / 2, kCanvasWidth / 2, CV_8UC3);
+        rng.fill(scene, cv::RNG::UNIFORM, cv::Scalar::all(0), cv::Scalar::all(255));
+        cv::GaussianBlur(scene, scene, cv::Size(0, 0), 2 + (i % 5));
+        if (CVPixelBufferRef buffer = makeCameraFrame(scene)) {
+            buffers.push_back(buffer);
+        }
+    }
+    bool ok = true;
+    std::thread worker([&] {
+        @autoreleasepool {
+            NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+            for (int round = 0; round < 5; ++round) {
+                for (CVPixelBufferRef buffer : buffers) {
+                    NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:buffer];
+                    if (output.detectedMode != 0 || output.fileURL != nil || output.progressFraction != nil) {
+                        ok = false;
+                    }
+                }
+            }
+        }
+    });
+    worker.join();
+    for (CVPixelBufferRef buffer : buffers) CVPixelBufferRelease(buffer);
+    printf("%s  no code      300 frames of noise, no lock and no file\n", ok ? "PASS" : "FAIL");
+    return ok;
+}
+
 // 截图素材：把一帧 B 模式动画码存成 PNG（模拟器的 OpenCV 切片没有 imgcodecs，用 ImageIO 写）
 bool dumpFrame(const char *path) {
     std::vector<cv::Mat> frames = encodeFrames(68, "demo.bin", makePayload(64 * 1024), 4);
@@ -262,19 +320,30 @@ int main(int argc, char **argv) {
             int receiver;
             bool expectReceived;
             int expectDetected;
+            bool degrade;
         };
         const Case cases[] = {
-            {"auto  <- B ", 68, 0, true, 68},
-            {"auto  <- Bm", 67, 0, true, 67},
-            {"auto  <- Bu", 66, 0, true, 66},
-            {"auto  <- 4C", 4, 0, true, 4},
-            {"B     <- B ", 68, 68, true, 0},
-            {"Bm    <- Bm", 67, 67, true, 0},
-            {"B     <- Bu", 66, 68, false, 0},
+            {"auto  <- B ", 68, 0, true, 68, false},
+            {"auto  <- Bm", 67, 0, true, 67, false},
+            {"auto  <- Bu", 66, 0, true, 66, false},
+            {"auto  <- 4C", 4, 0, true, 4, false},
+            {"B     <- B ", 68, 68, true, 0, false},
+            {"Bm    <- Bm", 67, 67, true, 0, false},
+            {"B     <- Bu", 66, 68, false, 0, false},
+            // 拍摄质量变差（倾斜、模糊、偏暗、噪点）：自动模式要和对应的手动模式一样能收完
+            {"~auto <- B ", 68, 0, true, 68, true},
+            {"~B    <- B ", 68, 68, true, 0, true},
+            {"~auto <- Bm", 67, 0, true, 67, true},
+            {"~Bm   <- Bm", 67, 67, true, 0, true},
+            {"~auto <- Bu", 66, 0, true, 66, true},
+            {"~Bu   <- Bu", 66, 66, true, 0, true},
+            {"~auto <- 4C", 4, 0, true, 4, true},
+            {"~4C   <- 4C", 4, 4, true, 0, true},
         };
 
         int failures = 0;
         for (const Case &c : cases) {
+            gDegrade = c.degrade;
             Result r = runDecode(c.sender, c.receiver, payload, @"selftest.bin");
             const bool ok = r.received == c.expectReceived
                 && (!c.expectReceived || r.contentMatches)
@@ -285,7 +354,12 @@ int main(int argc, char **argv) {
             printf("%s  %-12s received=%d match=%d detected=%d frames=%d  %.1f ms/frame\n",
                    ok ? "PASS" : "FAIL", c.name, r.received, r.contentMatches, r.detectedMode, r.framesFed, r.msPerFrame);
         }
+        gDegrade = false;
         if (!runRepeatTest()) {
+            ++failures;
+        }
+        gDegrade = true;
+        if (!runNoCodeTest()) {
             ++failures;
         }
         printf("%s (%d failure%s)\n", failures == 0 ? "ALL PASSED" : "FAILED", failures, failures == 1 ? "" : "s");

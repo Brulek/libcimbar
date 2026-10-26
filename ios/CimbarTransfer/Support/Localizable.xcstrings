@@ -2531,6 +2531,16 @@
         }
       }
     },
+    "距离远或屏幕小时，把网页菜单里的 Mode 换成 Bm 或 Bu" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For distant or small screens, switch Mode in the page menu to Bm or Bu"
+          }
+        }
+      }
+    },
     "跳过" : {
       "localizations" : {
         "en" : {

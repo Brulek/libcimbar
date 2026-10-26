@@ -34,6 +34,8 @@ struct SenderHelpSheet: View {
                     Label("靠近些，让动画码占满大部分取景框", systemImage: "arrow.up.left.and.arrow.down.right")
                     Label("调亮发送端屏幕，避开灯光反光", systemImage: "sun.max")
                     Label("在网页菜单里调低 Framerate", systemImage: "speedometer")
+                    // 自测里画面模糊、偏远时 Bm/Bu 仍能收完而 B 不行；萤传自动识别，换了也不用改设置
+                    Label("距离远或屏幕小时，把网页菜单里的 Mode 换成 Bm 或 Bu", systemImage: "square.grid.2x2")
                 }
                 .font(.subheadline)
             }
