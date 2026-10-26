@@ -69,7 +69,7 @@ targets:
       - sdk: libz.tbd
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.cimbar.CimbarTransfer
+        PRODUCT_BUNDLE_IDENTIFIER: com.brulek.lumen
         DEVELOPMENT_TEAM: DF24DNZFWX
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: Support/Info.plist

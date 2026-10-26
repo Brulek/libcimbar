@@ -725,7 +725,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.cimbar.CimbarTransfer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brulek.lumen;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "App/CimbarTransfer-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -776,7 +776,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.cimbar.CimbarTransfer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.brulek.lumen;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "App/CimbarTransfer-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
