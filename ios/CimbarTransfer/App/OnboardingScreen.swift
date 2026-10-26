@@ -79,7 +79,7 @@ struct OnboardingScreen: View {
             )
             RadialGradient(
                 colors: [Brand.glow.opacity(0.22), .clear],
-                center: UnitPoint(x: 0.5, y: 0.18),
+                center: UnitPoint(x: 0.5, y: 0.31),
                 startRadius: 10,
                 endRadius: 320
             )
@@ -212,21 +212,23 @@ private struct OnboardingPageView: View {
     @Binding var confidentialAcknowledged: Bool
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 32) {
-                hero
-                content
-                if page.role == .howToReceive {
-                    senderLink
+        // 内容放不满时上下居中（iPad、短页面），放不下时可滚动（大字号）
+        GeometryReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 32) {
+                    hero
+                    content
+                    if page.role == .howToReceive {
+                        senderLink
+                    }
+                    if page.role == .ready {
+                        confirmationToggle
+                    }
                 }
-                if page.role == .ready {
-                    confirmationToggle
-                }
-                Spacer(minLength: 16)
+                .padding(.vertical, 24)
+                .frame(maxWidth: 520)
+                .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.85)
             }
-            .padding(.vertical, 24)
-            .frame(maxWidth: 520)
-            .frame(maxWidth: .infinity)
         }
     }
 
