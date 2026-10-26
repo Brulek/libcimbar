@@ -28,6 +28,11 @@ with zipfile.ZipFile('comment.zip', 'w') as z:
     z.writestr('a.txt', 'a')
     z.comment = b'c' * 60000
 open('bad.zip', 'wb').write(b'not a zip at all' * 10)
+# 不压缩（存储）的条目：zip 和 docx 各一个
+with zipfile.ZipFile('stored.zip', 'w', zipfile.ZIP_STORED) as z:
+    z.writestr('folder/note.txt', '存储的条目\n')
+with zipfile.ZipFile('stored.docx', 'w', zipfile.ZIP_STORED) as z:
+    z.writestr('word/document.xml', '<w:document><w:body><w:p><w:r><w:t>不压缩的 Word</w:t></w:r></w:p></w:body></w:document>')
 with zipfile.ZipFile('book.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('xl/sharedStrings.xml', '<sst><si><t>客户名称</t></si><si><r><t xml:space="preserve">北京 </t></r>'
                '<r><t>分行</t></r></si><si><t>&#x4E2D;文&amp;符号</t></si></sst>')

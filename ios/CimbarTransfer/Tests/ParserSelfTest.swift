@@ -33,6 +33,16 @@ enum ParserSelfTest {
         check("long comment", ZipListing.read(file("comment.zip"))?.fileCount == 1, "")
         check("not a zip", ZipListing.read(file("bad.zip")) == nil, "")
 
+        let storedEntry = ZipArchive.entries(of: file("stored.zip"))?.first { $0.name == "folder/note.txt" }
+        let storedData = storedEntry.flatMap { ZipArchive.data(of: $0, in: file("stored.zip"), maxSize: 1024) }
+        check("stored entry", storedEntry?.method == 0 && storedData.map { String(decoding: $0, as: UTF8.self) } == "存储的条目\n",
+              "\(String(describing: storedEntry?.method))")
+        check("stored docx", OfficeText.read(file("stored.docx")) == "不压缩的 Word", "")
+        let deflatedEntry = ZipArchive.entries(of: file("mac.zip"))?.first { $0.name.hasSuffix("数据.csv") }
+        let deflatedData = deflatedEntry.flatMap { ZipArchive.data(of: $0, in: file("mac.zip"), maxSize: 1 << 20) }
+        check("deflated entry", deflatedEntry?.method == 8 && deflatedData?.count == 10000, "\(String(describing: deflatedData?.count))")
+        check("size cap", deflatedEntry.flatMap { ZipArchive.data(of: $0, in: file("mac.zip"), maxSize: 100) } == nil, "")
+
         let docx = OfficeText.read(file("doc.docx")) ?? ""
         check("docx", docx.contains("A&B 公司 <重点>") && docx.contains("Second paragraph \"quoted\"."), docx.debugDescription)
 

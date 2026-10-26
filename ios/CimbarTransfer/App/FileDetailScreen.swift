@@ -198,6 +198,9 @@ struct FileDetailScreen: View {
         .task(id: file.fileName) {
             mediaDetail = await MediaDetail.load(for: file.url)
         }
+        .onDisappear {
+            if zipListing != nil { ZipListing.cleanUpPreviews() }
+        }
         .task(id: file.fileName) {
             guard file.fileExtension.lowercased() == "zip" else {
                 zipListing = nil
@@ -211,7 +214,7 @@ struct FileDetailScreen: View {
                 webLink = nil
                 textSnippet = nil
                 // Word / PowerPoint / Excel：开头几段文字也直接给看
-                if ["docx", "pptx", "xlsx"].contains(file.fileExtension.lowercased()),
+                if SearchableText.isOfficeDocument(file.fileExtension),
                    SearchableText.canIndexDocument(fileExtension: file.fileExtension, size: file.fileSize) {
                     let url = file.url
                     textSnippet = await Task.detached(priority: .userInitiated) {
@@ -562,6 +565,14 @@ struct MediaDetail: Equatable {
 
 /// 简介页里点开 zip 中的单个文件（解出来预览，不用先存到「文件」解压）
 extension ZipListing {
+    private static var previewDirectory: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("ZipPreview", isDirectory: true)
+    }
+
+    static func cleanUpPreviews() {
+        try? FileManager.default.removeItem(at: previewDirectory)
+    }
+
     /// 简介页上能点开预览的：类型预览得了、没加密、解出来不太大
     static let maxPreviewBytes: UInt64 = 50 * 1024 * 1024
 
@@ -575,9 +586,8 @@ extension ZipListing {
     static func extractForPreview(_ entry: ZipArchive.Entry, from url: URL) -> URL? {
         guard canPreview(entry),
               let data = ZipArchive.data(of: entry, in: url, maxSize: Int(maxPreviewBytes)) else { return nil }
-        let base = FileManager.default.temporaryDirectory.appendingPathComponent("ZipPreview", isDirectory: true)
-        try? FileManager.default.removeItem(at: base)
-        let folder = base.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        // 每次解到新的子目录：上一个预览可能还没关；简介页关掉时整个目录一起清（cleanUpPreviews）
+        let folder = previewDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let name = ReceivedFileStorage.sanitizedFilename((entry.name as NSString).lastPathComponent)
         let destination = folder.appendingPathComponent(name)
         do {

@@ -9,13 +9,18 @@ enum SearchableText {
     static let maxPDFPages = 20
     static let maxPDFBytes: Int64 = 20 * 1024 * 1024
 
+    /// Word / PowerPoint / Excel：读得出文字（见 OfficeText）
+    static let officeExtensions: Set<String> = ["docx", "pptx", "xlsx"]
+
+    static func isOfficeDocument(_ fileExtension: String) -> Bool {
+        officeExtensions.contains(fileExtension.lowercased())
+    }
+
     /// 小文本以外能按内容搜的：PDF、Office 文档（有大小上限）和 zip（只读末尾的文件名列表，多大都行）
     static func canIndexDocument(fileExtension: String, size: Int64) -> Bool {
-        switch fileExtension.lowercased() {
-        case "pdf", "docx", "pptx", "xlsx": return size > 0 && size <= maxPDFBytes
-        case "zip": return size > 0
-        default: return false
-        }
+        let ext = fileExtension.lowercased()
+        if ext == "zip" { return size > 0 }
+        return (ext == "pdf" || isOfficeDocument(ext)) && size > 0 && size <= maxPDFBytes
     }
 
     /// 后台调用
@@ -26,7 +31,7 @@ enum SearchableText {
         case "zip":
             // 一行一个文件路径，命中时结果里显示的就是包里的那个文件
             return ZipListing.read(url, maxNames: 5_000)?.names.joined(separator: "\n")
-        case "docx", "pptx", "xlsx":
+        case let ext where isOfficeDocument(ext):
             return OfficeText.read(url).map { String($0.prefix(maxCharacters)) }
         default:
             break

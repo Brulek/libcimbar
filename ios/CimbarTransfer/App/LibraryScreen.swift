@@ -145,6 +145,8 @@ struct LibraryScreen: View {
                     onShare: { onShareFiles([$0]) },
                     onPreview: { onPreviewFiles([$0], 0) }
                 )
+                // 已经开着一个文件的简介时又要求打开另一个（扫码页点了压缩包）：换成新的页面，不沿用旧的状态
+                .id(target.id)
             }
         }
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
@@ -543,8 +545,8 @@ struct LibraryScreen: View {
         guard let name = detailRequest?.wrappedValue,
               let file = store.cachedFiles.first(where: { $0.fileName == name }) else { return }
         detailRequest?.wrappedValue = nil
+        // 多选时的底栏不该带进简介页；搜索词留着，回来还是原来的结果
         isSelecting = false
-        searchText = ""
         showDetail(file)
     }
 
