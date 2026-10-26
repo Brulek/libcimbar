@@ -19,12 +19,12 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.1</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>3</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
-	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>需要使用相机扫描 Cimbar 发送端画面以接收文件。该权限只在「扫码」页激活时使用，不会上传任何画面到服务器。</string>
@@ -35,6 +35,8 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
@@ -42,6 +44,8 @@
 		<key>UIImageName</key>
 		<string>BrandMark</string>
 	</dict>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -51,9 +55,5 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>UIRequiresFullScreen</key>
-	<true/>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 </dict>
 </plist>
