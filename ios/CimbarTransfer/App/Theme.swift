@@ -24,22 +24,28 @@ extension Brand {
 /// 琥珀实心主按钮，整宽
 struct BrandPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.colorScheme) private var colorScheme
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            // 不可点时系统会把强调色压成灰色，深色字叠上去几乎看不见：改成浅色字 + 淡白底
-            .foregroundStyle(isEnabled ? AnyShapeStyle(Brand.ink) : AnyShapeStyle(Color.white.opacity(0.45)))
+            // 不可点时系统会把强调色压成灰色，深色字叠上去几乎看不见：改成灰字 + 淡底（深浅背景各一套）
+            .foregroundStyle(isEnabled ? AnyShapeStyle(Brand.ink) : AnyShapeStyle(disabledText))
             .background(
-                isEnabled ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.white.opacity(0.1)),
+                isEnabled ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(disabledFill),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .opacity(configuration.isPressed ? 0.8 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
+}
+
+private extension BrandPrimaryButtonStyle {
+    var disabledText: Color { colorScheme == .dark ? .white.opacity(0.45) : .black.opacity(0.35) }
+    var disabledFill: Color { colorScheme == .dark ? .white.opacity(0.1) : .black.opacity(0.06) }
 }
 
 extension ButtonStyle where Self == BrandPrimaryButtonStyle {
