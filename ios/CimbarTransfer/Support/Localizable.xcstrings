@@ -37,6 +37,16 @@
         }
       }
     },
+    "%lld 个" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
     "%lld 个文件 · %@" : {
       "localizations" : {
         "en" : {
@@ -55,6 +65,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld 张" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
           }
         }
       }
@@ -1161,6 +1181,16 @@
         }
       }
     },
+    "工作表" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sheets"
+          }
+        }
+      }
+    },
     "已删除 %lld 个文件" : {
       "localizations" : {
         "en" : {
@@ -1383,6 +1413,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Help"
+          }
+        }
+      }
+    },
+    "幻灯片" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slides"
           }
         }
       }
