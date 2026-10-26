@@ -208,7 +208,8 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
     if (bytes > 0) {
         _unreadableFrames = 0;
     } else if (bytes == 0) {
-        _unreadableFrames += 1;
+        // 封顶：不然对着读不出的码 30 秒后计数到 900，码移开后提示还要再挂 30 秒才消失
+        _unreadableFrames = MIN(_unreadableFrames + 1, kUnreadableFramesBeforeHint + 30);
     } else if (_unreadableFrames > 0) {
         _unreadableFrames -= 1;
     }
