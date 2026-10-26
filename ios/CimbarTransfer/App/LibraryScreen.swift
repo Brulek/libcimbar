@@ -50,10 +50,8 @@ struct LibraryScreen: View {
     @State private var searchText = ""
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""
-    @State private var deleteTarget: CachedReceivedFile?
     @State private var isSelecting: Bool = false
     @State private var selectedIDs: Set<String> = []
-    @State private var bulkDeleteConfirm = false
     @State private var saveToast: SaveToast?
     @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
@@ -130,15 +128,10 @@ struct LibraryScreen: View {
 
     var body: some View {
         content
-            .modifier(LibraryAlertsModifier(
+            .modifier(RenameAlertModifier(
                 renameTarget: $renameTarget,
                 renameText: $renameText,
-                deleteTarget: $deleteTarget,
-                bulkDeleteConfirm: $bulkDeleteConfirm,
-                selectedCount: selectedIDs.count,
-                onCommitRename: commitRename,
-                onCommitSingleDelete: commitSingleDelete,
-                onCommitBulkDelete: commitBulkDelete
+                onCommitRename: commitRename
             ))
     }
 
@@ -158,6 +151,16 @@ struct LibraryScreen: View {
             }
         }
         .animation(.spring(duration: 0.3), value: saveToast?.id)
+        .safeAreaInset(edge: .bottom) {
+            if let pending = store.pendingDeletion {
+                UndoBar(message: pending.message) {
+                    withAnimation { store.undoPendingDeletion() }
+                }
+                .id(pending.id)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(duration: 0.3), value: store.pendingDeletion?.id)
         .navigationTitle("我的文件")
         .navigationBarTitleDisplayMode(.large)
         .navigationDestination(isPresented: Binding(
@@ -236,7 +239,7 @@ struct LibraryScreen: View {
                 Spacer()
 
                 Button(role: .destructive) {
-                    bulkDeleteConfirm = true
+                    deleteSelected()
                 } label: {
                     Image(systemName: "trash")
                 }
@@ -319,7 +322,7 @@ struct LibraryScreen: View {
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             if !isSelecting {
                 Button(role: .destructive) {
-                    deleteTarget = file
+                    delete(file)
                 } label: {
                     Label("删除", systemImage: "trash")
                 }
@@ -358,7 +361,7 @@ struct LibraryScreen: View {
             } label: { Label("简介", systemImage: "info.circle") }
             Divider()
             Button(role: .destructive) {
-                deleteTarget = file
+                delete(file)
             } label: { Label("删除", systemImage: "trash") }
         })
     }
@@ -394,14 +397,19 @@ struct LibraryScreen: View {
         }
     }
 
-    private func commitSingleDelete() {
-        defer { deleteTarget = nil }
-        guard let file = deleteTarget else { return }
-        store.deleteFiles(ids: [file.id])
+    // 不再弹确认框：先从列表移走，底部给几秒「撤销」
+    private func delete(_ file: CachedReceivedFile) {
+        withAnimation {
+            store.deleteWithUndo(ids: [file.id], message: String(localized: "已删除「\(file.displayName)」"))
+        }
     }
 
-    private func commitBulkDelete() {
-        store.deleteFiles(ids: selectedIDs)
+    private func deleteSelected() {
+        let ids = selectedIDs
+        guard !ids.isEmpty else { return }
+        withAnimation {
+            store.deleteWithUndo(ids: ids, message: String(localized: "已删除 \(ids.count) 个文件"))
+        }
         endSelection()
     }
 
@@ -606,15 +614,10 @@ private struct LibraryEmptyState: View {
     }
 }
 
-private struct LibraryAlertsModifier: ViewModifier {
+private struct RenameAlertModifier: ViewModifier {
     @Binding var renameTarget: CachedReceivedFile?
     @Binding var renameText: String
-    @Binding var deleteTarget: CachedReceivedFile?
-    @Binding var bulkDeleteConfirm: Bool
-    let selectedCount: Int
     let onCommitRename: () -> Void
-    let onCommitSingleDelete: () -> Void
-    let onCommitBulkDelete: () -> Void
 
     func body(content: Content) -> some View {
         content
@@ -630,23 +633,35 @@ private struct LibraryAlertsModifier: ViewModifier {
             } message: {
                 RenameHint(fileExtension: renameTarget?.fileExtension ?? "")
             }
-            .alert("删除这个文件？", isPresented: Binding(
-                get: { deleteTarget != nil },
-                set: { if !$0 { deleteTarget = nil } }
-            )) {
-                Button("删除", role: .destructive, action: onCommitSingleDelete)
-                Button("取消", role: .cancel) { deleteTarget = nil }
-            } message: {
-                if let target = deleteTarget {
-                    Text("「\(target.displayName)」删除后无法恢复。")
-                }
-            }
-            .confirmationDialog("删除 \(selectedCount) 个文件？", isPresented: $bulkDeleteConfirm, titleVisibility: .visible) {
-                Button("删除", role: .destructive, action: onCommitBulkDelete)
-                Button("取消", role: .cancel) {}
-            } message: {
-                Text("删除后无法恢复。")
-            }
+    }
+}
+
+/// 删除后底部的「撤销」条；撤销窗口由 store 计时，这里只负责展示
+private struct UndoBar: View {
+    let message: String
+    let onUndo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "trash")
+                .foregroundStyle(.secondary)
+            Text(message)
+                .font(.subheadline)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 8)
+            Button("撤销", action: onUndo)
+                .font(.subheadline.weight(.semibold))
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
+        .frame(maxWidth: 560)
+        .accessibilityElement(children: .combine)
+        .accessibilityAction(named: Text("撤销"), onUndo)
     }
 }
 

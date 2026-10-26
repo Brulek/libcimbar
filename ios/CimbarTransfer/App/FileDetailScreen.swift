@@ -17,7 +17,6 @@ struct FileDetailScreen: View {
     @State private var copiedChecksum = false
     @State private var renamePresented = false
     @State private var renameText = ""
-    @State private var deleteConfirm = false
     @State private var photoSaveMessage: String?
     @State private var photoSaved = false
     @State private var photoSaveNeedsSettings = false
@@ -97,11 +96,17 @@ struct FileDetailScreen: View {
 
             Section {
                 Button(role: .destructive) {
-                    deleteConfirm = true
+                    // 回到列表后底部有「撤销」，这里不再二次确认
+                    store.deleteWithUndo(ids: [file.id], message: String(localized: "已删除「\(file.displayName)」"))
+                    dismiss()
                 } label: {
-                    Label("删除文件", systemImage: "trash")
+                    Label {
+                        Text("删除文件")
+                    } icon: {
+                        Image(systemName: "trash")
+                            .foregroundStyle(.red)
+                    }
                 }
-                .tint(.red)
             }
         }
         .readableListWidth()
@@ -141,15 +146,6 @@ struct FileDetailScreen: View {
             Button("好", role: .cancel) {}
         } message: {
             Text("换个名称试试")
-        }
-        .alert("删除这个文件？", isPresented: $deleteConfirm) {
-            Button("删除", role: .destructive) {
-                store.deleteFiles(ids: [file.id])
-                dismiss()
-            }
-            Button("取消", role: .cancel) {}
-        } message: {
-            Text("「\(file.displayName)」删除后无法恢复。")
         }
         .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveMessage != nil },

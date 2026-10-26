@@ -158,6 +158,8 @@ struct ContentView: View {
                 }
             case .background:
                 viewModel.stop()
+                // 撤销窗口内被切到后台：直接删掉，免得下次打开文件又「复活」
+                cacheStore.commitPendingDeletion()
             case .inactive:
                 break
             @unknown default:

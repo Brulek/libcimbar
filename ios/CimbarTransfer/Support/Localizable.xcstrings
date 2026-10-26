@@ -141,16 +141,6 @@
         }
       }
     },
-    "「%@」删除后无法恢复。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“%@” will be permanently deleted."
-          }
-        }
-      }
-    },
     "一、协议接受" : {
       "localizations" : {
         "en" : {
@@ -541,28 +531,6 @@
         }
       }
     },
-    "删除 %lld 个文件？" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld File?"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Delete %lld Files?"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "删除后无法恢复。" : {
       "localizations" : {
         "en" : {
@@ -589,16 +557,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete File"
-          }
-        }
-      }
-    },
-    "删除这个文件？" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete This File?"
           }
         }
       }
@@ -979,6 +937,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dimensions"
+          }
+        }
+      }
+    },
+    "已删除 %lld 个文件" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Deleted %lld file"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Deleted %lld files"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "已删除「%@」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted “%@”"
           }
         }
       }
@@ -1501,6 +1491,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search"
+          }
+        }
+      }
+    },
+    "撤销" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
           }
         }
       }
