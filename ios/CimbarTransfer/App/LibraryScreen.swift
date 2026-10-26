@@ -21,7 +21,7 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
         switch self {
         case .dateDescending: return "arrow.down"
         case .dateAscending:  return "arrow.up"
-        case .nameAscending:  return "textformat"
+        case .nameAscending:  return "abc"
         case .sizeDescending: return "internaldrive"
         }
     }
@@ -178,6 +178,9 @@ struct LibraryScreen: View {
         }
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
         .toolbar { toolbarContent }
+        // 多选时底部是操作栏；iOS 26 的悬浮标签栏会和它挤在同一行、挡住中间的按钮，
+        // 和「照片」「文件」一样选择期间收起标签栏
+        .toolbar(isSelecting ? .hidden : .automatic, for: .tabBar)
         .refreshable {
             store.refresh(cleanup: false)
         }
@@ -231,11 +234,22 @@ struct LibraryScreen: View {
                 .accessibilityLabel("分享所选文件")
                 .disabled(selectedIDs.isEmpty)
 
+                if selectedFiles.contains(where: { PhotoLibrarySaver.canSave(extension: $0.fileExtension) }) {
+                    Button {
+                        Task { await saveSelectedToPhotos() }
+                    } label: {
+                        Image(systemName: "photo.on.rectangle")
+                    }
+                    .accessibilityLabel("把所选照片和视频存到相册")
+                }
+
                 Spacer()
                 Text(selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
+                    .lineLimit(1)
+                    .fixedSize()
                 Spacer()
 
                 Button(role: .destructive) {
@@ -418,6 +432,32 @@ struct LibraryScreen: View {
             store.deleteWithUndo(ids: ids, message: String(localized: "已删除 \(ids.count) 个文件"))
         }
         endSelection()
+    }
+
+    /// 多选里只存图片/视频，其余类型跳过；一次权限申请，逐个写入
+    @MainActor
+    private func saveSelectedToPhotos() async {
+        let media = selectedFiles.filter { PhotoLibrarySaver.canSave(extension: $0.fileExtension) }
+        var saved = 0
+        for file in media {
+            do {
+                try await PhotoLibrarySaver.save(fileURL: file.url)
+                saved += 1
+            } catch {
+                if PhotoLibrarySaver.isPermissionDenied(error) {
+                    photoPermissionAlert = true
+                    return
+                }
+            }
+        }
+        let failed = media.count - saved
+        presentToast(SaveToast(
+            message: failed == 0
+                ? String(localized: "已存 \(saved) 个到相册")
+                : String(localized: "已存 \(saved) 个，\(failed) 个没能存入"),
+            style: failed == 0 ? .success : .failure
+        ))
+        if failed == 0 { endSelection() }
     }
 
     @MainActor

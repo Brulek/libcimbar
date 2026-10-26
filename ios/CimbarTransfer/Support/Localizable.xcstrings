@@ -1033,6 +1033,38 @@
         }
       }
     },
+    "已存 %lld 个到相册" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Saved %lld item to Photos"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Saved %lld items to Photos"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "已存 %lld 个，%lld 个没能存入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved %1$lld, %2$lld couldn't be saved"
+          }
+        }
+      }
+    },
     "已存入" : {
       "localizations" : {
         "en" : {
@@ -1411,6 +1443,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fit the animated code inside the viewfinder"
+          }
+        }
+      }
+    },
+    "把所选照片和视频存到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Selected Photos and Videos"
           }
         }
       }
