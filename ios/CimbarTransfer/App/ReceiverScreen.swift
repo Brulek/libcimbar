@@ -48,21 +48,20 @@ struct ReceiverScreen: View {
                 .accessibilityElement(children: .ignore)
                 #if DEBUG
                 .overlay {
-                    // 帧回放：把正在喂给解码器的那一帧画进取景框，模拟拍到的屏幕
-                    // （与取景框同样的上下预留，码才落在框正中）
+                    // 帧回放：把正在喂给解码器的那一帧画进取景框，模拟拍到的屏幕。
+                    // 和 ScanFrameOverlay 同一套算法，码比取景框略小、落在框正中（小屏上框更小）
                     if let frame = viewModel.replayFrame {
-                        ZStack {
-                            Color.black.ignoresSafeArea()
+                        GeometryReader { proxy in
+                            let available = max(proxy.size.height - topReservedHeight - bottomReservedHeight, 200)
+                            let side = min(proxy.size.width - 32, available, 640) * 0.9
                             Image(uiImage: frame)
                                 .resizable()
                                 .interpolation(.medium)
                                 .scaledToFit()
-                                // 取景框最大 640pt（iPad），码比框略小
-                                .frame(maxWidth: 580, maxHeight: 580)
-                                .padding(.horizontal, 40)
-                                .padding(.top, topReservedHeight)
-                                .padding(.bottom, bottomReservedHeight)
+                                .frame(width: side, height: side)
+                                .position(x: proxy.size.width / 2, y: topReservedHeight + available / 2)
                         }
+                        .background(Color.black)
                         .allowsHitTesting(false)
                     }
                 }
