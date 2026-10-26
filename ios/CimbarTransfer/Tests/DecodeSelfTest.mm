@@ -111,6 +111,7 @@ struct Result {
     bool contentMatches = false;
     int framesFed = 0;
     int detectedMode = 0;
+    double msPerFrame = 0;
 };
 
 Result runDecode(int senderMode, int receiverMode, const std::string &payload, NSString *filename) {
@@ -136,6 +137,7 @@ Result runDecode(int senderMode, int receiverMode, const std::string &payload, N
                 decoder.decodeMode = receiverMode;
                 [decoder reset];
             }
+            const CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
             for (size_t i = 0; i < buffers.size() * 2 && !result.received; ++i) {
                 NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:buffers[i % buffers.size()]];
                 result.framesFed = static_cast<int>(i + 1);
@@ -150,6 +152,7 @@ Result runDecode(int senderMode, int receiverMode, const std::string &payload, N
                     [[NSFileManager defaultManager] removeItemAtURL:output.fileURL error:nil];
                 }
             }
+            result.msPerFrame = (CFAbsoluteTimeGetCurrent() - start) * 1000.0 / std::max(result.framesFed, 1);
         }
     });
     worker.join();
@@ -279,8 +282,8 @@ int main(int argc, char **argv) {
             if (!ok) {
                 ++failures;
             }
-            printf("%s  %-12s received=%d match=%d detected=%d frames=%d\n",
-                   ok ? "PASS" : "FAIL", c.name, r.received, r.contentMatches, r.detectedMode, r.framesFed);
+            printf("%s  %-12s received=%d match=%d detected=%d frames=%d  %.1f ms/frame\n",
+                   ok ? "PASS" : "FAIL", c.name, r.received, r.contentMatches, r.detectedMode, r.framesFed, r.msPerFrame);
         }
         if (!runRepeatTest()) {
             ++failures;
