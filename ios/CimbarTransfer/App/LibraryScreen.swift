@@ -413,6 +413,9 @@ struct LibraryScreen: View {
             )
         }
         .buttonStyle(.plain)
+        // iPad 分栏：右边正在看的那个文件在列表里标出来
+        .listRowBackground(isOpenInSplit(file) ? Color.accentColor.opacity(0.16) : nil)
+        .accessibilityAddTraits(isOpenInSplit(file) ? .isSelected : [])
         .accessibilityHint(isSelecting ? "轻点切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "轻点查看简介" : "轻点预览")
         .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -485,6 +488,10 @@ struct LibraryScreen: View {
                 delete(file)
             } label: { Label("删除", systemImage: "trash") }
         })
+    }
+
+    private func isOpenInSplit(_ file: CachedReceivedFile) -> Bool {
+        !isSelecting && splitDetail?.wrappedValue?.id == file.id
     }
 
     private func showDetail(_ file: CachedReceivedFile) {
