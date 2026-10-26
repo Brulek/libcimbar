@@ -70,6 +70,9 @@ struct LibraryScreen: View {
             base = store.cachedFiles.filter { file in
                 file.displayName.localizedCaseInsensitiveContains(query)
                     || file.fileName.localizedCaseInsensitiveContains(query)
+                    // 改过名的文件也能按发送端的原名搜到
+                    || (ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.originalName
+                        .localizedCaseInsensitiveContains(query) ?? false)
             }
         }
         return sorted(base)
