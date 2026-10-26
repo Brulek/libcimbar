@@ -13,12 +13,19 @@ struct RevealedFile: Equatable {
     let url: URL
     let cacheKey: String
     let isText: Bool
+    /// 小文本开头的文字：取景框里显示它，VoiceOver 也读它（看不到画面的人才知道收到了什么）。
+    /// 编码认不出来时为 nil
+    let textSnippet: String?
 
     init?(url: URL) {
         let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
         let size = (attrs?[.size] as? NSNumber)?.int64Value ?? 0
         isText = TextClipboard.canCopy(fileExtension: url.pathExtension, size: size)
         guard isText || ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
+        // 最多 512 KB，收完一个文件才读一次
+        textSnippet = isText
+            ? TextClipboard.readText(url).map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500)) }
+            : nil
         let modified = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
         self.url = url
         self.cacheKey = "reveal-\(url.lastPathComponent)-\(modified)"
@@ -74,7 +81,7 @@ struct ScanFrameOverlay: View {
                     } label: {
                         Group {
                             if reveal.isText {
-                                TextRevealPage(url: reveal.url, side: side)
+                                TextRevealPage(snippet: reveal.textSnippet, fileExtension: reveal.url.pathExtension, side: side)
                             } else {
                                 FileThumbnailView(
                                     url: reveal.url,
@@ -94,6 +101,7 @@ struct ScanFrameOverlay: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("预览 \(reveal.url.lastPathComponent)")
+                    .accessibilityValue(Text(verbatim: reveal.textSnippet.map { String($0.prefix(300)) } ?? ""))
                     .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
@@ -298,12 +306,10 @@ private struct Firefly: View {
 
 /// 收到的小文本把开头几段直接摊在取景框里：链接、口令、一段话，不用点开就能看到
 private struct TextRevealPage: View {
-    let url: URL
+    let snippet: String?
+    let fileExtension: String
     /// 取景框边长：字号随框缩放，iPad 的大框里不至于是一角小字
     let side: CGFloat
-    @State private var snippet: String?
-    /// 编码认不出来时退回类型图标，不留一张空白页
-    @State private var unreadable = false
 
     private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
 
@@ -312,7 +318,7 @@ private struct TextRevealPage: View {
     }
 
     private var font: Font {
-        Self.codeExtensions.contains(url.pathExtension.lowercased())
+        Self.codeExtensions.contains(fileExtension.lowercased())
             ? .system(size: baseSize - 2, design: .monospaced)
             : .system(size: baseSize)
     }
@@ -323,24 +329,25 @@ private struct TextRevealPage: View {
     }
 
     var body: some View {
-        if unreadable {
-            FileKindIcon(fileExtension: url.pathExtension, cornerRadius: 0)
+        if let snippet {
+            page(snippet)
         } else {
-            page
+            // 编码认不出来时退回类型图标，不留一张空白页
+            FileKindIcon(fileExtension: fileExtension, cornerRadius: 0)
         }
     }
 
-    private var page: some View {
+    private func page(_ snippet: String) -> some View {
         Color(white: 0.97)
             .overlay {
-                if let snippet, isShortLine(snippet) {
+                if isShortLine(snippet) {
                     Text(snippet)
                         .font(.system(size: baseSize * 1.35, weight: .medium))
                         .foregroundStyle(Color(white: 0.12))
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.6)
                         .padding(side * 0.08)
-                } else if let snippet {
+                } else {
                     // 从第一行开始排，放不下的在最后一行以省略号结束
                     VStack(alignment: .leading, spacing: 0) {
                         Text(snippet)
@@ -353,15 +360,6 @@ private struct TextRevealPage: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(side * 0.06)
                 }
-            }
-            .task(id: url) {
-                let url = url
-                snippet = await Task.detached(priority: .userInitiated) {
-                    TextClipboard.readText(url).map {
-                        String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500))
-                    }
-                }.value
-                unreadable = snippet == nil
             }
     }
 }
