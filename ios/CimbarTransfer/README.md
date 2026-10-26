@@ -40,7 +40,7 @@
 - 帮助：怎么发送文件、查看引导；关于页里是隐私政策、用户协议、开源许可
 
 **其他**
-- 「快捷指令」/ Spotlight / Siri / 操作按钮：「扫码接收文件」直接打开扫码页（Siri 短语在 `Support/*.lproj/AppShortcuts.strings`）
+- 「快捷指令」/ Spotlight / Siri / 操作按钮：「扫码接收文件」直接打开扫码页；「最近收到的文件」把最新文件交给快捷指令继续处理（Siri 短语在 `Support/*.lproj/AppShortcuts.strings`）
 - 品牌琥珀色主题，iOS 26 起相机浮层用液态玻璃；iPad 上（iOS 17+）列表限制在可读宽度
 
 ## 截图

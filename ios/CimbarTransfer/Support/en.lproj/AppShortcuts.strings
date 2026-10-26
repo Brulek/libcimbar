@@ -1,2 +1,3 @@
 "用${applicationName}扫码" = "Scan with ${applicationName}";
 "打开${applicationName}扫码" = "Open the ${applicationName} scanner";
+"${applicationName}最近收到的文件" = "Latest file from ${applicationName}";

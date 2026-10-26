@@ -1807,6 +1807,16 @@
         }
       }
     },
+    "最近收到的文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Latest Received File"
+          }
+        }
+      }
+    },
     "有 %lld 个文件删除失败，请稍后重试" : {
       "localizations" : {
         "en" : {
@@ -2689,6 +2699,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Previous 7 Days"
+          }
+        }
+      }
+    },
+    "返回萤传最近收到的一个文件，可在快捷指令里继续处理。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Returns the most recent file Lumen received so a shortcut can pass it on."
           }
         }
       }
