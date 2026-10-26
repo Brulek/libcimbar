@@ -197,6 +197,8 @@ struct ContentView: View {
                 if selectedTab == .scan {
                     viewModel.start()
                 }
+                // 收到的文件在「文件」App 里也看得到：在那边删了、改名或拖进来新文件，回来时列表要跟上
+                cacheStore.refresh(cleanup: false)
             case .background:
                 viewModel.stop()
                 // 撤销窗口内被切到后台：直接删掉，免得下次打开文件又「复活」
