@@ -337,10 +337,9 @@ private struct CompletedTransferCard: View {
             fileSize = info.size
             thumbnailKey = "completed-\(fileURL.lastPathComponent)-\(info.modified)"
             photoSaving = false
-            photoSaved = PhotoLibrarySaver.autoSavedPaths.contains(fileURL.path)
+            photoSaved = PhotoLibrarySaver.savedPaths.contains(fileURL.path)
             photoSaveError = nil
             if AppPreferences.shared.autoSaveToPhotos, canSaveToPhotos, !isDuplicate, !photoSaved {
-                PhotoLibrarySaver.autoSavedPaths.insert(fileURL.path)
                 await saveToPhotos()
             }
         }
@@ -361,10 +360,13 @@ private struct CompletedTransferCard: View {
     private func saveToPhotos() async {
         photoSaving = true
         defer { photoSaving = false }
+        // 先登记再存：存的过程中卡片若被重建，不会再发起第二次
+        PhotoLibrarySaver.savedPaths.insert(fileURL.path)
         do {
             try await PhotoLibrarySaver.save(fileURL: fileURL)
             withAnimation { photoSaved = true }
         } catch {
+            PhotoLibrarySaver.savedPaths.remove(fileURL.path)
             photoSaveNeedsSettings = PhotoLibrarySaver.isPermissionDenied(error)
             photoSaveError = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }

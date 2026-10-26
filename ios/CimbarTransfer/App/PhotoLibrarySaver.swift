@@ -36,8 +36,9 @@ enum PhotoLibrarySaver {
         return supportedExtensions.contains(ext) || supportedVideoExtensions.contains(ext)
     }
 
-    /// 本次运行里已自动存过的文件：完成卡片每次出现都会跑 .task，不能重复存
-    @MainActor static var autoSavedPaths: Set<String> = []
+    /// 本次运行里已存进相册（或正在存）的文件：完成卡片每次出现都会跑 .task，
+    /// 用它避免自动存第二遍，也让卡片重新出现时还显示「已存入」
+    @MainActor static var savedPaths: Set<String> = []
 
     /// 判定错误是否为「相册写入权限被拒」——需要给用户跳系统设置的入口
     static func isPermissionDenied(_ error: Error) -> Bool {
