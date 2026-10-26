@@ -381,7 +381,9 @@ bool runNoCodeTest() {
             for (int round = 0; round < 5; ++round) {
                 for (CVPixelBufferRef buffer : buffers) {
                     NativeCimbarDecodeOutput *output = [decoder processPixelBuffer:buffer];
-                    if (output.detectedMode != 0 || output.fileURL != nil || output.progressFraction != nil) {
+                    // 没有码的画面也不能报「看到了动画码，但读不出来」
+                    if (output.detectedMode != 0 || output.fileURL != nil || output.progressFraction != nil
+                        || output.codeUnreadable) {
                         ok = false;
                     }
                 }
@@ -390,7 +392,7 @@ bool runNoCodeTest() {
     });
     worker.join();
     for (CVPixelBufferRef buffer : buffers) CVPixelBufferRelease(buffer);
-    printf("%s  no code      300 frames of noise, no lock and no file\n", ok ? "PASS" : "FAIL");
+    printf("%s  no code      300 frames of noise, no lock, no file, no \"unreadable\" hint\n", ok ? "PASS" : "FAIL");
     return ok;
 }
 

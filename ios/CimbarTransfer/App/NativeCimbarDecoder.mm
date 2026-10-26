@@ -19,6 +19,9 @@ static const NSUInteger kAutoUnlockFrames = 150;
 // 已有进度后连续这么多帧（约 3 秒）解不出数据，开始每隔几帧用别的模式试一帧：
 // 发送端中途换了模式时能跟上。试探不动喷泉流，原来的进度不受影响
 static const NSUInteger kStuckFramesBeforeProbe = 90;
+// 连续这么多帧「找到了码但一个字节都没读出来」才提示（相机 30fps 约 3 秒）。
+// 自动模式轮换时 4 个模式里有 3 个本来就读不出，正常传输里成功的那帧会把计数清零
+static const NSUInteger kUnreadableFramesBeforeHint = 90;
 
 @implementation NativeCimbarDecoder {
     std::vector<unsigned char> _scanBuffer;
@@ -38,6 +41,8 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
     BOOL _hasProgress;
     NSUInteger _stuckFrames;
     NSUInteger _probeCursor;
+    NSUInteger _unreadableFrames;
+    BOOL _reportedUnreadable;
     // 上一个收到的文件：不随 -reset 清空。点「继续接收」时发送端往往还在放同一个文件，
     // 几秒内会再收一遍；内容一致就复用已保存的文件，不再存出「xxx (1).jpg」
     uint32_t _lastFileID;
@@ -89,6 +94,8 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
     _framesWithoutData = 0;
     _hasProgress = NO;
     _stuckFrames = 0;
+    _unreadableFrames = 0;
+    _reportedUnreadable = NO;
 }
 
 - (void)latchError:(NSString *)message into:(NativeCimbarDecodeOutput *)output {
@@ -196,15 +203,28 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
         _stuckFrames = bytes > 0 ? 0 : _stuckFrames + 1;
     }
 
+    // 0 = 找到了码但没读出数据；负数 = 没找到码（-3）或参数错误。没找到码的帧慢慢抵消计数，
+    // 免得手抖一下、码短暂出框就把「一直读不出来」的判断清零
+    if (bytes > 0) {
+        _unreadableFrames = 0;
+    } else if (bytes == 0) {
+        _unreadableFrames += 1;
+    } else if (_unreadableFrames > 0) {
+        _unreadableFrames -= 1;
+    }
+    const BOOL unreadable = !_hasProgress && _unreadableFrames >= kUnreadableFramesBeforeHint;
+
     if (bytes <= 0) {
         if (self.isAutoMode && _lockedMode != 0 && !_hasProgress
             && ++_framesWithoutData > kAutoUnlockFrames) {
             _lockedMode = 0;
             _framesWithoutData = 0;
         }
-        if ((_processedFrameCount % 20) == 0) {
+        if ((_processedFrameCount % 20) == 0 || unreadable != _reportedUnreadable) {
+            _reportedUnreadable = unreadable;
             NativeCimbarDecodeOutput *idle = [NativeCimbarDecodeOutput new];
             idle.isIdle = YES;
+            idle.codeUnreadable = unreadable;
             idle.statusText = _stickyErrorText ?: NSLocalizedString(@"正在寻找动画码", nil);
             idle.hasStickyError = (_stickyErrorText != nil);
             idle.detectedMode = self.isAutoMode ? _lockedMode : 0;
@@ -217,6 +237,7 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
         _lockedMode = probingMode;
     }
     _framesWithoutData = 0;
+    _reportedUnreadable = NO; // 读出数据的输出 codeUnreadable 默认是 NO，界面据此收起提示
     _detectedFrameCount += 1;
     NativeCimbarDecodeOutput *output = [NativeCimbarDecodeOutput new];
     output.detectedFrameCount = _detectedFrameCount;

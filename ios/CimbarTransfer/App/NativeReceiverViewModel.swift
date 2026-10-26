@@ -12,6 +12,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var progressValue: Double?
     /// 最近的帧里是否识别到了码
     @Published private(set) var isTracking = false
+    /// 看得到动画码但一直读不出数据（还没开始接收时才有意义）
+    @Published private(set) var codeUnreadable = false
     @Published private(set) var remainingSeconds: Int?
     @Published private(set) var stallHint: String?
     @Published private(set) var receivedFileURL: URL?
@@ -471,6 +473,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         if detectedMode != Int(result.detectedMode) {
             detectedMode = Int(result.detectedMode)
         }
+        if codeUnreadable != result.codeUnreadable {
+            codeUnreadable = result.codeUnreadable
+        }
 
         if result.isIdle {
             // 码离开取景框：进度还在喷泉流里，界面保留最后的百分比；
@@ -663,6 +668,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.scanErrorLatched = false
             self.progressValue = nil
             self.isTracking = false
+            self.codeUnreadable = false
             self.detectedMode = 0
             self.remainingSeconds = nil
             self.stallHint = nil

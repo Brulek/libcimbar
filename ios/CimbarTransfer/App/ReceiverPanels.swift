@@ -37,6 +37,8 @@ struct ReceiverBottomPanel: View {
             } else {
                 WaitingCard(
                     cameraError: viewModel.cameraErrorText,
+                    codeUnreadable: viewModel.codeUnreadable,
+                    isManualMode: AppPreferences.shared.decodeMode != 0,
                     onShowSenderHelp: onShowSenderHelp
                 )
                 .transition(.opacity)
@@ -48,13 +50,24 @@ struct ReceiverBottomPanel: View {
         .animation(.easeInOut(duration: 0.25), value: viewModel.receivedFileURL != nil)
         .animation(.easeInOut(duration: 0.25), value: viewModel.scanErrorLatched)
         .animation(.easeInOut(duration: 0.25), value: viewModel.isIdlePaused)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.codeUnreadable)
         .animation(.easeInOut(duration: 0.25), value: viewModel.progressValue == nil)
     }
 }
 
 private struct WaitingCard: View {
     let cameraError: String?
+    var codeUnreadable = false
+    var isManualMode = false
     let onShowSenderHelp: () -> Void
+
+    private var subtitle: LocalizedStringKey {
+        guard codeUnreadable else { return "发送方用浏览器打开 cimbar.org，选好文件即可" }
+        // 手动选了模式、又一直读不出来，最可能是和网页不一致
+        if isManualMode { return "解码模式和网页上的 Mode 不一致时读不出来，改成「自动识别」最省事" }
+        // 很小的文件（比如只有一个网址）发送端会补一大片空白，现在的版本读不出来
+        return "靠近些、调亮发送端屏幕。只发一个网址这类很短的文字时可能收不到，和别的文件打包再发"
+    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -63,11 +76,14 @@ private struct WaitingCard: View {
                     Label(cameraError, systemImage: "exclamationmark.triangle.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.orange)
+                } else if codeUnreadable {
+                    Text("看到了动画码，但读不出来")
+                        .font(.headline)
                 } else {
                     Text("对准屏幕上的动画码")
                         .font(.headline)
                 }
-                Text("发送方用浏览器打开 cimbar.org，选好文件即可")
+                Text(subtitle)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

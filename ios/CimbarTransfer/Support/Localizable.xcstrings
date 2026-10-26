@@ -2453,6 +2453,16 @@
         }
       }
     },
+    "看到了动画码，但读不出来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code in view, but it can't be read"
+          }
+        }
+      }
+    },
     "第 %lld 页，共 %lld 页" : {
       "localizations" : {
         "en" : {
@@ -2699,6 +2709,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Decode Mode"
+          }
+        }
+      }
+    },
+    "解码模式和网页上的 Mode 不一致时读不出来，改成「自动识别」最省事" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This happens when Decode Mode doesn't match the page's Mode. Setting it to Automatic is easiest."
           }
         }
       }
@@ -3039,6 +3059,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Camera Access Needed"
+          }
+        }
+      }
+    },
+    "靠近些、调亮发送端屏幕。只发一个网址这类很短的文字时可能收不到，和别的文件打包再发" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move closer or brighten the sender's screen. Very short text, like a single link, may not come through; zip it with another file and send again."
           }
         }
       }

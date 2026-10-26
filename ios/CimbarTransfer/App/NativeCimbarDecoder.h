@@ -21,6 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int detectedMode;
 // 与上一个收到的文件完全相同，fileURL 指向已保存的那份，没有另存
 @property (nonatomic, assign) BOOL isDuplicate;
+// 最近一段时间里一直看得到动画码，却读不出数据（码太小、模式不对、太糊/反光）。
+// 只在还没有进度时有意义；状态变化时会单独输出一次
+@property (nonatomic, assign) BOOL codeUnreadable;
 @end
 
 @interface NativeCimbarDecoder : NSObject
