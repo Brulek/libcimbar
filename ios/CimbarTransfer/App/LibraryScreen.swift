@@ -390,8 +390,8 @@ struct LibraryScreen: View {
         Button {
             if isSelecting {
                 toggleSelection(for: file.id)
-            } else if FilesExport.isArchive(file.fileExtension) {
-                // 压缩包预览不了，打开简介页，那里能「存到文件」再解压
+            } else if !FilesExport.hasUsefulPreview(file.fileExtension) {
+                // 预览不了的类型（压缩包等）打开简介页，那里能「存到文件」再解压/安装
                 detailTarget = file
             } else if let index = files.firstIndex(of: file) {
                 // 传入当前列表，预览里可以左右滑动看相邻文件
@@ -408,7 +408,7 @@ struct LibraryScreen: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityHint(isSelecting ? "轻点切换选中" : FilesExport.isArchive(file.fileExtension) ? "轻点查看简介" : "轻点预览")
+        .accessibilityHint(isSelecting ? "轻点切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "轻点查看简介" : "轻点预览")
         .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             if !isSelecting {

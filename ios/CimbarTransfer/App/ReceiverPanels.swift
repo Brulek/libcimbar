@@ -230,9 +230,9 @@ private struct CompletedTransferCard: View {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
     }
 
-    /// 压缩包的系统预览只有一个图标和大小，点进去什么也做不了
-    private var isArchive: Bool {
-        FilesExport.isArchive(fileURL.pathExtension)
+    /// 压缩包、安装包、未知格式的系统预览只有一个图标和大小，点进去什么也做不了
+    private var hasNoPreview: Bool {
+        !FilesExport.hasUsefulPreview(fileURL.pathExtension)
     }
 
     private var detailText: String {
@@ -261,7 +261,7 @@ private struct CompletedTransferCard: View {
             // 英文按钮上只放得下 Open，由 Safari 图标表示打开的是网页；读屏读全称和网站
             .accessibilityLabel("打开网址")
             .accessibilityHint(Text(verbatim: webLink.host ?? ""))
-        } else if !isArchive {
+        } else if !hasNoPreview {
             Button(action: onPreview) {
                 Label("预览", systemImage: "eye")
                     .frame(maxWidth: .infinity, minHeight: 34)
@@ -354,8 +354,8 @@ private struct CompletedTransferCard: View {
             .buttonStyle(.plain)
             .accessibilityLabel("已收到 \(fileURL.lastPathComponent)")
             .accessibilityValue(detailText)
-            .accessibilityHint(isArchive ? Text(verbatim: "") : Text("轻点预览"))
-            .allowsHitTesting(!isArchive)
+            .accessibilityHint(hasNoPreview ? Text(verbatim: "") : Text("轻点预览"))
+            .allowsHitTesting(!hasNoPreview)
 
             // 大字号下三个按钮并排放不下，改为竖排，不截断文字
             ViewThatFits(in: .horizontal) {

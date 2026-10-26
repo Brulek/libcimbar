@@ -197,9 +197,9 @@ struct FileDetailScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("预览")
-            // 压缩包没有可看的预览：图标只作展示，不变灰
-            .allowsHitTesting(!FilesExport.isArchive(file.fileExtension))
-            .accessibilityHidden(FilesExport.isArchive(file.fileExtension))
+            // 预览不了的类型（压缩包等）：图标只作展示，不变灰
+            .allowsHitTesting(FilesExport.hasUsefulPreview(file.fileExtension))
+            .accessibilityHidden(!FilesExport.hasUsefulPreview(file.fileExtension))
 
             Text(file.displayName)
                 .font(.title3.weight(.semibold))
@@ -230,7 +230,7 @@ struct FileDetailScreen: View {
                 }
                 .accessibilityLabel("打开网址")
                 .accessibilityHint(Text(verbatim: webLink.host ?? ""))
-            } else if !FilesExport.isArchive(file.fileExtension) {
+            } else if FilesExport.hasUsefulPreview(file.fileExtension) {
                 DetailActionButton(title: "预览", systemImage: "eye") {
                     onPreview(file.url)
                 }
