@@ -17,6 +17,16 @@
         }
       }
     },
+    "%@（标注）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (Marked Up)"
+          }
+        }
+      }
+    },
     "%lld" : {
       "localizations" : {
         "en" : {

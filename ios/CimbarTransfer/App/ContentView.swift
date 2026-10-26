@@ -212,7 +212,9 @@ struct ContentView: View {
         .sheet(item: $previewRequest, onDismiss: {
             resumeScanIfAppropriate()
         }) { request in
-            QuickLookPreview(fileURLs: request.urls, initialIndex: request.index)
+            QuickLookPreview(fileURLs: request.urls, initialIndex: request.index) { _ in
+                cacheStore.refresh(cleanup: false)
+            }
                 .ignoresSafeArea()
         }
     }
