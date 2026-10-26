@@ -255,7 +255,7 @@ private struct CompletedTransferCard: View {
         var parts: [String] = []
         if let fileSize { parts.append(fileSize) }
         if isDuplicate {
-            parts.append(String(localized: "刚才已收到，没有重复保存"))
+            parts.append(String(localized: "已经收到过，没有重复保存"))
         } else if let duration, duration >= 1 {
             let formatted = Duration.seconds(duration.rounded())
                 .formatted(.units(allowed: [.minutes, .seconds], width: .abbreviated))

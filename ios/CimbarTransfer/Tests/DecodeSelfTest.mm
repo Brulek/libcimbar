@@ -247,6 +247,35 @@ bool runRepeatTest() {
     return ok;
 }
 
+// 重开 App（换一个解码器）后再收同一个文件：收件目录里已有内容相同的，复用它，不另存「 (1)」
+bool runStoredRepeatTest() {
+    const std::string payload = makePayload(12 * 1024);
+    std::vector<CVPixelBufferRef> frames = cameraFrames(encodeFrames(68, "stored.bin", payload, 60, 92));
+
+    bool ok = false;
+    std::thread worker([&] {
+        @autoreleasepool {
+            NativeCimbarDecodeOutput *a = feedUntilFile([NativeCimbarDecoder new], frames);
+            NativeCimbarDecodeOutput *b = feedUntilFile([NativeCimbarDecoder new], frames);
+            NSArray<NSString *> *copies = [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:
+                a.fileURL.URLByDeletingLastPathComponent.path error:nil]
+                filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF BEGINSWITH 'stored'"]];
+            ok = a != nil && b != nil && !a.isDuplicate && b.isDuplicate
+                && [a.fileURL isEqual:b.fileURL] && copies.count == 1;
+            printf("%s  stored-repeat first=%s second=%s (dup=%d) copies=%lu\n", ok ? "PASS" : "FAIL",
+                   a.fileURL.lastPathComponent.UTF8String ?: "-",
+                   b.fileURL.lastPathComponent.UTF8String ?: "-", b.isDuplicate, (unsigned long)copies.count);
+            for (NSString *name in copies) {
+                [[NSFileManager defaultManager] removeItemAtURL:[a.fileURL.URLByDeletingLastPathComponent
+                    URLByAppendingPathComponent:name] error:nil];
+            }
+        }
+    });
+    worker.join();
+    for (CVPixelBufferRef buffer : frames) CVPixelBufferRelease(buffer);
+    return ok;
+}
+
 // 发送端给的文件名是外部数据：路径分隔符、空名、点开头、换行、超长名都要落在收件目录里且名字可用
 bool runFilenameTest() {
     std::string longName;
@@ -567,6 +596,9 @@ int main(int argc, char **argv) {
         }
         gDegrade = false;
         if (!runRepeatTest()) {
+            ++failures;
+        }
+        if (!runStoredRepeatTest()) {
             ++failures;
         }
         if (!runFilenameTest()) {

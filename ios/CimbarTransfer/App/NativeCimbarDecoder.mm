@@ -318,15 +318,32 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
 }
 
 // 同一次传输（喷泉 ID 相同）且内容逐字节一致时，删掉刚写的临时文件，交回上次保存的文件
+// 换了解码器（重开 App、中间收过别的文件）后再收到同一个文件：收件目录里已有同名、内容一样的就不再另存一份
+- (BOOL)reuseStoredFileIfSame:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
+    NSURL *stored = [ReceivedFileStorage storedFileMatchingContentsOf:tmpURL filename:filename];
+    if (stored == nil) {
+        return NO;
+    }
+    _lastFileID = fileID;
+    _lastFileURL = stored;
+    [self emitDuplicateOf:fileID tmpURL:tmpURL originalName:filename into:output];
+    return YES;
+}
+
 - (BOOL)reuseLastFileIfSame:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
     if (_lastFileURL == nil || fileID != _lastFileID) {
         return NO;
     }
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    if (![fileManager contentsEqualAtPath:tmpURL.path andPath:_lastFileURL.path]) {
+    if (![[NSFileManager defaultManager] contentsEqualAtPath:tmpURL.path andPath:_lastFileURL.path]) {
         return NO;
     }
-    [fileManager removeItemAtURL:tmpURL error:nil];
+    [self emitDuplicateOf:fileID tmpURL:tmpURL originalName:filename into:output];
+    return YES;
+}
+
+// 丢掉刚写的临时文件，把已有的 _lastFileURL 当作这次收到的文件交出去
+- (void)emitDuplicateOf:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
+    [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];
     _stickyErrorText = nil;
     [_emittedFileIDs addObject:@(fileID)];
     output.fileURL = _lastFileURL;
@@ -334,7 +351,6 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
     output.progressFraction = @(1.0);
     output.isDuplicate = YES;
     output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已收到 %@", nil), _lastFileURL.lastPathComponent];
-    return YES;
 }
 
 - (void)recoverFileWithID:(uint32_t)fileID into:(NativeCimbarDecodeOutput *)output {
@@ -408,7 +424,8 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
         return;
     }
 
-    if ([self reuseLastFileIfSame:fileID tmpURL:tmpURL originalName:filename into:output]) {
+    if ([self reuseLastFileIfSame:fileID tmpURL:tmpURL originalName:filename into:output]
+        || [self reuseStoredFileIfSame:fileID tmpURL:tmpURL originalName:filename into:output]) {
         return;
     }
 

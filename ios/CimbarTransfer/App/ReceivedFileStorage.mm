@@ -112,4 +112,56 @@ static NSString * const kLegacyCachesRelativeDirectory = @"CimbarTransfer/Receiv
     return candidate;
 }
 
+// uniqueDestinationURL 给重名文件起的名字：「名字 (N).扩展名」
++ (BOOL)name:(NSString *)name isCopyOfBase:(NSString *)baseName extension:(NSString *)extension {
+    NSString *stem = name;
+    if (extension.length > 0) {
+        NSString *dottedExtension = [@"." stringByAppendingString:extension];
+        if (![name hasSuffix:dottedExtension]) {
+            return NO;
+        }
+        stem = [name substringToIndex:name.length - dottedExtension.length];
+    }
+    if ([stem isEqualToString:baseName]) {
+        return YES;
+    }
+    NSString *prefix = [baseName stringByAppendingString:@" ("];
+    if (![stem hasPrefix:prefix] || ![stem hasSuffix:@")"] || stem.length <= prefix.length + 1) {
+        return NO;
+    }
+    NSString *number = [stem substringWithRange:NSMakeRange(prefix.length, stem.length - prefix.length - 1)];
+    return [number rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet].invertedSet].location == NSNotFound;
+}
+
++ (NSURL * _Nullable)storedFileMatchingContentsOf:(NSURL *)fileURL filename:(NSString *)filename {
+    NSURL *directory = [self receivedFilesDirectoryURL:nil];
+    if (directory == nil) {
+        return nil;
+    }
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSNumber *size = [fileManager attributesOfItemAtPath:fileURL.path error:nil][NSFileSize];
+    if (size == nil) {
+        return nil;
+    }
+    NSString *safeName = [self sanitizedFilename:filename];
+    NSString *baseName = [safeName stringByDeletingPathExtension];
+    NSString *extension = [safeName pathExtension];
+    NSArray<NSURL *> *contents = [fileManager contentsOfDirectoryAtURL:directory
+                                            includingPropertiesForKeys:@[NSURLFileSizeKey]
+                                                               options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                 error:nil];
+    for (NSURL *candidate in contents) {
+        if (![self name:candidate.lastPathComponent isCopyOfBase:baseName extension:extension]) {
+            continue;
+        }
+        NSNumber *candidateSize = nil;
+        [candidate getResourceValue:&candidateSize forKey:NSURLFileSizeKey error:nil];
+        // 先比大小，同样大才逐字节比
+        if ([candidateSize isEqualToNumber:size] && [fileManager contentsEqualAtPath:candidate.path andPath:fileURL.path]) {
+            return candidate;
+        }
+    }
+    return nil;
+}
+
 @end

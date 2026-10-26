@@ -611,16 +611,6 @@
         }
       }
     },
-    "刚才已收到，没有重复保存" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "already received, not saved again"
-          }
-        }
-      }
-    },
     "删除" : {
       "localizations" : {
         "en" : {
@@ -1313,6 +1303,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Storage Used"
+          }
+        }
+      }
+    },
+    "已经收到过，没有重复保存" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "already received, not saved again"
           }
         }
       }
