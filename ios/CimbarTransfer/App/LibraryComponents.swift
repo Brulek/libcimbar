@@ -284,7 +284,7 @@ struct RenameHint: View {
     }
 }
 
-/// 长按菜单。图片/视频/PDF 带大图预览，其余类型用系统默认的行预览
+/// 长按菜单。图片/视频/PDF 带大图预览，小文本把文字摊开，其余类型用系统默认的行预览
 struct FileContextMenu<MenuItems: View>: ViewModifier {
     let file: CachedReceivedFile
     let isEnabled: Bool
@@ -293,7 +293,8 @@ struct FileContextMenu<MenuItems: View>: ViewModifier {
     func body(content: Content) -> some View {
         if !isEnabled {
             content
-        } else if ThumbnailLoader.supportsLargePreview(fileExtension: file.fileExtension) {
+        } else if ThumbnailLoader.supportsLargePreview(fileExtension: file.fileExtension)
+                    || TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
             content.contextMenu {
                 menuItems()
             } preview: {
@@ -309,15 +310,31 @@ struct FileContextMenu<MenuItems: View>: ViewModifier {
 
 private struct FileContextPreview: View {
     let file: CachedReceivedFile
+    @State private var snippet: String?
+    @State private var loaded = false
+
+    private var isText: Bool {
+        TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            FileThumbnailView(
-                url: file.url,
-                cacheKey: "preview-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
-                cornerRadius: 0,
-                generationSide: 600
-            )
+            Group {
+                if isText {
+                    if loaded {
+                        TextRevealPage(snippet: snippet, fileExtension: file.fileExtension, side: 300)
+                    } else {
+                        Color(white: 0.97)
+                    }
+                } else {
+                    FileThumbnailView(
+                        url: file.url,
+                        cacheKey: "preview-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
+                        cornerRadius: 0,
+                        generationSide: 600
+                    )
+                }
+            }
             .frame(width: 300, height: 300)
             VStack(alignment: .leading, spacing: 2) {
                 Text(file.displayName)
@@ -331,5 +348,12 @@ private struct FileContextPreview: View {
             .padding(12)
         }
         .frame(width: 300)
+        .task(id: file.id) {
+            // 最大 512 KB、可能要猜编码，放后台读
+            guard isText else { return }
+            let url = file.url
+            snippet = await Task.detached(priority: .userInitiated) { TextClipboard.snippet(url) }.value
+            loaded = true
+        }
     }
 }

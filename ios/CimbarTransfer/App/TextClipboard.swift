@@ -47,6 +47,13 @@ enum TextClipboard {
         CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue)
     ))
 
+    /// 页面上展示用的开头一段（去掉首尾空白；只有空白时返回 nil）
+    static func snippet(_ url: URL) -> String? {
+        readText(url)
+            .map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500)) }
+            .flatMap { $0.isEmpty ? nil : $0 }
+    }
+
     /// 整个文件只是一个网址（常见用法：把电脑上的链接送到手机）时返回它
     static func singleWebLink(_ url: URL) -> URL? {
         guard let text = readText(url)?.trimmingCharacters(in: .whitespacesAndNewlines),

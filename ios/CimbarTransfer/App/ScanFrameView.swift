@@ -24,11 +24,7 @@ struct RevealedFile: Equatable {
         // 其他类型（压缩包、Office 等）画大号类型图标：每次收完取景框里都有「收到的东西」
         // 最多 512 KB，收完一个文件才读一次
         // 只有空白的文件和认不出编码的一样处理，显示类型图标而不是一张白纸
-        textSnippet = isText
-            ? TextClipboard.readText(url)
-                .map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500)) }
-                .flatMap { $0.isEmpty ? nil : $0 }
-            : nil
+        textSnippet = isText ? TextClipboard.snippet(url) : nil
         let modified = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
         self.url = url
         self.cacheKey = "reveal-\(url.lastPathComponent)-\(modified)"
@@ -322,7 +318,8 @@ private struct Firefly: View {
 }
 
 /// 收到的小文本把开头几段直接摊在取景框里：链接、口令、一段话，不用点开就能看到
-private struct TextRevealPage: View {
+/// 文字摊开成一页：扫码页收到小文本时、「我的文件」长按小文本时都用它
+struct TextRevealPage: View {
     let snippet: String?
     let fileExtension: String
     /// 取景框边长：字号随框缩放，iPad 的大框里不至于是一角小字
