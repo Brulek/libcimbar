@@ -8,8 +8,9 @@ struct ZipListing: Equatable {
     let fileCount: Int
     /// 解压后的总大小
     let totalSize: Int64
-    /// 按中央目录里的顺序取前几个文件的路径
-    let names: [String]
+    /// 按中央目录里的顺序取前几个文件
+    let entries: [ZipArchive.Entry]
+    var names: [String] { entries.map(\.name) }
 
     static let maxNames = 8
 
@@ -20,7 +21,7 @@ struct ZipListing: Equatable {
         return ZipListing(
             fileCount: files.count,
             totalSize: files.reduce(0) { $0 + Int64(clamping: $1.uncompressedSize) },
-            names: files.prefix(maxNames).map(\.name)
+            entries: Array(files.prefix(maxNames))
         )
     }
 

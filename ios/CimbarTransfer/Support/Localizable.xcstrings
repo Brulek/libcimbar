@@ -1071,6 +1071,16 @@
         }
       }
     },
+    "存到「文件」里解压后再看。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save the archive to Files and unzip it there."
+          }
+        }
+      }
+    },
     "存到文件" : {
       "localizations" : {
         "en" : {
@@ -3099,6 +3109,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About %lld s left"
+          }
+        }
+      }
+    },
+    "这个文件没能解出来" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't Unpack This File"
           }
         }
       }

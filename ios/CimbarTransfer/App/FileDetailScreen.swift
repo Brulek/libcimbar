@@ -37,6 +37,7 @@ struct FileDetailScreen: View {
     @State private var mediaDetail: MediaDetail?
     /// zip 里的文件列表：存到「文件」之前先看看里面有什么
     @State private var zipListing: ZipListing?
+    @State private var zipPreviewFailed = false
     /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
     @State private var trackedFileName: String
 
@@ -97,16 +98,34 @@ struct FileDetailScreen: View {
 
             if let zipListing, zipListing.fileCount > 0 {
                 Section {
-                    ForEach(zipListing.names, id: \.self) { name in
-                        Label {
-                            Text((name as NSString).lastPathComponent)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                        } icon: {
-                            Image(systemName: "doc")
-                                .foregroundStyle(.secondary)
+                    ForEach(zipListing.entries, id: \.name) { entry in
+                        let name = (entry.name as NSString).lastPathComponent
+                        if ZipListing.canPreview(entry) {
+                            // 不用先存到「文件」解压：点一下单独解出这个文件预览
+                            Button {
+                                Task { await previewZipEntry(entry) }
+                            } label: {
+                                Label {
+                                    Text(name)
+                                        .lineLimit(1)
+                                        .truncationMode(.middle)
+                                } icon: {
+                                    Image(systemName: "doc")
+                                }
+                                .font(.callout)
+                            }
+                            .accessibilityHint("轻点预览")
+                        } else {
+                            Label {
+                                Text(name)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            } icon: {
+                                Image(systemName: "doc")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .font(.callout)
                         }
-                        .font(.callout)
                     }
                     if zipListing.fileCount > zipListing.names.count {
                         Text("还有 \(zipListing.fileCount - zipListing.names.count) 个文件")
@@ -235,6 +254,11 @@ struct FileDetailScreen: View {
             Button("取消", role: .cancel) {}
         } message: {
             RenameHint(fileExtension: file.fileExtension)
+        }
+        .alert("这个文件没能解出来", isPresented: $zipPreviewFailed) {
+            Button("好", role: .cancel) {}
+        } message: {
+            Text("存到「文件」里解压后再看。")
         }
         .alert("没能重命名", isPresented: $renameFailed) {
             Button("好", role: .cancel) {}
@@ -392,6 +416,18 @@ struct FileDetailScreen: View {
         }
     }
 
+    private func previewZipEntry(_ entry: ZipArchive.Entry) async {
+        let url = file.url
+        let extracted = await Task.detached(priority: .userInitiated) {
+            ZipListing.extractForPreview(entry, from: url)
+        }.value
+        if let extracted {
+            onPreview(extracted)
+        } else {
+            zipPreviewFailed = true
+        }
+    }
+
     private func loadChecksum() async {
         checksumFailed = false
         // 缓存的校验值只有在文件内容自接收后未被外部改动时才可信
@@ -520,5 +556,35 @@ struct MediaDetail: Equatable {
     private static func pageCount(_ url: URL) -> MediaDetail? {
         guard let document = CGPDFDocument(url as CFURL) else { return nil }
         return MediaDetail(label: String(localized: "页数"), value: "\(document.numberOfPages)")
+    }
+}
+
+/// 简介页里点开 zip 中的单个文件（解出来预览，不用先存到「文件」解压）
+extension ZipListing {
+    /// 简介页上能点开预览的：类型预览得了、没加密、解出来不太大
+    static let maxPreviewBytes: UInt64 = 50 * 1024 * 1024
+
+    static func canPreview(_ entry: ZipArchive.Entry) -> Bool {
+        !entry.isEncrypted && (entry.method == 0 || entry.method == 8)
+            && entry.uncompressedSize <= maxPreviewBytes
+            && FilesExport.hasUsefulPreview((entry.name as NSString).pathExtension)
+    }
+
+    /// 解出一个文件放进临时目录给预览用（上一次解出的先清掉）；后台调用
+    static func extractForPreview(_ entry: ZipArchive.Entry, from url: URL) -> URL? {
+        guard canPreview(entry),
+              let data = ZipArchive.data(of: entry, in: url, maxSize: Int(maxPreviewBytes)) else { return nil }
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent("ZipPreview", isDirectory: true)
+        try? FileManager.default.removeItem(at: base)
+        let folder = base.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let name = ReceivedFileStorage.sanitizedFilename((entry.name as NSString).lastPathComponent)
+        let destination = folder.appendingPathComponent(name)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try data.write(to: destination)
+            return destination
+        } catch {
+            return nil
+        }
     }
 }
