@@ -142,7 +142,7 @@ struct Result {
 
 Result runDecode(int senderMode, int receiverMode, const std::string &payload, NSString *filename) {
     Result result;
-    std::vector<cv::Mat> frames = encodeFrames(senderMode, filename.UTF8String, payload, 120);
+    std::vector<cv::Mat> frames = encodeFrames(senderMode, filename.UTF8String, payload, payload.size() > 100000 ? 400 : 120);
     if (frames.empty()) {
         fprintf(stderr, "  encoder produced no frames\n");
         return result;
@@ -437,6 +437,17 @@ int main(int argc, char **argv) {
             }
             printf("%s  %-12s received=%d match=%d detected=%d frames=%d  %.1f ms/frame\n",
                    ok ? "PASS" : "FAIL", c.name, r.received, r.contentMatches, r.detectedMode, r.framesFed, r.msPerFrame);
+        }
+        {
+            // 大文件：重组 + 分块解压 + 落盘整条链路
+            const std::string big = makePayload(1024 * 1024);
+            Result r = runDecode(68, 0, big, @"big.bin");
+            const bool ok = r.received && r.contentMatches;
+            if (!ok) {
+                ++failures;
+            }
+            printf("%s  1 MB auto<-B received=%d match=%d frames=%d  %.1f ms/frame\n",
+                   ok ? "PASS" : "FAIL", r.received, r.contentMatches, r.framesFed, r.msPerFrame);
         }
         gDegrade = false;
         if (!runRepeatTest()) {
