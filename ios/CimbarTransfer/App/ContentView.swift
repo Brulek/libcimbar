@@ -157,6 +157,9 @@ struct ContentView: View {
             }
             switch newValue {
             case .scan:
+                // 撤销条只在「我的文件」里：离开就真的删掉。否则撤销窗口内收到同一个文件，
+                // 会复用一个马上要被删的文件
+                cacheStore.commitPendingDeletion()
                 viewModel.start()
             case .library, .settings:
                 viewModel.stop()
