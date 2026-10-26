@@ -6,7 +6,7 @@ struct OpenSourceLicensesScreen: View {
             name: "libcimbar",
             license: "Mozilla Public License 2.0",
             urlString: "https://github.com/sz3/libcimbar",
-            note: String(localized: "本应用基于 libcimbar 源码实现 cimbar 解码，并包含少量适配 iOS 的修改（接收端 C 接口的小幅扩展）。修改后的源文件依 MPL-2.0 同样以源代码形式提供，可通过 App Store 页面的支持渠道获取。")
+            note: String(localized: "萤传基于 libcimbar 源码实现解码，为 iOS 做了少量修改（接收端 C 接口的小幅扩展、按模式缓存解码器）。修改后的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。")
         ),
         LicenseEntry(name: "OpenCV", license: "Apache License 2.0", urlString: "https://opencv.org/", note: nil),
         LicenseEntry(name: "zstd", license: "BSD License", urlString: "https://github.com/facebook/zstd", note: nil),
@@ -25,14 +25,12 @@ struct OpenSourceLicensesScreen: View {
     var body: some View {
         List {
             Section {
-                Text("萤传用到了以下开源软件，感谢各位作者。")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            Section("开源组件") {
                 ForEach(entries) { entry in
                     LicenseRow(entry: entry)
                 }
+            } header: {
+                Text("萤传用到了以下开源软件，感谢各位作者。")
+                    .textCase(nil)
             }
         }
         .listStyle(.insetGrouped)

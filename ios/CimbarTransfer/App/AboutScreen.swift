@@ -82,16 +82,22 @@ private struct ExternalLinkRow: View {
     let detail: String
     let systemImage: String
 
+    // 在 Link 里 .primary/.secondary 这类层级样式会被解析成主题色，要用具体的 Color
     var body: some View {
         HStack {
-            Label(title, systemImage: systemImage)
-                .foregroundStyle(.primary)
+            Label {
+                Text(title)
+                    .foregroundStyle(Color.primary)
+            } icon: {
+                Image(systemName: systemImage)
+                    .foregroundStyle(Color.accentColor)
+            }
             Spacer()
             Text(detail)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.secondary)
             Image(systemName: "arrow.up.forward")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color(.tertiaryLabel))
         }
     }
 }
