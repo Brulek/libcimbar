@@ -27,7 +27,7 @@ struct AboutScreen: View {
             }
 
             Section {
-                Link(destination: URL(string: "https://cimbar.org")!) {
+                Link(destination: SenderSite.url) {
                     ExternalLinkRow(title: "发送端网页", detail: "cimbar.org", systemImage: "safari")
                 }
                 Link(destination: URL(string: "https://github.com/sz3/libcimbar")!) {
