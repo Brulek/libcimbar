@@ -127,7 +127,8 @@ struct LibraryScreen: View {
         }
         .animation(.spring(duration: 0.3), value: saveToast?.id)
         .animation(.spring(duration: 0.3), value: store.pendingDeletion?.id)
-        .navigationTitle("我的文件")
+        // 多选时标题换成已选个数（同「照片」）；放在底栏里 iOS 26 会给文字套一块玻璃，和按钮组挤在一起
+        .navigationTitle(isSelecting ? selectionTitle : String(localized: "我的文件"))
         .navigationBarTitleDisplayMode(.large)
         .navigationDestination(isPresented: Binding(
             get: { detailTarget != nil },
@@ -286,13 +287,6 @@ struct LibraryScreen: View {
                 }
 
                 Spacer()
-                Text(selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个"))
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .fixedSize()
-                Spacer()
 
                 Button(role: .destructive) {
                     deleteSelected()
@@ -371,6 +365,10 @@ struct LibraryScreen: View {
         .listStyle(.insetGrouped)
         .animation(.default, value: sortOption)
         .readableListWidth()
+    }
+
+    private var selectionTitle: String {
+        selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个")
     }
 
     /// 不分组的排序（名称、大小）在列表顶上写明排法；搜索时按相关度不显示
