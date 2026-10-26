@@ -73,7 +73,7 @@ struct ScanFrameOverlay: View {
                     } label: {
                         Group {
                             if reveal.isText {
-                                TextRevealPage(url: reveal.url)
+                                TextRevealPage(url: reveal.url, side: side)
                             } else {
                                 FileThumbnailView(
                                     url: reveal.url,
@@ -298,6 +298,8 @@ private struct Firefly: View {
 /// 收到的小文本把开头几段直接摊在取景框里：链接、口令、一段话，不用点开就能看到
 private struct TextRevealPage: View {
     let url: URL
+    /// 取景框边长：字号随框缩放，iPad 的大框里不至于是一角小字
+    let side: CGFloat
     @State private var snippet: String?
     /// 编码认不出来时退回类型图标，不留一张空白页
     @State private var unreadable = false
@@ -305,9 +307,10 @@ private struct TextRevealPage: View {
     private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
 
     private var font: Font {
-        Self.codeExtensions.contains(url.pathExtension.lowercased())
-            ? .system(size: 14, design: .monospaced)
-            : .system(size: 16)
+        let size = min(max(side * 0.043, 15), 22)
+        return Self.codeExtensions.contains(url.pathExtension.lowercased())
+            ? .system(size: size - 2, design: .monospaced)
+            : .system(size: size)
     }
 
     var body: some View {
@@ -332,7 +335,7 @@ private struct TextRevealPage: View {
                         Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(22)
+                    .padding(side * 0.06)
                 }
             }
             .task(id: url) {

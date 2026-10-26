@@ -57,6 +57,8 @@ struct ReceiverScreen: View {
                                 .resizable()
                                 .interpolation(.medium)
                                 .scaledToFit()
+                                // 取景框最大 640pt（iPad），码比框略小
+                                .frame(maxWidth: 580, maxHeight: 580)
                                 .padding(.horizontal, 40)
                                 .padding(.top, topReservedHeight)
                                 .padding(.bottom, bottomReservedHeight)
