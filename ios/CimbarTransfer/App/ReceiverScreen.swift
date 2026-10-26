@@ -89,6 +89,9 @@ struct ReceiverScreen: View {
                     onToggleZoom: { viewModel.toggleQuickZoom() },
                     onToggleTorch: { viewModel.toggleTorch() }
                 )
+                // 相机浮层按钮和系统相机一样封顶字号：再大就挤掉取景区，模式名也会被压没。
+                // 要加在调用处，按钮尺寸的 @ScaledMetric 才会跟着封顶
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 Spacer()
             }
             .padding(.horizontal)
@@ -231,6 +234,8 @@ private struct ReceiverTopBar: View {
                     Image(systemName: "dot.viewfinder")
                     Text(modeTitle)
                         .monospacedDigit()
+                        .lineLimit(1)
+                        .fixedSize()
                     Image(systemName: "chevron.down")
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(.white.opacity(0.6))
@@ -434,7 +439,7 @@ private struct ProgressCard: View {
 
     private var footnote: String {
         if !isTracking {
-            return String(localized: "动画码已离开取景框，对准后继续")
+            return String(localized: "暂时读不到动画码，保持对准")
         }
         return String(localized: "已识别 \(frameCount) 帧")
     }

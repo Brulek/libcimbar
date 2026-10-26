@@ -188,7 +188,18 @@ struct FileDetailScreen: View {
     }
 
     private var actions: some View {
-        HStack(spacing: 10) {
+        // 大字号下四个并排放不下，改成两列
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) { actionButtons }
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                actionButtons
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        Group {
             DetailActionButton(title: "预览", systemImage: "eye") {
                 onPreview(file.url)
             }
@@ -318,7 +329,7 @@ private struct DetailActionButton: View {
                 Text(title)
                     .font(.caption.weight(.medium))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .fixedSize()
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)

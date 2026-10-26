@@ -581,16 +581,6 @@
         }
       }
     },
-    "动画码已离开取景框，对准后继续" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Code out of view. Point at it to continue."
-          }
-        }
-      }
-    },
     "动画码显示在屏幕上，附近的人也能拍到" : {
       "localizations" : {
         "en" : {
@@ -1671,6 +1661,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday"
+          }
+        }
+      }
+    },
+    "暂时读不到动画码，保持对准" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can’t read the code right now. Keep it in view."
           }
         }
       }
