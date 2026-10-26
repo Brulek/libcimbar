@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ACB68456E8D9ED7E835D6EDB /* LibraryComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */; };
 		8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */; };
 		523B42E89FFDF80D0A48491D /* SenderHelpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */; };
 		F42DC49E0ECA9EE226AE99CA /* ReceiverPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */; };
@@ -89,6 +90,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryComponents.swift; sourceTree = "<group>"; };
 		7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanFrameView.swift; sourceTree = "<group>"; };
 		A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderHelpSheet.swift; sourceTree = "<group>"; };
 		0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverPanels.swift; sourceTree = "<group>"; };
@@ -413,6 +415,7 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */,
 				7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */,
 				A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */,
 				0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */,
@@ -584,6 +587,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACB68456E8D9ED7E835D6EDB /* LibraryComponents.swift in Sources */,
 				8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */,
 				523B42E89FFDF80D0A48491D /* SenderHelpSheet.swift in Sources */,
 				F42DC49E0ECA9EE226AE99CA /* ReceiverPanels.swift in Sources */,
