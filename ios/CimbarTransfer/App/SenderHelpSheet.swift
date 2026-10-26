@@ -32,6 +32,8 @@ struct SenderHelpSheet: View {
 
                 Section("收不到时") {
                     Label("靠近些，让动画码占满大部分取景框", systemImage: "arrow.up.left.and.arrow.down.right")
+                    // Pro 机型主摄最近对焦约 20 cm，两部手机贴太近会糊
+                    Label("发送端是手机、贴得很近时画面会糊：点 2×，再把手机拿远一点", systemImage: "camera.macro")
                     Label("调亮发送端屏幕，避开灯光反光", systemImage: "sun.max")
                     Label("在网页菜单里调低 Framerate", systemImage: "speedometer")
                     // 自测里画面模糊、偏远时 Bm/Bu 仍能收完而 B 不行；萤传自动识别，换了也不用改设置

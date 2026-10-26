@@ -681,6 +681,16 @@
         }
       }
     },
+    "发送端是手机、贴得很近时画面会糊：点 2×，再把手机拿远一点" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If the sender is a phone held very close, the image blurs: tap 2× and move back a little"
+          }
+        }
+      }
+    },
     "发送端网页" : {
       "localizations" : {
         "en" : {
