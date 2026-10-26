@@ -84,7 +84,8 @@ struct ReceiverScreen: View {
                         bottomReservedHeight: bottomReservedHeight,
                         scanState: scanState,
                         showCheckmark: showCheckmark,
-                        isPaused: viewModel.isIdlePaused,
+                        // 没有相机权限时没在扫，萤火虫也别绕圈
+                        isPaused: viewModel.isIdlePaused || viewModel.cameraPermissionDenied,
                         progress: viewModel.receivedFileURL == nil ? viewModel.progressValue : nil,
                         progressTint: Brand.progressTint(
                             isTracking: viewModel.isTracking,
