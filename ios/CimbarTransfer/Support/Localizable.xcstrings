@@ -1847,6 +1847,16 @@
         }
       }
     },
+    "改为按日期排列" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort by Date"
+          }
+        }
+      }
+    },
     "文件会一直保留，直到你手动删除。" : {
       "localizations" : {
         "en" : {

@@ -351,6 +351,7 @@ struct LibraryScreen: View {
                             Button("按日期") { sortOption = .dateDescending }
                                 .font(.footnote.weight(.semibold))
                                 .textCase(nil)
+                                .accessibilityLabel("改为按日期排列")
                         }
                     }
                 } footer: {
