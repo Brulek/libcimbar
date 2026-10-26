@@ -257,14 +257,20 @@ bool runStoredRepeatTest() {
         @autoreleasepool {
             NativeCimbarDecodeOutput *a = feedUntilFile([NativeCimbarDecoder new], frames);
             NativeCimbarDecodeOutput *b = feedUntilFile([NativeCimbarDecoder new], frames);
+            // 只剩「名字 (N)」那一份时也要认出来
+            NSURL *numbered = [a.fileURL.URLByDeletingLastPathComponent URLByAppendingPathComponent:@"stored (3).bin"];
+            [[NSFileManager defaultManager] moveItemAtURL:a.fileURL toURL:numbered error:nil];
+            NativeCimbarDecodeOutput *c = feedUntilFile([NativeCimbarDecoder new], frames);
             NSArray<NSString *> *copies = [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:
                 a.fileURL.URLByDeletingLastPathComponent.path error:nil]
                 filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF BEGINSWITH 'stored'"]];
-            ok = a != nil && b != nil && !a.isDuplicate && b.isDuplicate
-                && [a.fileURL isEqual:b.fileURL] && copies.count == 1;
-            printf("%s  stored-repeat first=%s second=%s (dup=%d) copies=%lu\n", ok ? "PASS" : "FAIL",
+            ok = a != nil && b != nil && c != nil && !a.isDuplicate && b.isDuplicate && c.isDuplicate
+                && [a.fileURL isEqual:b.fileURL] && [c.fileURL.lastPathComponent isEqualToString:@"stored (3).bin"]
+                && copies.count == 1;
+            printf("%s  stored-repeat first=%s second=%s (dup=%d) numbered=%s (dup=%d) copies=%lu\n", ok ? "PASS" : "FAIL",
                    a.fileURL.lastPathComponent.UTF8String ?: "-",
-                   b.fileURL.lastPathComponent.UTF8String ?: "-", b.isDuplicate, (unsigned long)copies.count);
+                   b.fileURL.lastPathComponent.UTF8String ?: "-", b.isDuplicate,
+                   c.fileURL.lastPathComponent.UTF8String ?: "-", c.isDuplicate, (unsigned long)copies.count);
             for (NSString *name in copies) {
                 [[NSFileManager defaultManager] removeItemAtURL:[a.fileURL.URLByDeletingLastPathComponent
                     URLByAppendingPathComponent:name] error:nil];
