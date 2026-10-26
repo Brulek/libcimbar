@@ -283,11 +283,23 @@ private struct ReceiverTopBar: View {
     var body: some View {
         HStack(spacing: 10) {
             Menu {
+                // 几乎都用自动识别：手动的五种收进二级菜单，一级只剩三项
                 Picker("解码模式", selection: $decodeMode) {
-                    ForEach(DecodeMode.allCases) { mode in
-                        Text(mode.title).tag(mode.rawValue)
+                    Text(DecodeMode.auto.title).tag(DecodeMode.auto.rawValue)
+                }
+                Menu {
+                    Picker("指定模式", selection: $decodeMode) {
+                        ForEach(DecodeMode.allCases.filter { $0 != .auto }) { mode in
+                            Text(mode.title).tag(mode.rawValue)
+                        }
+                    }
+                } label: {
+                    Text("指定模式")
+                    if let mode = DecodeMode(rawValue: decodeMode), mode != .auto {
+                        Text(mode.title)
                     }
                 }
+                Divider()
                 Toggle(isOn: $highResolution) {
                     Label("高清采集", systemImage: "camera.aperture")
                 }

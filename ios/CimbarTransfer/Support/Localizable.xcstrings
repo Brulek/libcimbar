@@ -1657,6 +1657,16 @@
         }
       }
     },
+    "指定模式" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual Mode"
+          }
+        }
+      }
+    },
     "按名称排列" : {
       "localizations" : {
         "en" : {
