@@ -79,7 +79,12 @@ struct QuickLookPreview: UIViewControllerRepresentable {
                 savedCopies[original] = unique
             }
             let size = (try? fileManager.attributesOfItem(atPath: destination.path)[.size] as? NSNumber)?.int64Value ?? 0
-            _ = ReceivedFileMetadataStore.shared.register(filename: destination.lastPathComponent, fileSize: size)
+            // 原始文件名记成被标注的那份，简介页里就能看出是从哪个文件来的
+            _ = ReceivedFileMetadataStore.shared.register(
+                filename: destination.lastPathComponent,
+                originalName: original.lastPathComponent,
+                fileSize: size
+            )
             DispatchQueue.main.async { self.onSavedEditedCopy(destination) }
         }
 
