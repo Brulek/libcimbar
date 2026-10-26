@@ -328,7 +328,8 @@ struct TextRevealPage: View {
     private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
 
     private var baseSize: CGFloat {
-        min(max(side * 0.043, 15), 22)
+        // iPad 的取景框最大 640pt，封顶 28：再小就是一大张白纸角上几行字
+        min(max(side * 0.043, 15), 28)
     }
 
     private var font: Font {
