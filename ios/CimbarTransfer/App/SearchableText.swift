@@ -53,6 +53,9 @@ enum SearchableText {
 enum OfficeText {
     /// 单个 XML 最多解出这么大，太大的文档只是搜不到，不至于卡住
     private static let maxXMLBytes = 16 * 1024 * 1024
+    /// 一个文档总共最多解出这么多、读这么多个部分：防止上千页的幻灯片（或故意做的压缩炸弹）把 CPU 和内存占满
+    private static let maxTotalBytes = 64 * 1024 * 1024
+    private static let maxParts = 500
 
     private struct Kind {
         /// 要读的 XML 条目
@@ -82,8 +85,11 @@ enum OfficeText {
         // 幻灯片按页码排（slide2 在 slide10 前面）
         let parts = entries.filter(kind.parts).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         var text = ""
-        for part in parts {
-            guard let data = ZipArchive.data(of: part, in: url, maxSize: maxXMLBytes) else { continue }
+        var budget = maxTotalBytes
+        for part in parts.prefix(maxParts) {
+            guard budget > 0,
+                  let data = ZipArchive.data(of: part, in: url, maxSize: min(maxXMLBytes, budget)) else { continue }
+            budget -= data.count
             text += extract(String(decoding: data, as: UTF8.self), kind: kind)
             if text.count >= SearchableText.maxCharacters { break }
         }
