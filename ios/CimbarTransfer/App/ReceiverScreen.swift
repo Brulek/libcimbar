@@ -7,6 +7,7 @@ private enum ScanState: Equatable {
 
 struct ReceiverScreen: View {
     @ObservedObject var viewModel: NativeReceiverViewModel
+    @ObservedObject private var preferences = AppPreferences.shared
     let onShare: (URL) -> Void
     let onPreview: (URL) -> Void
 
@@ -14,16 +15,15 @@ struct ReceiverScreen: View {
     @State private var lastCelebratedURL: URL?
     @State private var focusIndicatorPoint: CGPoint?
     @State private var focusIndicatorID = UUID()
+    @State private var showingSenderHelp = false
 
-    // 动态字体放大时，顶部标题区/底部面板占用更多空间，取景框预留区随之缩放
-    @ScaledMetric(relativeTo: .body) private var topReservedHeight: CGFloat = 110
-    @ScaledMetric(relativeTo: .body) private var bottomReservedHeight: CGFloat = 180
+    // 底部面板通过 safeAreaInset 已从取景区扣除，这里只需让出顶部按钮行；
+    // 动态字体放大时按钮变高，预留随之缩放
+    @ScaledMetric(relativeTo: .body) private var topReservedHeight: CGFloat = 64
+    private let bottomReservedHeight: CGFloat = 20
 
     private var scanState: ScanState {
-        if viewModel.progressValue != nil && viewModel.receivedFileURL == nil {
-            return .detecting
-        }
-        return .idle
+        viewModel.isTracking && viewModel.receivedFileURL == nil ? .detecting : .idle
     }
 
     var body: some View {
@@ -39,7 +39,7 @@ struct ReceiverScreen: View {
                 onDoubleTap: { viewModel.resetZoom() }
             )
                 .ignoresSafeArea()
-                .accessibilityLabel("相机预览，轻点对焦，捏合缩放")
+                .accessibilityLabel("相机取景，轻点对焦，捏合缩放")
                 .accessibilityElement(children: .ignore)
                 .overlay {
                     ScanFrameOverlay(
@@ -59,11 +59,15 @@ struct ReceiverScreen: View {
                 .overlay {
                     if viewModel.cameraPermissionDenied {
                         PermissionDeniedCard()
+                            .padding(.horizontal, 24)
                     }
                 }
 
-            VStack(spacing: 18) {
+            VStack {
                 ReceiverTopBar(
+                    decodeMode: $preferences.decodeMode,
+                    highResolution: $preferences.highResolutionCapture,
+                    detectedMode: viewModel.detectedMode,
                     zoomFactor: viewModel.zoomFactor,
                     torchAvailable: viewModel.torchAvailable,
                     torchActive: viewModel.torchActive,
@@ -73,27 +77,29 @@ struct ReceiverScreen: View {
                 Spacer()
             }
             .padding(.horizontal)
-            .padding(.top)
+            .padding(.top, 8)
         }
         .safeAreaInset(edge: .bottom) {
-            ReceiverBottomPanel(
-                statusText: viewModel.statusText,
-                progressValue: viewModel.progressValue,
-                progressLabel: viewModel.progressLabel,
-                statsText: viewModel.statsText,
-                stallHint: viewModel.stallHint,
-                scanErrorLatched: viewModel.scanErrorLatched,
-                receivedFileURL: viewModel.receivedFileURL,
-                showCheckmark: showCheckmark,
-                onShare: onShare,
-                onPreview: onPreview,
-                onContinueScanning: resetScan
-            )
-            .padding(.horizontal)
-            .padding(.bottom, 8)
+            if !viewModel.cameraPermissionDenied {
+                ReceiverBottomPanel(
+                    viewModel: viewModel,
+                    showCheckmark: showCheckmark,
+                    onShare: onShare,
+                    onPreview: onPreview,
+                    onContinueScanning: resetScan,
+                    onShowSenderHelp: { showingSenderHelp = true }
+                )
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+            }
         }
         .background(Color.black)
+        // 相机界面始终用深色外观，与取景画面一致，不跟随系统浅色
+        .environment(\.colorScheme, .dark)
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showingSenderHelp) {
+            SenderHelpSheet()
+        }
         .task {
             viewModel.start()
         }
@@ -161,36 +167,74 @@ struct ReceiverScreen: View {
     }
 }
 
+// MARK: - 顶部按钮
+
 private struct ReceiverTopBar: View {
+    @Binding var decodeMode: Int
+    @Binding var highResolution: Bool
+    let detectedMode: Int
     let zoomFactor: CGFloat
     let torchAvailable: Bool
     let torchActive: Bool
     let onResetZoom: () -> Void
     let onToggleTorch: () -> Void
 
+    @ScaledMetric(relativeTo: .body) private var buttonSide: CGFloat = 44
+
+    /// 自动模式识别出发送端模式后显示「自动 · B」，方便核对
+    private var modeTitle: String {
+        guard let mode = DecodeMode(rawValue: decodeMode) else { return "" }
+        if mode == .auto, detectedMode != DecodeMode.auto.rawValue,
+           let detected = DecodeMode.code(for: detectedMode) {
+            return String(localized: "自动 · \(detected)")
+        }
+        return mode.code
+    }
+
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("萤传")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.white)
-                Text("对准发送端动画码")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
+        HStack(spacing: 10) {
+            Menu {
+                Picker("解码模式", selection: $decodeMode) {
+                    ForEach(DecodeMode.allCases) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                Toggle(isOn: $highResolution) {
+                    Label("高清采集", systemImage: "camera.aperture")
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "dot.viewfinder")
+                    Text(modeTitle)
+                        .monospacedDigit()
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .frame(height: buttonSide)
+                .glassChrome(in: Capsule())
+                .contentShape(Capsule())
             }
+            .accessibilityLabel("解码模式")
+            .accessibilityValue(modeTitle)
+
             Spacer()
 
             if zoomFactor > 1.01 {
                 Button(action: onResetZoom) {
                     Text(String(format: "%.1f×", zoomFactor))
                         .font(.subheadline.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(.yellow)
-                        .frame(height: 44)
+                        .foregroundStyle(Brand.glow)
                         .padding(.horizontal, 12)
-                        .background(Color.white.opacity(0.16), in: Capsule())
+                        .frame(height: buttonSide)
+                        .glassChrome(in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("当前变焦 \(String(format: "%.1f", zoomFactor)) 倍，点按恢复 1 倍")
+                .accessibilityLabel("变焦 \(String(format: "%.1f", zoomFactor)) 倍")
+                .accessibilityHint("轻点恢复 1 倍")
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
 
@@ -198,9 +242,9 @@ private struct ReceiverTopBar: View {
                 Button(action: onToggleTorch) {
                     Image(systemName: torchActive ? "flashlight.on.fill" : "flashlight.off.fill")
                         .font(.headline)
-                        .foregroundStyle(torchActive ? .yellow : .white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .foregroundStyle(torchActive ? Brand.glow : .white)
+                        .frame(width: buttonSide, height: buttonSide)
+                        .glassChrome(in: Circle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(torchActive ? "关闭手电筒" : "打开手电筒")
@@ -216,7 +260,7 @@ private struct FocusIndicatorView: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: 10, style: .continuous)
-            .stroke(Color.yellow, lineWidth: 1.5)
+            .stroke(Brand.glow, lineWidth: 1.5)
             .frame(width: 68, height: 68)
             .scaleEffect(appeared ? 1.0 : 1.45)
             .opacity(appeared ? 1.0 : 0.4)
@@ -230,105 +274,191 @@ private struct FocusIndicatorView: View {
     }
 }
 
+// MARK: - 底部面板
+
 private struct ReceiverBottomPanel: View {
-    let statusText: String
-    let progressValue: Double?
-    let progressLabel: String?
-    let statsText: String?
-    let stallHint: String?
-    let scanErrorLatched: Bool
-    let receivedFileURL: URL?
+    @ObservedObject var viewModel: NativeReceiverViewModel
     let showCheckmark: Bool
     let onShare: (URL) -> Void
     let onPreview: (URL) -> Void
     let onContinueScanning: () -> Void
+    let onShowSenderHelp: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let file = receivedFileURL {
+        Group {
+            if let file = viewModel.receivedFileURL {
                 CompletedTransferCard(
                     fileURL: file,
+                    duration: viewModel.transferDuration,
                     highlightShareAction: showCheckmark,
                     onPreview: { onPreview(file) },
                     onShare: { onShare(file) },
                     onContinueScanning: onContinueScanning
                 )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
-                StatusCapsule(text: statusText)
-                ProgressCard(
-                    progressValue: progressValue,
-                    progressLabel: progressLabel,
-                    statsText: statsText,
-                    stallHint: stallHint
-                )
-                if scanErrorLatched {
-                    // 错误文案让用户「点按继续扫码重试」，这里必须真的有这个按钮：
-                    // 喷泉流已在 sink 中标记完成、无法重放，只有重扫能恢复
-                    Button(action: onContinueScanning) {
-                        Label("继续扫码", systemImage: "arrow.counterclockwise")
-                            .font(.subheadline.weight(.semibold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                    }
-                    .buttonStyle(.borderedProminent)
+            } else if viewModel.scanErrorLatched {
+                // 喷泉流已在 sink 中标记完成、无法重放，只有重扫能恢复
+                ScanErrorCard(message: viewModel.statusText, onRetry: onContinueScanning)
                     .transition(.opacity)
-                }
+            } else if let progress = viewModel.progressValue {
+                ProgressCard(
+                    progress: progress,
+                    isTracking: viewModel.isTracking,
+                    frameCount: viewModel.detectedFrameCount,
+                    remainingSeconds: viewModel.remainingSeconds,
+                    stallHint: viewModel.stallHint
+                )
+                .transition(.opacity)
+            } else {
+                WaitingCard(
+                    cameraError: viewModel.cameraErrorText,
+                    onShowSenderHelp: onShowSenderHelp
+                )
+                .transition(.opacity)
             }
         }
         .padding(16)
         .frame(maxWidth: 560)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .animation(.easeInOut(duration: 0.25), value: receivedFileURL != nil)
-        .animation(.easeInOut(duration: 0.25), value: scanErrorLatched)
+        .glassChrome(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .animation(.easeInOut(duration: 0.25), value: viewModel.receivedFileURL != nil)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.scanErrorLatched)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.progressValue == nil)
+    }
+}
+
+private struct WaitingCard: View {
+    let cameraError: String?
+    let onShowSenderHelp: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                if let cameraError {
+                    Label(cameraError, systemImage: "exclamationmark.triangle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.orange)
+                } else {
+                    Text("对准屏幕上的动画码")
+                        .font(.headline)
+                }
+                Text("发送方用浏览器打开 cimbar.org，选好文件即可")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(action: onShowSenderHelp) {
+                Image(systemName: "questionmark")
+                    .font(.headline)
+                    .frame(width: 40, height: 40)
+                    .background(.white.opacity(0.12), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("怎么发送文件")
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 
 private struct ProgressCard: View {
-    let progressValue: Double?
-    let progressLabel: String?
-    let statsText: String?
+    let progress: Double
+    let isTracking: Bool
+    let frameCount: Int
+    let remainingSeconds: Int?
     let stallHint: String?
 
+    private var percentText: String {
+        progress.formatted(.percent.precision(.fractionLength(0)))
+    }
+
+    private var remainingText: String? {
+        guard isTracking, let remainingSeconds else { return nil }
+        if remainingSeconds < 90 {
+            return String(localized: "还需约 \(remainingSeconds) 秒")
+        }
+        let minutes = Int((Double(remainingSeconds) / 60).rounded())
+        return String(localized: "还需约 \(minutes) 分钟")
+    }
+
+    private var footnote: String {
+        if !isTracking {
+            return String(localized: "动画码已离开取景框，对准后继续")
+        }
+        return String(localized: "已识别 \(frameCount) 帧")
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let value = progressValue {
-                ProgressView(value: value)
-                    .progressViewStyle(.linear)
-                    .tint(stallHint == nil ? .accentColor : .orange)
-            } else {
-                ProgressView(value: 0)
-                    .progressViewStyle(.linear)
-                    .opacity(progressLabel == nil ? 0.45 : 0.7)
-            }
-            Text(progressLabel ?? String(localized: "等待识别动画码"))
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(.primary)
-                .lineLimit(2)
-            if let stats = statsText {
-                Text(stats)
-                    .font(.caption2.monospacedDigit())
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(percentText)
+                    .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
+                    .contentTransition(.numericText())
+                Text("正在接收")
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .transition(.opacity)
+                Spacer()
+                if let remainingText {
+                    Text(remainingText)
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
+                }
             }
-            if let hint = stallHint {
-                Label(hint, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption2)
+
+            ProgressView(value: progress)
+                .progressViewStyle(.linear)
+                .tint(stallHint == nil ? Color.accentColor : .orange)
+
+            if let stallHint {
+                Label(stallHint, systemImage: "exclamationmark.triangle.fill")
+                    .font(.footnote)
                     .foregroundStyle(.orange)
+                    .transition(.opacity)
+            } else {
+                Text(footnote)
+                    .font(.footnote.monospacedDigit())
+                    .foregroundStyle(.secondary)
                     .transition(.opacity)
             }
         }
-        .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.25), value: stallHint)
-        .accessibilityElement(children: .combine)
-        .accessibilityValue([progressLabel ?? String(localized: "等待识别"), statsText, stallHint].compactMap { $0 }.joined(separator: String(localized: "，")))
+        .animation(.easeInOut(duration: 0.25), value: isTracking)
+        .animation(.easeOut(duration: 0.2), value: progress)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("正在接收")
+        .accessibilityValue([percentText, remainingText, stallHint ?? footnote].compactMap { $0 }.joined(separator: String(localized: "，")))
+        .accessibilityAddTraits(.updatesFrequently)
+    }
+}
+
+private struct ScanErrorCard: View {
+    let message: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label {
+                Text(message)
+                    .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "xmark.octagon.fill")
+                    .foregroundStyle(.red)
+            }
+            .font(.subheadline.weight(.medium))
+
+            Button(action: onRetry) {
+                Label("重新扫描", systemImage: "arrow.counterclockwise")
+            }
+            .buttonStyle(.brandPrimary)
+        }
     }
 }
 
 private struct CompletedTransferCard: View {
     let fileURL: URL
+    let duration: TimeInterval?
     let highlightShareAction: Bool
     let onPreview: () -> Void
     let onShare: () -> Void
@@ -348,6 +478,17 @@ private struct CompletedTransferCard: View {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
     }
 
+    private var detailText: String {
+        var parts: [String] = []
+        if let fileSize { parts.append(fileSize) }
+        if let duration, duration >= 1 {
+            let formatted = Duration.seconds(duration.rounded())
+                .formatted(.units(allowed: [.minutes, .seconds], width: .abbreviated))
+            parts.append(String(localized: "用时 \(formatted)"))
+        }
+        return parts.isEmpty ? String(localized: "已收到") : parts.joined(separator: " · ")
+    }
+
     private static func loadFileInfo(for url: URL) -> (size: String?, modified: TimeInterval) {
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else {
             return (nil, 0)
@@ -361,31 +502,39 @@ private struct CompletedTransferCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 12) {
-                FileThumbnailView(
-                    url: fileURL,
-                    cacheKey: thumbnailKey.isEmpty ? "completed-\(fileURL.lastPathComponent)" : thumbnailKey
-                )
-                .frame(width: 48, height: 48)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(fileURL.lastPathComponent)
-                        .font(.subheadline.weight(.semibold))
-                        .lineLimit(1)
-                    Text(fileSize ?? String(localized: "已接收"))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            Button(action: onPreview) {
+                HStack(spacing: 12) {
+                    FileThumbnailView(
+                        url: fileURL,
+                        cacheKey: thumbnailKey.isEmpty ? "completed-\(fileURL.lastPathComponent)" : thumbnailKey
+                    )
+                    .frame(width: 52, height: 52)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(fileURL.lastPathComponent)
+                            .font(.headline)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                        Text(detailText)
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.green)
+                        .accessibilityHidden(true)
                 }
-                Spacer()
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                    .font(.title3)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("已收到 \(fileURL.lastPathComponent)")
+            .accessibilityValue(detailText)
+            .accessibilityHint("轻点预览")
 
             HStack(spacing: 10) {
                 Button(action: onPreview) {
-                    Label("查看", systemImage: "eye")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                    Label("预览", systemImage: "eye")
+                        .frame(maxWidth: .infinity, minHeight: 34)
                 }
                 .buttonStyle(.bordered)
 
@@ -393,9 +542,8 @@ private struct CompletedTransferCard: View {
                     Button {
                         Task { await saveToPhotos() }
                     } label: {
-                        Label(photoSaved ? "已保存" : "存相册", systemImage: photoSaved ? "checkmark" : "photo.on.rectangle")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
+                        Label(photoSaved ? "已存入" : "存相册", systemImage: photoSaved ? "checkmark" : "photo.on.rectangle")
+                            .frame(maxWidth: .infinity, minHeight: 34)
                     }
                     .buttonStyle(.bordered)
                     .tint(photoSaved ? .green : nil)
@@ -404,23 +552,25 @@ private struct CompletedTransferCard: View {
 
                 Button(action: onShare) {
                     Label("分享", systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, minHeight: 34)
+                        .foregroundStyle(Brand.ink)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(highlightShareAction ? .green : .accentColor)
+                .scaleEffect(highlightShareAction ? 1.03 : 1)
             }
             .labelStyle(CompactActionLabelStyle())
+            .font(.subheadline.weight(.semibold))
 
             Button(action: onContinueScanning) {
-                Label("继续扫码", systemImage: "arrow.counterclockwise")
+                Label("继续接收", systemImage: "viewfinder")
                     .font(.subheadline.weight(.medium))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
         }
+        .animation(.spring(duration: 0.35), value: highlightShareAction)
         .task(id: fileURL) {
             let info = Self.loadFileInfo(for: fileURL)
             fileSize = info.size
@@ -429,12 +579,12 @@ private struct CompletedTransferCard: View {
             photoSaved = false
             photoSaveError = nil
         }
-        .alert("存到相册失败", isPresented: Binding(
+        .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveError != nil },
             set: { if !$0 { photoSaveError = nil } }
         )) {
             if photoSaveNeedsSettings {
-                Button("打开设置") { AppSettingsOpener.open() }
+                Button("去设置") { AppSettingsOpener.open() }
             }
             Button("好", role: .cancel) {}
         } message: {
@@ -470,50 +620,95 @@ private struct CompactActionLabelStyle: LabelStyle {
 
 private struct PermissionDeniedCard: View {
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "camera.slash.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.white.opacity(0.7))
-            Text("未授予相机权限")
+        VStack(spacing: 14) {
+            Image(systemName: "camera.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(Brand.glow)
+            Text("需要相机权限")
                 .font(.headline)
-                .foregroundStyle(.white)
-            Text("需要相机权限来扫描 Cimbar 动画码接收文件")
+            Text("萤传通过相机读取屏幕上的动画码，画面不会离开这台设备。")
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button("打开设置", action: openSettings)
-                .buttonStyle(.borderedProminent)
+            Button("去设置开启") { AppSettingsOpener.open() }
+                .buttonStyle(.brandPrimary)
+                .padding(.top, 4)
         }
-        .padding(32)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-
-    private func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-        UIApplication.shared.open(url)
+        .padding(28)
+        .frame(maxWidth: 420)
+        .glassChrome(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 }
 
-private struct StatusCapsule: View {
-    let text: String
+// MARK: - 发送端说明
+
+struct SenderHelpSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var copied = false
+
+    private static let senderURL = URL(string: "https://cimbar.org")!
 
     var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(.tint)
-                .frame(width: 6, height: 6)
-            Text(text)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(2)
+        NavigationStack {
+            List {
+                Section {
+                    StepRow(number: 1, text: "在电脑或另一台手机的浏览器里打开 cimbar.org")
+                    StepRow(number: 2, text: "打开网页菜单，点 Find File 选择文件，也可以直接把文件拖进网页")
+                    StepRow(number: 3, text: "网页开始播放动画码后，用萤传对准它，进度到 100% 即完成")
+                } footer: {
+                    Text("网页菜单里的 Mode 保持默认即可，萤传会自动识别。")
+                }
+
+                Section {
+                    Button {
+                        UIPasteboard.general.url = Self.senderURL
+                        withAnimation { copied = true }
+                    } label: {
+                        Label(copied ? "已复制网址" : "复制网址", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    }
+                    ShareLink(item: Self.senderURL) {
+                        Label("把网址发给发送方", systemImage: "square.and.arrow.up")
+                    }
+                }
+
+                Section("收不到时") {
+                    Label("靠近些，让动画码占满大部分取景框", systemImage: "arrow.up.left.and.arrow.down.right")
+                    Label("调亮发送端屏幕，避开灯光反光", systemImage: "sun.max")
+                    Label("在网页菜单里调低 Framerate", systemImage: "speedometer")
+                }
+                .font(.subheadline)
+            }
+            .navigationTitle("怎么发送文件")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(.thickMaterial, in: Capsule())
-        .accessibilityLabel(text)
-        .accessibilityAddTraits(.updatesFrequently)
+        .presentationDetents([.medium, .large])
     }
 }
+
+private struct StepRow: View {
+    let number: Int
+    let text: LocalizedStringKey
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text("\(number)")
+                .font(.subheadline.weight(.bold).monospacedDigit())
+                .foregroundStyle(Brand.ink)
+                .frame(width: 24, height: 24)
+                .background(Color.accentColor, in: Circle())
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 2)
+    }
+}
+
+// MARK: - 取景框
 
 private struct ScanFrameOverlay: View {
     let topReservedHeight: CGFloat
@@ -523,8 +718,8 @@ private struct ScanFrameOverlay: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let availableHeight = max(proxy.size.height - topReservedHeight - bottomReservedHeight, 260)
-            let side = min(proxy.size.width - 16, availableHeight)
+            let availableHeight = max(proxy.size.height - topReservedHeight - bottomReservedHeight, 200)
+            let side = min(proxy.size.width - 32, availableHeight, 520)
             let centerY = topReservedHeight + availableHeight / 2
             let center = CGPoint(x: proxy.size.width / 2, y: centerY)
             let cornerRadius = max(28, side * 0.08)
@@ -552,12 +747,14 @@ private struct FireflyScanFrame: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let trailCount: Int = 16
+    /// 萤火虫光晕（44pt + blur）伸出边框的距离
+    private static let glowOutset: CGFloat = 40
 
     private var fireflyColor: Color {
         if showCheckmark { return .green }
         switch scanState {
-        case .idle:      return Color(red: 1.0, green: 0.86, blue: 0.32)
-        case .detecting: return Color(red: 0.55, green: 1.0, blue: 0.55)
+        case .idle:      return Brand.glow
+        case .detecting: return Brand.signal
         }
     }
 
@@ -573,7 +770,7 @@ private struct FireflyScanFrame: View {
             // 「减弱动态效果」下不跑 60fps 环绕动画，用静态描边表达同样的状态色
             ZStack {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(fireflyColor.opacity(0.55), lineWidth: 1.5)
+                    .stroke(fireflyColor.opacity(0.6), lineWidth: 1.5)
                     .frame(width: side, height: side)
                 checkmarkOverlay
             }
@@ -585,7 +782,7 @@ private struct FireflyScanFrame: View {
 
                 ZStack {
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(fireflyColor.opacity(0.18), lineWidth: 1)
+                        .stroke(fireflyColor.opacity(0.28), lineWidth: 1)
                         .frame(width: side, height: side)
 
                     if !showCheckmark {
@@ -632,6 +829,9 @@ private struct FireflyScanFrame: View {
                 .offset(x: perimeterPoint(t: t).x,
                         y: perimeterPoint(t: t).y)
         }
+        // drawingGroup 会按自身尺寸裁剪：不撑开到取景框 + 光晕外延，
+        // ZStack 只有萤火虫本身 44pt 大，偏移到边框上的光点全部被裁掉
+        .frame(width: side + Self.glowOutset * 2, height: side + Self.glowOutset * 2)
         // 16 个独立 blur 是 16 次离屏渲染；合并成单个 Metal 图层后一次完成
         .drawingGroup()
     }

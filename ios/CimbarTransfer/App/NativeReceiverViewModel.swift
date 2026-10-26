@@ -6,13 +6,23 @@ import os
 import UIKit
 
 final class NativeReceiverViewModel: NSObject, ObservableObject {
-    @Published private(set) var statusText: String = String(localized: "准备中...")
+    /// 给 VoiceOver 播报用的当前状态；界面上只展示错误类文案
+    @Published private(set) var statusText: String = String(localized: "正在启动相机")
+    /// 传输进度（0~1）；nil 表示还没开始接收。码离开取景框时保留最后的值
     @Published private(set) var progressValue: Double?
-    @Published private(set) var progressLabel: String?
-    @Published private(set) var statsText: String?
+    /// 最近的帧里是否识别到了码
+    @Published private(set) var isTracking = false
+    @Published private(set) var detectedFrameCount = 0
+    @Published private(set) var remainingSeconds: Int?
     @Published private(set) var stallHint: String?
     @Published private(set) var receivedFileURL: URL?
+    /// 从识别到首帧到文件落盘的用时
+    @Published private(set) var transferDuration: TimeInterval?
     @Published private(set) var scanErrorLatched = false
+    /// 相机无法启动的原因（模拟器、被其他 App 占用等）
+    @Published private(set) var cameraErrorText: String?
+    /// 自动模式下识别出的发送端模式（mode_val），0 表示尚未识别
+    @Published private(set) var detectedMode = 0
     @Published private(set) var cameraPermissionDenied = false
     @Published private(set) var torchAvailable = false
     @Published private(set) var torchActive = false
@@ -52,11 +62,19 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var lastAdvanceUptime: TimeInterval = 0
     private var lastAdvanceFraction: Double = -1
     private var stallTimer: Timer?
+    // 仅在主线程读写：首次识别到码帧的时间，用于计算传输用时
+    private var transferStartUptime: TimeInterval?
 
     func start() {
+        #if DEBUG
+        if let demo = DemoContent.scanState {
+            applyDemoState(demo)
+            return
+        }
+        #endif
         impactGenerator.prepare()
         notificationGenerator.prepare()
-        updateStatusIfIdle(String(localized: "启动相机中..."))
+        updateStatusIfIdle(String(localized: "正在启动相机"))
         publishCameraPermissionDenied(false)
         startStallTimerIfNeeded()
 
@@ -64,7 +82,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         case .authorized:
             configureAndStartSession()
         case .notDetermined:
-            updateStatus(String(localized: "请求相机权限..."))
+            updateStatus(String(localized: "等待相机权限"))
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 guard let self else { return }
                 if granted {
@@ -258,7 +276,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
                     try self.configureSession()
                     self.isConfigured = true
                 } catch {
-                    self.updateStatus(String(localized: "相机初始化失败: \(error.localizedDescription)"))
+                    let message = String(localized: "无法启动相机：\(error.localizedDescription)")
+                    self.updateStatus(message)
+                    DispatchQueue.main.async { self.cameraErrorText = message }
                     return
                 }
             }
@@ -266,9 +286,12 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             if !self.session.isRunning {
                 self.session.startRunning()
             }
+            DispatchQueue.main.async {
+                if self.cameraErrorText != nil { self.cameraErrorText = nil }
+            }
             // 接收过程用户全程无触摸，扫码期间禁用自动锁屏，避免长传输被打断
             self.setIdleTimerDisabled(true)
-            self.updateStatusIfIdle(String(localized: "相机已启动，正在初始化解码器..."))
+            self.updateStatusIfIdle(String(localized: "正在寻找动画码"))
         }
     }
 
@@ -346,20 +369,30 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
         let preferences = AppPreferences.shared
 
+        if detectedMode != Int(result.detectedMode) {
+            detectedMode = Int(result.detectedMode)
+        }
+
+        if result.isIdle {
+            // 码离开取景框：进度还在喷泉流里，界面保留最后的百分比；
+            // ETA 已不准确，清掉，采样也清空，信号恢复后重新估算速率
+            if isTracking { isTracking = false }
+            remainingSeconds = nil
+            progressSamples.removeAll()
+        } else if result.detectedFrameCount > 0 {
+            if !isTracking { isTracking = true }
+            detectedFrameCount = Int(result.detectedFrameCount)
+            if transferStartUptime == nil {
+                transferStartUptime = ProcessInfo.processInfo.systemUptime
+            }
+        }
+
         if let fraction = result.progressFraction {
             if result.didDetectFirstFrame, preferences.hapticEnabled {
                 impactGenerator.impactOccurred()
             }
             progressValue = fraction.doubleValue
-            progressLabel = result.progressLabel
-            updateStats(fraction: fraction.doubleValue, frameCount: result.detectedFrameCount)
-        } else if let label = result.progressLabel {
-            progressValue = nil
-            progressLabel = label
-            // 信号丢失（idle 输出）：清掉冻结的帧数/ETA，避免展示过期数据；
-            // 采样也清空，信号恢复后重新估算速率而不是跨断档平均
-            statsText = nil
-            progressSamples.removeAll()
+            updateStats(fraction: fraction.doubleValue)
         }
 
         if let fileURL = result.fileURL {
@@ -372,10 +405,11 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
                 originalName: result.originalFilename ?? savedName,
                 fileSize: (attrs?[.size] as? NSNumber)?.int64Value ?? 0
             )
-            progressValue = result.progressFraction?.doubleValue ?? 1.0
-            progressLabel = result.progressLabel ?? String(localized: "文件接收 100%")
-            statsText = nil
+            progressValue = 1.0
+            remainingSeconds = nil
             stallHint = nil
+            transferDuration = transferStartUptime.map { ProcessInfo.processInfo.systemUptime - $0 }
+            transferStartUptime = nil
             progressSamples.removeAll()
             lastAdvanceFraction = -1
             // 文件已落盘，后续帧不会再产生新结果；停掉解码链，
@@ -421,9 +455,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         let elapsed = ProcessInfo.processInfo.systemUptime - lastAdvanceUptime
         let newHint: String?
         if elapsed > 12 {
-            newHint = String(localized: "仍无新数据：试试靠近一点、调整角度避免反光，或调高发送端屏幕亮度")
+            newHint = String(localized: "试试靠近些、避开反光，或调亮发送端屏幕")
         } else if elapsed > 5 {
-            newHint = String(localized: "进度停滞了？请确保动画码完整、无遮挡地处于取景框内")
+            newHint = String(localized: "让动画码完整留在取景框里")
         } else {
             newHint = nil
         }
@@ -433,7 +467,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     }
 
     // 主线程调用。用最近一段时间的进度斜率估算剩余时间，避免瞬时抖动
-    private func updateStats(fraction: Double, frameCount: UInt) {
+    private func updateStats(fraction: Double) {
         let now = ProcessInfo.processInfo.systemUptime
         progressSamples.append((time: now, fraction: fraction))
         progressSamples.removeAll { now - $0.time > 12 }
@@ -444,28 +478,16 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             if stallHint != nil { stallHint = nil }
         }
 
-        var parts: [String] = []
-        if frameCount > 0 {
-            parts.append(String(localized: "已识别 \(Int(frameCount)) 帧"))
-        }
+        var remaining: Int?
         if let first = progressSamples.first,
            now - first.time >= 1.5,
            fraction > first.fraction {
             let rate = (fraction - first.fraction) / (now - first.time)
             if rate > 0.0005 {
-                parts.append(String(localized: "预计还需 \(Self.formatRemainingTime((1.0 - fraction) / rate))"))
+                remaining = max(1, Int(((1.0 - fraction) / rate).rounded(.up)))
             }
         }
-        statsText = parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    private static func formatRemainingTime(_ seconds: Double) -> String {
-        let clamped = max(1, Int(seconds.rounded(.up)))
-        if clamped < 90 {
-            return String(localized: "\(clamped) 秒")
-        }
-        let minutes = Int((Double(clamped) / 60.0).rounded())
-        return String(localized: "\(minutes) 分钟")
+        remainingSeconds = remaining
     }
 
     private func updateStatus(_ text: String) {
@@ -477,7 +499,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     // 传输进行中/完成后回前台重启相机时，启动类文案不应覆盖实时进度
     private func updateStatusIfIdle(_ text: String) {
         DispatchQueue.main.async {
-            guard self.progressLabel == nil, self.receivedFileURL == nil else { return }
+            guard self.progressValue == nil, self.receivedFileURL == nil else { return }
             self.statusText = text
         }
     }
@@ -492,14 +514,18 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private func publishResetState() {
         DispatchQueue.main.async {
             self.receivedFileURL = nil
+            self.transferDuration = nil
+            self.transferStartUptime = nil
             self.scanErrorLatched = false
             self.progressValue = nil
-            self.progressLabel = nil
-            self.statsText = nil
+            self.isTracking = false
+            self.detectedFrameCount = 0
+            self.detectedMode = 0
+            self.remainingSeconds = nil
             self.stallHint = nil
             self.progressSamples.removeAll()
             self.lastAdvanceFraction = -1
-            self.statusText = String(localized: "相机已启动，请将发送端动画码放入取景框")
+            self.statusText = String(localized: "正在寻找动画码")
         }
     }
 
@@ -511,10 +537,48 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     private func handlePermissionDenied() {
         setIdleTimerDisabled(false)
-        updateStatus(String(localized: "未授予相机权限，请到系统设置中开启"))
+        updateStatus(String(localized: "没有相机权限"))
         publishCameraPermissionDenied(true)
     }
 }
+
+#if DEBUG
+extension NativeReceiverViewModel {
+    /// 截图/界面验证用：跳过相机，直接把界面置于某个状态（见 DemoContent）
+    fileprivate func applyDemoState(_ name: String) {
+        DispatchQueue.main.async {
+            switch name {
+            case "receiving":
+                self.progressValue = 0.62
+                self.isTracking = true
+                self.detectedFrameCount = 214
+                self.remainingSeconds = 9
+                self.detectedMode = 68
+            case "lost":
+                self.progressValue = 0.62
+                self.isTracking = false
+                self.detectedFrameCount = 214
+                self.detectedMode = 68
+            case "stalled":
+                self.progressValue = 0.41
+                self.isTracking = true
+                self.detectedFrameCount = 133
+                self.detectedMode = 68
+                self.stallHint = String(localized: "试试靠近些、避开反光，或调亮发送端屏幕")
+            case "error":
+                self.scanErrorLatched = true
+                self.statusText = String(format: NSLocalizedString("文件解压失败（错误 %d），传输可能受损", comment: ""), -15)
+            case "done":
+                self.progressValue = 1
+                self.transferDuration = 23
+                self.receivedFileURL = DemoContent.completedSampleURL()
+            default:
+                break
+            }
+        }
+    }
+}
+#endif
 
 extension NativeReceiverViewModel: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(
@@ -538,7 +602,7 @@ extension NativeReceiverViewModel: AVCaptureVideoDataOutputSampleBufferDelegate 
                 created.reset()
             }
             decoder = created
-            updateStatusIfCurrent(String(localized: "相机已启动，请将发送端动画码放入取景框"), revision: revision)
+            updateStatusIfCurrent(String(localized: "正在寻找动画码"), revision: revision)
             return
         }
 

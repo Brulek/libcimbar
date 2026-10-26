@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <map>
 #include <memory>
 
 
@@ -53,18 +54,16 @@ namespace {
 	}
 
 	// Decoder construction decodes + hashes all symbol tiles -- far too heavy
-	// to do per frame. Cache it per mode. Serial use only (single decode queue).
-	std::unique_ptr<Decoder> _decoder;
-	int _decoderModeVal = 0;
+	// to do per frame. Cache one per mode, so mode autodetect (which cycles
+	// modes frame by frame) doesn't rebuild it. Serial use only (single decode queue).
+	std::map<int, std::unique_ptr<Decoder>> _decoders;
 
 	Decoder& get_decoder()
 	{
-		if (!_decoder || _decoderModeVal != _modeVal)
-		{
-			_decoder = std::make_unique<Decoder>();
-			_decoderModeVal = _modeVal;
-		}
-		return *_decoder;
+		std::unique_ptr<Decoder>& dec = _decoders[_modeVal];
+		if (!dec)
+			dec = std::make_unique<Decoder>();
+		return *dec;
 	}
 
 	// set up stateful decompressor
@@ -331,10 +330,7 @@ int cimbard_configure_decode(int mode_val)
 	_modeVal = mode_val;
 	sync_thread_config();
 	if (refresh)
-	{
 		_sink.reset();
-		_decoder.reset();
-	}
 
 	return 0;
 }

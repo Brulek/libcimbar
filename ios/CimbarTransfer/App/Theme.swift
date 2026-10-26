@@ -1,0 +1,88 @@
+import SwiftUI
+
+/// 品牌色取自 App 图标：深夜蓝底 + 萤火琥珀光
+enum Brand {
+    /// 萤火光（深色背景上的发光色，相机取景、引导页用）
+    static let glow = Color(red: 1.0, green: 0.78, blue: 0.30)
+    /// 识别到传输后的状态色
+    static let signal = Color(red: 0.62, green: 0.95, blue: 0.55)
+    /// 图标底色，与 LaunchBackground 一致
+    static let night = Color(red: 0.05, green: 0.07, blue: 0.18)
+    static let nightDeep = Color(red: 0.02, green: 0.03, blue: 0.09)
+    /// 琥珀色按钮上的文字色：白字在琥珀上对比度不足
+    static let ink = Color(red: 0.13, green: 0.09, blue: 0.02)
+}
+
+/// 琥珀实心主按钮，整宽
+struct BrandPrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .foregroundStyle(Brand.ink.opacity(isEnabled ? 1 : 0.45))
+            .background(
+                Color.accentColor.opacity(isEnabled ? 1 : 0.35),
+                in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+            )
+            .opacity(configuration.isPressed ? 0.8 : 1)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == BrandPrimaryButtonStyle {
+    static var brandPrimary: BrandPrimaryButtonStyle { BrandPrimaryButtonStyle() }
+}
+
+extension View {
+    /// 相机画面上的浮层底：iOS 26 起用液态玻璃，更早的系统退回毛玻璃
+    @ViewBuilder
+    func glassChrome<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            glassEffect(.regular, in: shape)
+        } else {
+            background(.ultraThinMaterial, in: shape)
+        }
+    }
+}
+
+/// 设置页风格的彩色圆角图标
+struct IconTile: View {
+    let systemName: String
+    let color: Color
+
+    @ScaledMetric(relativeTo: .body) private var side: CGFloat = 29
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.system(size: side * 0.55, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: side, height: side)
+            .background(color.gradient, in: RoundedRectangle(cornerRadius: side * 0.24, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}
+
+/// 带彩色图标的设置行标题
+struct TileLabel: View {
+    let title: LocalizedStringKey
+    let systemName: String
+    let color: Color
+
+    init(_ title: LocalizedStringKey, systemName: String, color: Color) {
+        self.title = title
+        self.systemName = systemName
+        self.color = color
+    }
+
+    var body: some View {
+        Label {
+            Text(title)
+        } icon: {
+            IconTile(systemName: systemName, color: color)
+        }
+    }
+}

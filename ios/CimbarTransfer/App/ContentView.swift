@@ -24,6 +24,12 @@ struct ContentView: View {
     @State private var previewRequest: PreviewRequest?
     @State private var autoJumpTask: Task<Void, Never>?
 
+    private var newFileCount: Int {
+        guard selectedTab != .library else { return 0 }
+        let lastViewed = preferences.libraryLastViewed
+        return cacheStore.cachedFiles.filter { $0.receivedAt > lastViewed }.count
+    }
+
     var body: some View {
         ZStack {
             // 引导未完成时不把主界面挂进视图层级，
@@ -47,8 +53,8 @@ struct ContentView: View {
             NavigationStack {
                 ReceiverScreen(
                     viewModel: viewModel,
-                    onShare: presentShare,
-                    onPreview: presentPreview
+                    onShare: { presentShare(for: [$0]) },
+                    onPreview: { presentPreview(for: [$0], at: 0) }
                 )
             }
             .tabItem {
@@ -59,15 +65,17 @@ struct ContentView: View {
             NavigationStack {
                 LibraryScreen(
                     store: cacheStore,
-                    onShare: presentShare,
-                    onPreview: presentPreview
+                    onShareFiles: { presentShare(for: $0) },
+                    onPreviewFiles: { presentPreview(for: $0, at: $1) },
+                    onGoToScan: { selectedTab = .scan }
                 )
             }
             .tabItem {
                 Label("我的文件", systemImage: "folder")
             }
             .tag(AppTab.library)
-            .badge(cacheStore.cachedFiles.count)
+            // 只数上次打开「我的文件」之后收到的，总数没有提醒价值
+            .badge(newFileCount)
 
             NavigationStack {
                 SettingsScreen(store: cacheStore)
@@ -78,6 +86,9 @@ struct ContentView: View {
             .tag(AppTab.settings)
         }
         .task {
+            #if DEBUG
+            DemoContent.seedFilesIfRequested()
+            #endif
             cacheStore.refresh(cleanup: true)
         }
         .onChange(of: viewModel.receivedFileURL) { newURL in
@@ -102,6 +113,7 @@ struct ContentView: View {
             autoJumpTask?.cancel()
             if newValue == .library {
                 cacheStore.refresh(cleanup: false)
+                preferences.libraryLastViewed = Date()
             }
             switch newValue {
             case .scan:
@@ -111,6 +123,10 @@ struct ContentView: View {
             }
         }
         .onChange(of: cacheStore.cachedFiles) { _ in
+            // 停在「我的文件」时新到的文件当场就看到了，不再算作未读
+            if selectedTab == .library {
+                preferences.libraryLastViewed = Date()
+            }
             // 在「我的文件」/设置里删除或清空后，扫码页完成卡片若还指向
             // 已删除的文件，会给出死链的「查看/分享」入口——直接重置扫码
             guard let url = viewModel.receivedFileURL,
@@ -141,12 +157,12 @@ struct ContentView: View {
         .sheet(item: $shareRequest, onDismiss: {
             resumeScanIfAppropriate()
         }) { request in
-            ShareSheet(fileURL: request.url)
+            ShareSheet(fileURLs: request.urls)
         }
         .sheet(item: $previewRequest, onDismiss: {
             resumeScanIfAppropriate()
         }) { request in
-            QuickLookPreview(fileURL: request.url)
+            QuickLookPreview(fileURLs: request.urls, initialIndex: request.index)
                 .ignoresSafeArea()
         }
     }
@@ -158,27 +174,28 @@ struct ContentView: View {
         viewModel.resumeProcessing()
     }
 
-    private func presentShare(for fileURL: URL) {
-        guard shareRequest == nil else { return }
+    private func presentShare(for fileURLs: [URL]) {
+        guard shareRequest == nil, !fileURLs.isEmpty else { return }
         autoJumpTask?.cancel()
         viewModel.pauseProcessing()
-        shareRequest = ShareRequest(url: fileURL)
+        shareRequest = ShareRequest(urls: fileURLs)
     }
 
-    private func presentPreview(for fileURL: URL) {
-        guard previewRequest == nil else { return }
+    private func presentPreview(for fileURLs: [URL], at index: Int) {
+        guard previewRequest == nil, !fileURLs.isEmpty else { return }
         autoJumpTask?.cancel()
         viewModel.pauseProcessing()
-        previewRequest = PreviewRequest(url: fileURL)
+        previewRequest = PreviewRequest(urls: fileURLs, index: index)
     }
 }
 
 struct ShareRequest: Identifiable {
     let id = UUID()
-    let url: URL
+    let urls: [URL]
 }
 
 struct PreviewRequest: Identifiable {
     let id = UUID()
-    let url: URL
+    let urls: [URL]
+    let index: Int
 }

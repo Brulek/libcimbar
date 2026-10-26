@@ -1,17 +1,6 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-    "，" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ", "
-          }
-        }
-      }
-    },
     "%@ · %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -28,135 +17,346 @@
         }
       }
     },
-    "%@。点按「继续扫码」可重试" : {
+    "%lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@. Tap “Scan Again” to retry."
+            "value" : "%lld"
           }
         }
       }
     },
     "%lld 个文件 · %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld files · %@"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld file · %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld files · %@"
+                }
+              }
+            }
           }
         }
       }
     },
-    "%lld 分钟" : {
-      "extractionState" : "stale",
+    "**相册写入权限（可选）**：仅在您主动选择将接收到的图片保存到相册时使用。本应用不读取您相册中的任何内容。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld min"
+            "value" : "**Add to Photos (optional):** used only when you choose to save a received image to your photo library. The app never reads anything in your library."
           }
         }
       }
     },
-    "%lld 秒" : {
-      "extractionState" : "stale",
+    "**相机权限（必需）**：仅用于扫描发送端的彩色动画码。该权限只在「扫码」页激活时使用，画面仅在本机内存中实时解码，不会被存储或上传。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld sec"
+            "value" : "**Camera (required):** used only to scan the sender's animated color code, and only while the Scan tab is active. Frames are decoded in memory on the device and are never stored or uploaded."
           }
         }
       }
     },
-    "•" : {
-      "shouldTranslate" : false
-    },
-    "libcimbar 开源项目" : {
-      "extractionState" : "stale",
+    "**请勿用于传输商业机密、个人隐私文件等敏感内容**" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "libcimbar Open-Source Project"
+            "value" : "**Do not use it to transfer sensitive content such as trade secrets or private personal files**"
           }
         }
       }
     },
-    "Lumen · 见屏即传" : {
+    "30 天后" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lumen · Transfer at a glance"
+            "value" : "After 30 Days"
           }
         }
       }
     },
-    "Micro 微码" : {
+    "7 天后" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Micro"
+            "value" : "After 7 Days"
           }
         }
       }
     },
-    "Mini 小码" : {
+    "8C（旧版）" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mini"
+            "value" : "8C (Legacy)"
           }
         }
       }
     },
     "SHA-256" : {
-      "shouldTranslate" : false
-    },
-    "一款基于 libcimbar 协议的离线文件接收工具" : {
-      "extractionState" : "stale",
+      "shouldTranslate" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "An offline file receiver powered by the libcimbar protocol"
+            "value" : "SHA-256"
           }
         }
       }
     },
-    "下一步" : {
+    "libcimbar 项目" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Next"
+            "value" : "libcimbar Project"
           }
         }
       }
     },
-    "仍无新数据：试试靠近一点、调整角度避免反光，或调高发送端屏幕亮度" : {
-      "extractionState" : "stale",
+    "•" : {
+      "shouldTranslate" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Still no new data. Try moving closer, changing the angle to avoid glare, or turning up the sender's screen brightness."
+            "value" : "•"
           }
         }
       }
     },
-    "体积（大→小）" : {
-      "extractionState" : "stale",
+    "「%@」删除后无法恢复。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Size (Largest First)"
+            "value" : "“%@” will be permanently deleted."
+          }
+        }
+      }
+    },
+    "一、协议接受" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Acceptance of Terms"
+          }
+        }
+      }
+    },
+    "一、本政策的适用范围" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1. Scope of This Policy"
+          }
+        }
+      }
+    },
+    "七、协议的变更与终止" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7. Changes and Termination"
+          }
+        }
+      }
+    },
+    "七、政策的变更" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7. Changes to This Policy"
+          }
+        }
+      }
+    },
+    "三、我们使用哪些权限" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3. What Permissions We Use"
+          }
+        }
+      }
+    },
+    "三、用户行为规范" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3. Acceptable Use"
+          }
+        }
+      }
+    },
+    "三步收文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three Steps"
+          }
+        }
+      }
+    },
+    "不联网、不配对，两台设备离得近就行" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet, no pairing. Just point and receive."
+          }
+        }
+      }
+    },
+    "二、我们收集哪些信息" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. What Information We Collect"
+          }
+        }
+      }
+    },
+    "二、服务说明" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2. Description of Service"
+          }
+        }
+      }
+    },
+    "五、本应用的安全声明" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5. Security Notice"
+          }
+        }
+      }
+    },
+    "五、知识产权" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5. Intellectual Property"
+          }
+        }
+      }
+    },
+    "仅保存在您本机设备上，不会被上传或同步到任何云端" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stay on your device only and are never uploaded or synced to any cloud"
+          }
+        }
+      }
+    },
+    "今天" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        }
+      }
+    },
+    "从不" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never"
+          }
+        }
+      }
+    },
+    "传输侵犯他人知识产权的文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer files that infringe anyone's intellectual property"
+          }
+        }
+      }
+    },
+    "传输含有计算机病毒、木马等恶意代码的文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer files containing viruses, trojans or other malicious code"
+          }
+        }
+      }
+    },
+    "传输商业机密、国家秘密、他人隐私等敏感信息（详见隐私政策中的安全声明）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transfer sensitive information such as trade secrets, state secrets or other people's private data (see the Security Notice in the Privacy Policy)"
+          }
+        }
+      }
+    },
+    "传输或接收任何违反中国法律法规的内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send or receive any content that violates applicable laws or regulations"
+          }
+        }
+      }
+    },
+    "传输过程的成功率（受光照、距离、设备性能等多种因素影响）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The success rate of transfers (which depends on lighting, distance, device performance and other factors)"
+          }
+        }
+      }
+    },
+    "位置信息、设备 IMEI 或唯一标识" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location, device IMEI or other unique identifiers"
           }
         }
       }
@@ -171,8 +371,17 @@
         }
       }
     },
+    "使用须知" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before You Start"
+          }
+        }
+      }
+    },
     "依赖列表" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -183,7 +392,6 @@
       }
     },
     "保存" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -193,19 +401,7 @@
         }
       }
     },
-    "保存位置" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save Location"
-          }
-        }
-      }
-    },
     "保存失败" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -215,74 +411,77 @@
         }
       }
     },
-    "保存文件名" : {
-      "extractionState" : "stale",
+    "保存失败，请检查剩余存储空间" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saved Filename"
+            "value" : "Couldn't save. Check your free storage."
           }
         }
       }
     },
-    "保持稳定数秒，进度条到 100% 即接收完成" : {
-      "extractionState" : "stale",
+    "信息" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold steady for a few seconds — the transfer is complete when the progress bar reaches 100%"
+            "value" : "Info"
           }
         }
       }
     },
-    "保留 7 天" : {
-      "extractionState" : "stale",
+    "全选" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep for 7 Days"
+            "value" : "Select All"
           }
         }
       }
     },
-    "保留 30 天" : {
-      "extractionState" : "stale",
+    "八、法律适用" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep for 30 Days"
+            "value" : "8. Governing Law"
           }
         }
       }
     },
-    "保留时长" : {
-      "extractionState" : "stale",
+    "八、联系我们" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep Files"
+            "value" : "8. Contact Us"
           }
         }
       }
     },
-    "保留策略" : {
-      "extractionState" : "stale",
+    "六、免责声明" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "File Retention"
+            "value" : "6. Disclaimer"
+          }
+        }
+      }
+    },
+    "六、未成年人保护" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6. Children's Privacy"
           }
         }
       }
     },
     "关于" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -292,8 +491,17 @@
         }
       }
     },
+    "关于萤传" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About Lumen"
+          }
+        }
+      }
+    },
     "关闭" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -304,7 +512,6 @@
       }
     },
     "关闭手电筒" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -314,70 +521,7 @@
         }
       }
     },
-    "兼容 4C（旧版）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4C (Legacy)"
-          }
-        }
-      }
-    },
-    "兼容 8C（旧版）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "8C (Legacy)"
-          }
-        }
-      }
-    },
-    "最后更新时间：2026 年 5 月" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last updated: May 2026"
-          }
-        }
-      }
-    },
-    "写入文件失败，请检查设备可用存储空间" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to write the file. Check the available storage on this device."
-          }
-        }
-      }
-    },
-    "准备中..." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparing…"
-          }
-        }
-      }
-    },
-    "准备就绪" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You're All Set"
-          }
-        }
-      }
-    },
     "分享" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -387,18 +531,17 @@
         }
       }
     },
-    "切换到「扫码」标签，对准发送端动画码即可开始接收" : {
+    "分享所选文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Go to the Scan tab and point your camera at the sender's animated code to start receiving."
+            "value" : "Share Selected Files"
           }
         }
       }
     },
     "删除" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -408,19 +551,39 @@
         }
       }
     },
-    "删除 %lld 个" : {
-      "extractionState" : "stale",
+    "删除 %lld 个文件？" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld File?"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld Files?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "删除后无法恢复。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete %lld Items"
+            "value" : "This can't be undone."
           }
         }
       }
     },
     "删除所选文件" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -430,19 +593,7 @@
         }
       }
     },
-    "删除所选文件？" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete Selected Files?"
-          }
-        }
-      }
-    },
     "删除文件" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -452,8 +603,57 @@
         }
       }
     },
+    "删除这个文件？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete This File?"
+          }
+        }
+      }
+    },
+    "利用本应用从事任何形式的非法活动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carry out any illegal activity of any kind"
+          }
+        }
+      }
+    },
+    "动画码已离开取景框，对准后继续" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code out of view. Point at it to continue."
+          }
+        }
+      }
+    },
+    "动画码显示在屏幕上，附近的人也能拍到" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The code is shown on screen, so anyone nearby can capture it too."
+          }
+        }
+      }
+    },
+    "卸载本应用时，这些文件会随应用一并删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are deleted together with the app when you delete it"
+          }
+        }
+      }
+    },
     "原始文件名" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -463,50 +663,67 @@
         }
       }
     },
-    "发送文件：在对方设备的浏览器打开 cimbar.org，选择文件生成动画码，用本机扫描即可。" : {
+    "去扫码" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To send files: open cimbar.org in a browser on the other device, choose a file to generate an animated code, then scan it with this device."
+            "value" : "Start Scanning"
           }
         }
       }
     },
-    "发送方在另一台设备上打开 libcimbar 网页或客户端，选择要发送的文件，会显示一段彩色动画码" : {
-      "extractionState" : "stale",
+    "去设置" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On another device, the sender opens the libcimbar web page or app and picks a file — a colorful animated code appears"
+            "value" : "Open Settings"
           }
         }
       }
     },
-    "发送端：在对方设备浏览器打开 cimbar.org" : {
+    "去设置开启" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To send: open cimbar.org in a browser on the other device"
+            "value" : "Open Settings"
           }
         }
       }
     },
-    "发送端网页（cimbar.org）" : {
-      "extractionState" : "stale",
+    "发送方用浏览器打开 cimbar.org，选好文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sender Website (cimbar.org)"
+            "value" : "The sender opens cimbar.org in a browser and picks a file"
+          }
+        }
+      }
+    },
+    "发送方用浏览器打开 cimbar.org，选好文件即可" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The sender opens cimbar.org in a browser and picks a file."
+          }
+        }
+      }
+    },
+    "发送端网页" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sender Web Page"
           }
         }
       }
     },
     "取消" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -516,35 +733,92 @@
         }
       }
     },
-    "名称（A→Z）" : {
-      "extractionState" : "stale",
+    "取消全选" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Name (A–Z)"
+            "value" : "Deselect All"
           }
         }
       }
     },
-    "启动相机中..." : {
-      "extractionState" : "stale",
+    "变焦 %@ 倍" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starting camera…"
+            "value" : "Zoom %@×"
+          }
+        }
+      }
+    },
+    "可在系统「文件」App 中浏览" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can be browsed in the Files app"
+          }
+        }
+      }
+    },
+    "名称" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "四、文件内容的责任归属" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4. Responsibility for File Content"
+          }
+        }
+      }
+    },
+    "四、文件如何存储" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4. How Files Are Stored"
+          }
+        }
+      }
+    },
+    "因接收非法文件、病毒文件造成的任何损失，由您自行承担" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You bear any loss caused by receiving illegal or infected files"
           }
         }
       }
     },
     "在「文件」App 中查看" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "View in Files"
+          }
+        }
+      }
+    },
+    "在本机完成数据重组并保存到本应用的文档目录" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reassembling the data on the device and saving it to the app's Documents folder"
           }
         }
       }
@@ -559,18 +833,27 @@
         }
       }
     },
-    "声明" : {
+    "在电脑或另一台手机的浏览器里打开 cimbar.org" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notices"
+            "value" : "Open cimbar.org in a browser on a computer or another phone."
+          }
+        }
+      }
+    },
+    "在网页菜单里调低 Framerate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lower the Framerate in the web page menu"
           }
         }
       }
     },
     "复制" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -580,8 +863,27 @@
         }
       }
     },
+    "复制网址" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Link"
+          }
+        }
+      }
+    },
+    "大小" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size"
+          }
+        }
+      }
+    },
     "好" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -601,8 +903,27 @@
         }
       }
     },
+    "如必须传输敏感文件，请先用强密码加密压缩后再发送" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you must send a sensitive file, put it in an archive encrypted with a strong password first"
+          }
+        }
+      }
+    },
+    "姓名、电话、邮箱、身份证号、地址等身份信息" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identity information such as name, phone number, email, ID number or address"
+          }
+        }
+      }
+    },
     "存储" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -613,7 +934,6 @@
       }
     },
     "存储目录不可用" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -624,40 +944,26 @@
       }
     },
     "存到相册" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Save to Photos"
-          }
-        }
-      }
-    },
-    "存到相册失败" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't Save to Photos"
           }
         }
       }
     },
     "存相册" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save to Photos"
+            "value" : "Save Image"
           }
         }
       }
     },
     "完成" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -667,82 +973,17 @@
         }
       }
     },
-    "完成后可直接预览、分享，或在「我的文件」中再次打开" : {
-      "extractionState" : "stale",
+    "对准屏幕上的动画码" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "When it's done, preview or share right away, or open it again in My Files"
-          }
-        }
-      }
-    },
-    "对准发送端动画码" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aim at the sender's animated code"
-          }
-        }
-      }
-    },
-    "对方用支持 cimbar 的发送端，本机扫一扫即可" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The other device shows a cimbar code — just scan it with this one"
-          }
-        }
-      }
-    },
-    "将删除「%@」，无法恢复。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“%@” will be deleted. This can’t be undone."
-          }
-        }
-      }
-    },
-    "将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This also renames the file on disk, so the same name appears when sharing and in the Files app. The file extension stays unchanged."
-          }
-        }
-      }
-    },
-    "已保存" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved"
-          }
-        }
-      }
-    },
-    "已保存到相册" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved to Photos"
+            "value" : "Point at the Code on Screen"
           }
         }
       }
     },
     "已复制" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -752,8 +993,37 @@
         }
       }
     },
-    "已接收" : {
-      "extractionState" : "stale",
+    "已复制网址" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link Copied"
+          }
+        }
+      }
+    },
+    "已存入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        }
+      }
+    },
+    "已存到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to Photos"
+          }
+        }
+      }
+    },
+    "已收到" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -763,59 +1033,59 @@
         }
       }
     },
-    "已接收喷泉流进度，继续保持取景（%lu 路）" : {
+    "已收到 %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Receiving fountain-coded data — keep the code in view (%lu streams)"
+            "value" : "Received %@"
           }
         }
       }
     },
-    "已检测到传输，正在重组数据" : {
+    "已收到 %@（%@）" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transfer detected — reassembling data"
+            "value" : "Received %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "已用空间" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage Used"
           }
         }
       }
     },
     "已识别 %lld 帧" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld frames detected"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld frame read"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld frames read"
+                }
+              }
+            }
           }
         }
       }
     },
-    "已识别到数据帧" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Data frames detected"
-          }
-        }
-      }
-    },
-    "已识别到码帧，正在解码（%lu）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Code frames detected, decoding (%lu)"
-          }
-        }
-      }
-    },
-    "已选 %lld 项" : {
-      "extractionState" : "stale",
+    "已选 %lld 个" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -826,7 +1096,6 @@
       }
     },
     "帮助" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -836,23 +1105,32 @@
         }
       }
     },
-    "应用信息" : {
-      "extractionState" : "stale",
+    "应用功能在所有 iOS 设备及版本上的兼容性" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Info"
+            "value" : "Compatibility with every iOS device and version"
           }
         }
       }
     },
-    "应用简介" : {
+    "应用持续可用、无中断、无错误" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Overview"
+            "value" : "Continuous, uninterrupted or error-free availability"
+          }
+        }
+      }
+    },
+    "开始使用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Started"
           }
         }
       }
@@ -867,24 +1145,32 @@
         }
       }
     },
-    "当前变焦 %@ 倍，点按恢复 1 倍" : {
-      "extractionState" : "stale",
+    "彩色动画码在屏幕上完整可见，附近的人可拍摄、录屏甚至远距离捕获" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom %@x. Tap to reset to 1x."
+            "value" : "The animated code is fully visible on screen; people nearby can photograph, record or capture it, even from a distance"
           }
         }
       }
     },
-    "怎么收文件" : {
-      "extractionState" : "stale",
+    "怎么发送文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "How to Receive Files"
+            "value" : "How to Send a File"
+          }
+        }
+      }
+    },
+    "您可随时在应用内手动删除，或在「设置 → 自动清理」中设置自动删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can delete them in the app at any time, or have them removed automatically under Settings → Auto-Delete"
           }
         }
       }
@@ -899,12 +1185,42 @@
         }
       }
     },
+    "您应自行判断文件来源是否可信" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are responsible for judging whether a file's source is trustworthy"
+          }
+        }
+      }
+    },
     "您承诺不会使用本应用从事以下行为：" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "You agree not to use the app to:"
+          }
+        }
+      }
+    },
+    "您接收到的文件内容" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The content of files you receive"
+          }
+        }
+      }
+    },
+    "我们对您接收的文件内容不负任何审查义务和责任" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We have no duty to review, and no liability for, the content of files you receive"
           }
         }
       }
@@ -919,29 +1235,17 @@
         }
       }
     },
-    "我已了解，开始使用" : {
-      "extractionState" : "stale",
+    "我已了解，不用萤传传输涉密文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Get Started"
-          }
-        }
-      }
-    },
-    "我已阅读上述提醒，承诺不使用本应用传输机密信息" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I've read the reminder above and agree not to transfer confidential information with this app"
+            "value" : "I understand and won't use Lumen for classified files"
           }
         }
       }
     },
     "我的文件" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -951,8 +1255,17 @@
         }
       }
     },
+    "打开 cimbar.org" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open cimbar.org"
+          }
+        }
+      }
+    },
     "打开手电筒" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -962,30 +1275,57 @@
         }
       }
     },
-    "打开设置" : {
-      "extractionState" : "stale",
+    "打开网页菜单，点 Find File 选择文件，也可以直接把文件拖进网页" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open Settings"
+            "value" : "Open the page menu and tap Find File, or drag a file onto the page."
           }
         }
       }
     },
-    "扫描中..." : {
-      "extractionState" : "stale",
+    "扩展名会保留" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scanning…"
+            "value" : "The file extension is kept."
+          }
+        }
+      }
+    },
+    "扫一扫屏幕上的动画码，文件就到手" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan the animated code on a screen and the file is yours."
+          }
+        }
+      }
+    },
+    "扫一扫屏幕，文件就到手" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan a screen, get the file"
+          }
+        }
+      }
+    },
+    "扫描别人屏幕上的动画码，收到的文件会出现在这里。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan an animated code on another screen. Received files show up here."
           }
         }
       }
     },
     "扫码" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -995,44 +1335,72 @@
         }
       }
     },
-    "扫码解码 %ld%%" : {
+    "把屏幕上的动画码放进取景框" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Decoding %ld%%"
+            "value" : "Fit the animated code inside the viewfinder"
           }
         }
       }
     },
-    "排序方式" : {
-      "extractionState" : "stale",
+    "把网址发给发送方" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sort By"
+            "value" : "Send Link to the Sender"
           }
         }
       }
     },
-    "接下来你将看到" : {
+    "振动" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What happens next"
+            "value" : "Vibration"
           }
         }
       }
     },
-    "接收" : {
-      "extractionState" : "stale",
+    "换个关键词试试" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Receiving"
+            "value" : "Try a different search."
+          }
+        }
+      }
+    },
+    "换个名称试试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try a different name."
+          }
+        }
+      }
+    },
+    "排序" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort"
+          }
+        }
+      }
+    },
+    "接收到的文件仅保存在您本机设备上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Received files are stored only on your device"
           }
         }
       }
@@ -1047,41 +1415,17 @@
         }
       }
     },
-    "接收后自动打开「我的文件」" : {
-      "extractionState" : "stale",
+    "接收文件的完整性和正确性" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open My Files After Receiving"
-          }
-        }
-      }
-    },
-    "接收完成提示音" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Play Sound on Completion"
-          }
-        }
-      }
-    },
-    "接收完成的文件可在「我的文件」标签查看" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Received files appear in the My Files tab"
+            "value" : "The completeness and correctness of received files"
           }
         }
       }
     },
     "接收时间" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1091,93 +1435,97 @@
         }
       }
     },
-    "接收的数据无法解压（错误 %d），可能是传输受损" : {
+    "提供文件预览、分享、重命名、删除等管理能力" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Received data couldn't be decompressed (error %d) — the transfer may be corrupted"
+            "value" : "Previewing, sharing, renaming and deleting received files"
           }
         }
       }
     },
-    "接收超过 7 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。" : {
-      "extractionState" : "stale",
+    "提示音" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Files received more than 7 days ago are cleaned up automatically (takes effect immediately and on every launch)."
+            "value" : "Sound"
           }
         }
       }
     },
-    "接收超过 30 天的文件会被自动清理（切换后立即生效，并在每次启动时检查）。" : {
-      "extractionState" : "stale",
+    "搜索" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Files received more than 30 days ago are cleaned up automatically (takes effect immediately and on every launch)."
+            "value" : "Search"
           }
         }
       }
     },
-    "搜索文件名" : {
-      "extractionState" : "stale",
+    "收不到时" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search files"
+            "value" : "If Nothing Comes Through"
           }
         }
       }
     },
-    "操作不可撤销。" : {
+    "收到文件后" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This action cannot be undone."
+            "value" : "When a File Arrives"
           }
         }
       }
     },
-    "支持任意文件类型：图片、文档、压缩包等" : {
-      "extractionState" : "stale",
+    "收到超过 30 天的文件会被自动删除。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Any file type: photos, documents, archives, and more"
+            "value" : "Files received more than 30 days ago are deleted automatically."
           }
         }
       }
     },
-    "数据不上传服务器，文件只在你的设备上" : {
-      "extractionState" : "stale",
+    "收到超过 7 天的文件会被自动删除。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nothing goes to a server — your files stay on your device"
+            "value" : "Files received more than 7 days ago are deleted automatically."
           }
         }
       }
     },
-    "文件保存在 App 的文档目录，可在系统「文件」App 中浏览。" : {
+    "文件会一直保留，直到你手动删除。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Files are saved to this app's Documents folder and can be browsed in the Files app."
+            "value" : "Files are kept until you delete them."
+          }
+        }
+      }
+    },
+    "文件只存在这台设备上" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Files stay on this device"
           }
         }
       }
     },
     "文件名" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1187,49 +1535,37 @@
         }
       }
     },
-    "文件已接收，可直接分享" : {
+    "文件已收到" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "File already received — ready to share"
+            "value" : "File received"
           }
         }
       }
     },
-    "文件接收 100%" : {
+    "文件解压失败（错误 %d），传输可能受损" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "File received 100%"
+            "value" : "Couldn't decompress the file (error %d). The transfer may be damaged."
           }
         }
       }
     },
-    "文件数据重组失败（错误 %d），可能是传输受损" : {
+    "文件重组失败（错误 %d），传输可能受损" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "File reassembly failed (error %d) — the transfer may be corrupted"
-          }
-        }
-      }
-    },
-    "文件详情" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "File Details"
+            "value" : "Couldn't reassemble the file (error %d). The transfer may be damaged."
           }
         }
       }
     },
     "新文件名不能为空" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1239,28 +1575,27 @@
         }
       }
     },
-    "无法保存接收文件" : {
+    "无法保存文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unable to save the received file"
+            "value" : "Couldn't save the file"
           }
         }
       }
     },
-    "无法写入接收文件" : {
+    "无法启动相机：%@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unable to write the received file"
+            "value" : "Camera unavailable: %@"
           }
         }
       }
     },
     "无法添加相机输入" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1271,7 +1606,6 @@
       }
     },
     "无法添加视频输出" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1281,41 +1615,67 @@
         }
       }
     },
-    "无需网络，无需配对，全程离线" : {
-      "extractionState" : "stale",
+    "昨天" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No network, no pairing — completely offline"
+            "value" : "Yesterday"
           }
         }
       }
     },
-    "时间（最早）" : {
-      "extractionState" : "stale",
+    "更多" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Date (Oldest First)"
+            "value" : "More"
           }
         }
       }
     },
-    "时间（最近）" : {
-      "extractionState" : "stale",
+    "更早" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Date (Newest First)"
+            "value" : "Earlier"
+          }
+        }
+      }
+    },
+    "最后更新时间：2026 年 5 月" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last updated: May 2026"
+          }
+        }
+      }
+    },
+    "最新优先" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Newest First"
+          }
+        }
+      }
+    },
+    "最早优先" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oldest First"
           }
         }
       }
     },
     "有 %lld 个文件删除失败，请稍后重试" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1326,7 +1686,6 @@
       }
     },
     "有 %lld 个文件未能清除，请稍后重试" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1336,55 +1695,22 @@
         }
       }
     },
+    "有文件没能删除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some Files Weren't Deleted"
+          }
+        }
+      }
+    },
     "未找到可用后置相机" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No back camera found"
-          }
-        }
-      }
-    },
-    "未授予相册写入权限" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Permission to save to your photo library was denied."
-          }
-        }
-      }
-    },
-    "未授予相机权限" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Camera Access"
-          }
-        }
-      }
-    },
-    "未授予相机权限，请到系统设置中开启" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera access denied. Please enable it in Settings."
-          }
-        }
-      }
-    },
-    "未选择" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing Selected"
           }
         }
       }
@@ -1439,16 +1765,6 @@
         }
       }
     },
-    "本应用使用 libcimbar 开源项目（Mozilla Public License 2.0）实现解码链路，包含少量适配 iOS 的修改；修改后的源文件依 MPL-2.0 以源代码形式提供。详细的开源声明请见「开源许可」页。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This app uses the libcimbar open-source project (Mozilla Public License 2.0) for its decoding pipeline, with minor modifications for iOS. The modified source files are made available in source form under MPL-2.0. See the Open Source Licenses page for details."
-          }
-        }
-      }
-    },
     "本应用使用了以下开源软件，对原作者表达诚挚谢意。" : {
       "localizations" : {
         "en" : {
@@ -1470,7 +1786,6 @@
       }
     },
     "本应用基于 libcimbar 源码实现 cimbar 解码，并包含少量适配 iOS 的修改（接收端 C 接口的小幅扩展）。修改后的源文件依 MPL-2.0 同样以源代码形式提供，可通过 App Store 页面的支持渠道获取。" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1496,16 +1811,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The app receives files offline using the libcimbar protocol:"
-          }
-        }
-      }
-    },
-    "本应用是由第三方开发的非官方客户端，与 libcimbar 开源项目及 cimbar.org 无隶属或合作关系。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is an unofficial third-party client and is not affiliated with the libcimbar project or cimbar.org."
           }
         }
       }
@@ -1550,55 +1855,12 @@
         }
       }
     },
-    "本机切到「扫码」页，将取景框对准对方屏幕" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Switch to the Scan tab on this device and point the viewfinder at the sender's screen"
-          }
-        }
-      }
-    },
     "本隐私政策仅适用于「萤传」iOS 客户端（以下简称「本应用」）。本应用是一款离线的文件接收工具，使用 libcimbar 协议在本机解码相机捕获到的彩色动画码。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "This privacy policy applies only to the Lumen iOS app (“the app”). The app is an offline file receiver that decodes animated color codes captured by the camera, on the device, using the libcimbar protocol."
-          }
-        }
-      }
-    },
-    "查看" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View"
-          }
-        }
-      }
-    },
-    "查看使用指南" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View User Guide"
-          }
-        }
-      }
-    },
-    "标准（Mode B）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standard (Mode B)"
           }
         }
       }
@@ -1613,45 +1875,82 @@
         }
       }
     },
-    "欢迎使用萤传" : {
-      "extractionState" : "stale",
+    "正在启动相机" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Welcome to Lumen"
+            "value" : "Starting camera"
           }
         }
       }
     },
-    "正在扫描，尚未识别到有效码帧" : {
+    "正在寻找动画码" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scanning — no valid code frames yet"
+            "value" : "Looking for a code"
           }
         }
       }
     },
-    "永久保留" : {
-      "extractionState" : "stale",
+    "正在接收" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep Forever"
+            "value" : "Receiving"
           }
         }
       }
     },
-    "法律" : {
-      "extractionState" : "stale",
+    "没有找到“%@”" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legal"
+            "value" : "No Results for “%@”"
+          }
+        }
+      }
+    },
+    "没有相机权限" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No camera access"
+          }
+        }
+      }
+    },
+    "没能存到相册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't Save to Photos"
+          }
+        }
+      }
+    },
+    "没能重命名" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't Rename"
+          }
+        }
+      }
+    },
+    "没能重命名，换个名称试试" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't rename. Try a different name."
           }
         }
       }
@@ -1666,19 +1965,29 @@
         }
       }
     },
-    "清空" : {
-      "extractionState" : "stale",
+    "清空 %lld 个文件" : {
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete All"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld File"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld Files"
+                }
+              }
+            }
           }
         }
       }
     },
     "清空所有文件" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1688,96 +1997,7 @@
         }
       }
     },
-    "清空未完全成功" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Some Files Couldn't Be Deleted"
-          }
-        }
-      }
-    },
-    "版本" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version"
-          }
-        }
-      }
-    },
-    "用户协议" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terms of Service"
-          }
-        }
-      }
-    },
-    "相机初始化失败: %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera setup failed: %@"
-          }
-        }
-      }
-    },
-    "相机已启动，正在初始化解码器..." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera started, initializing decoder…"
-          }
-        }
-      }
-    },
-    "相机已启动，请将发送端动画码放入取景框" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera ready. Center the sender's animated code in the frame."
-          }
-        }
-      }
-    },
-    "相机权限状态未知" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera permission status unknown"
-          }
-        }
-      }
-    },
-    "相机预览，轻点对焦，捏合缩放" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera preview. Tap to focus, pinch to zoom."
-          }
-        }
-      }
-    },
-    "确认清空所有文件？" : {
-      "extractionState" : "stale",
+    "清空所有文件？" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1787,8 +2007,67 @@
         }
       }
     },
+    "照片、文档、压缩包，什么格式都能收" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos, documents, archives — any file type works"
+          }
+        }
+      }
+    },
+    "版本 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        }
+      }
+    },
+    "用户协议" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Service"
+          }
+        }
+      }
+    },
+    "用时 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "took %@"
+          }
+        }
+      }
+    },
+    "相机取景，轻点对焦，捏合缩放" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera viewfinder. Tap to focus, pinch to zoom."
+          }
+        }
+      }
+    },
+    "相机权限状态未知" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera permission status unknown"
+          }
+        }
+      }
+    },
     "第 %lld 页，共 %lld 页" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1798,46 +2077,132 @@
         }
       }
     },
-    "等待识别" : {
-      "extractionState" : "stale",
+    "等待相机权限" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Waiting to detect"
+            "value" : "Waiting for camera access"
           }
         }
       }
     },
-    "等待识别动画码" : {
-      "extractionState" : "stale",
+    "简介" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Waiting to detect animated code"
+            "value" : "Info"
           }
         }
       }
     },
-    "继续扫码" : {
-      "extractionState" : "stale",
+    "类型" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan Again"
+            "value" : "Kind"
           }
         }
       }
     },
-    "自动开启相机扫描动画码" : {
-      "extractionState" : "stale",
+    "继续" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The camera opens automatically to scan animated codes"
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "继续接收" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receive Another"
+          }
+        }
+      }
+    },
+    "网页开始播放动画码后，用萤传对准它，进度到 100% 即完成" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the page starts playing the code, point Lumen at it. You're done at 100%."
+          }
+        }
+      }
+    },
+    "网页菜单里的 Mode 保持默认即可，萤传会自动识别。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave Mode in the page menu at its default — Lumen detects it automatically."
+          }
+        }
+      }
+    },
+    "自动" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        }
+      }
+    },
+    "自动 · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto · %@"
+          }
+        }
+      }
+    },
+    "自动打开「我的文件」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open My Files"
+          }
+        }
+      }
+    },
+    "自动清理" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-Delete"
+          }
+        }
+      }
+    },
+    "自动识别" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        }
+      }
+    },
+    "自动识别会匹配发送端的 Mode。远距离或对着大屏幕时可打开高清采集，耗电会多一些。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic matches the sender's Mode. Turn on HD Capture for distant or large screens; it uses a bit more battery."
           }
         }
       }
@@ -1872,38 +2237,37 @@
         }
       }
     },
-    "萤传是一款基于 cimbar 动态彩色码协议的离线文件接收工具。通过摄像头扫描发送端屏幕的动画码完成文件传输，无需网络、无需配对。" : {
+    "萤传是第三方开发的非官方客户端，与 libcimbar 及 cimbar.org 无隶属关系。解码部分基于 libcimbar（MPL-2.0），针对 iOS 修改过的源文件依 MPL-2.0 提供源代码，详见「开源许可」。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lumen is an offline file receiver built on the cimbar animated color-code protocol. Scan the animated code on the sender's screen with your camera to transfer files — no network, no pairing."
+            "value" : "Lumen is an unofficial third-party client, not affiliated with libcimbar or cimbar.org. Decoding is based on libcimbar (MPL-2.0); source for the files modified for iOS is available under MPL-2.0. See Open Source Licenses."
           }
         }
       }
     },
-    "解码完成: %@" : {
+    "萤传通过相机读取屏幕上的动画码，画面不会离开这台设备。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Decoding complete: %@"
+            "value" : "Lumen reads the animated code through the camera. The image never leaves this device."
           }
         }
       }
     },
-    "解码完成: %@ (%@)" : {
+    "解码出错，已自动恢复" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Decoding complete: %@ (%@)"
+            "value" : "Decoding error, recovered automatically"
           }
         }
       }
     },
     "解码模式" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1913,39 +2277,7 @@
         }
       }
     },
-    "解码模式需与发送端一致，cimbar.org 当前默认为标准 Mode B；切换模式会重置正在进行的扫码。1080p 采集可提高远距/大屏识别率，但更耗电。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The decode mode must match the sender's — cimbar.org currently defaults to standard Mode B. Switching modes resets any scan in progress. 1080p capture improves recognition at longer distances and on large screens, but uses more battery."
-          }
-        }
-      }
-    },
-    "解码遇到异常，已自动恢复，请继续保持取景" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Decoding hit an error and recovered automatically. Keep the code in view."
-          }
-        }
-      }
-    },
-    "触觉反馈" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haptic Feedback"
-          }
-        }
-      }
-    },
     "计算失败" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1955,8 +2287,17 @@
         }
       }
     },
+    "让动画码完整留在取景框里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the whole code inside the viewfinder"
+          }
+        }
+      }
+    },
     "许可全文" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1967,7 +2308,6 @@
       }
     },
     "设置" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1977,8 +2317,17 @@
         }
       }
     },
+    "试试靠近些、避开反光，或调亮发送端屏幕" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move closer, avoid glare, or brighten the sender's screen"
+          }
+        }
+      }
+    },
     "该文件不是支持的图片格式" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1988,56 +2337,42 @@
         }
       }
     },
-    "详情" : {
-      "extractionState" : "stale",
+    "请勿用萤传传输、存储或处理涉密文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Details"
+            "value" : "Don't use Lumen to transfer, store, or handle classified files"
           }
         }
       }
     },
-    "请保持发送端动画码完整放入取景框" : {
+    "请在设置中允许萤传添加照片" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keep the sender's animated code fully inside the frame"
+            "value" : "Allow Lumen to add photos in Settings."
           }
         }
       }
     },
-    "请勿传输、存储、处理任何涉密文件" : {
-      "extractionState" : "stale",
+    "读取中…" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Never transfer, store, or handle classified files"
+            "value" : "Loading…"
           }
         }
       }
     },
-    "请求相机权限..." : {
-      "extractionState" : "stale",
+    "调亮发送端屏幕，避开灯光反光" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Requesting camera access…"
-          }
-        }
-      }
-    },
-    "请阅读以下提醒并勾选确认" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Please read the reminder below and confirm"
+            "value" : "Brighten the sender's screen and avoid glare"
           }
         }
       }
@@ -2053,7 +2388,6 @@
       }
     },
     "轻点切换选中" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2063,18 +2397,37 @@
         }
       }
     },
-    "轻点预览文件" : {
-      "extractionState" : "stale",
+    "轻点恢复 1 倍" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Previews the file"
+            "value" : "Tap to reset to 1×"
           }
         }
       }
     },
-    "还没有接收到文件" : {
+    "轻点预览" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to preview"
+          }
+        }
+      }
+    },
+    "近 7 天" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous 7 Days"
+          }
+        }
+      }
+    },
+    "还没有收到文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2084,19 +2437,37 @@
         }
       }
     },
-    "进度停滞了？请确保动画码完整、无遮挡地处于取景框内" : {
-      "extractionState" : "stale",
+    "还需约 %lld 分钟" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Progress stalled? Make sure the animated code is fully visible and unobstructed in the frame."
+            "value" : "About %lld min left"
+          }
+        }
+      }
+    },
+    "还需约 %lld 秒" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About %lld s left"
+          }
+        }
+      }
+    },
+    "进度走到 100%，文件就收好了" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At 100%, the file is saved"
           }
         }
       }
     },
     "选择" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2106,199 +2477,12 @@
         }
       }
     },
-    "重命名" : {
-      "extractionState" : "stale",
+    "选择文件" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rename"
-          }
-        }
-      }
-    },
-    "重命名失败" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename Failed"
-          }
-        }
-      }
-    },
-    "重命名失败，请换一个名称重试" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename failed. Try a different name."
-          }
-        }
-      }
-    },
-    "隐私政策" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privacy Policy"
-          }
-        }
-      }
-    },
-    "需要相机权限来扫描 Cimbar 动画码接收文件" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Camera access is required to scan Cimbar animated codes and receive files."
-          }
-        }
-      }
-    },
-    "预览" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preview"
-          }
-        }
-      }
-    },
-    "预计还需 %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "about %@ left"
-          }
-        }
-      }
-    },
-    "高精度采集（1080p）" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "High-Resolution Capture (1080p)"
-          }
-        }
-      }
-    },
-    "默认设置。文件不会被自动删除，需要手动清理。" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Default. Files are never deleted automatically — clear them out manually."
-          }
-        }
-      }
-    },
-    "一、本政策的适用范围" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1. Scope of This Policy"
-          }
-        }
-      }
-    },
-    "二、我们收集哪些信息" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. What Information We Collect"
-          }
-        }
-      }
-    },
-    "三、我们使用哪些权限" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3. What Permissions We Use"
-          }
-        }
-      }
-    },
-    "四、文件如何存储" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4. How Files Are Stored"
-          }
-        }
-      }
-    },
-    "五、本应用的安全声明" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5. Security Notice"
-          }
-        }
-      }
-    },
-    "六、未成年人保护" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "6. Children's Privacy"
-          }
-        }
-      }
-    },
-    "七、政策的变更" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "7. Changes to This Policy"
-          }
-        }
-      }
-    },
-    "八、联系我们" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "8. Contact Us"
-          }
-        }
-      }
-    },
-    "姓名、电话、邮箱、身份证号、地址等身份信息" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identity information such as name, phone number, email, ID number or address"
-          }
-        }
-      }
-    },
-    "位置信息、设备 IMEI 或唯一标识" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Location, device IMEI or other unique identifiers"
+            "value" : "Select Files"
           }
         }
       }
@@ -2313,186 +2497,6 @@
         }
       }
     },
-    "您接收到的文件内容" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The content of files you receive"
-          }
-        }
-      }
-    },
-    "**相机权限（必需）**：仅用于扫描发送端的彩色动画码。该权限只在「扫码」页激活时使用，画面仅在本机内存中实时解码，不会被存储或上传。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Camera (required):** used only to scan the sender's animated color code, and only while the Scan tab is active. Frames are decoded in memory on the device and are never stored or uploaded."
-          }
-        }
-      }
-    },
-    "**相册写入权限（可选）**：仅在您主动选择将接收到的图片保存到相册时使用。本应用不读取您相册中的任何内容。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Add to Photos (optional):** used only when you choose to save a received image to your photo library. The app never reads anything in your library."
-          }
-        }
-      }
-    },
-    "仅保存在您本机设备上，不会被上传或同步到任何云端" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stay on your device only and are never uploaded or synced to any cloud"
-          }
-        }
-      }
-    },
-    "可在系统「文件」App 中浏览" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can be browsed in the Files app"
-          }
-        }
-      }
-    },
-    "您可随时在应用内手动删除，或在「设置 → 保留策略」中配置自动清理规则" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can be deleted in the app at any time, or cleaned up automatically under Settings → File Retention"
-          }
-        }
-      }
-    },
-    "卸载本应用时，这些文件会随应用一并删除" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Are deleted together with the app when you delete it"
-          }
-        }
-      }
-    },
-    "彩色动画码在屏幕上完整可见，附近的人可拍摄、录屏甚至远距离捕获" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The animated code is fully visible on screen; people nearby can photograph, record or capture it, even from a distance"
-          }
-        }
-      }
-    },
-    "**请勿用于传输商业机密、个人隐私文件等敏感内容**" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "**Do not use it to transfer sensitive content such as trade secrets or private personal files**"
-          }
-        }
-      }
-    },
-    "如必须传输敏感文件，请先用强密码加密压缩后再发送" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If you must send a sensitive file, put it in an archive encrypted with a strong password first"
-          }
-        }
-      }
-    },
-    "一、协议接受" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1. Acceptance of Terms"
-          }
-        }
-      }
-    },
-    "二、服务说明" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2. Description of Service"
-          }
-        }
-      }
-    },
-    "三、用户行为规范" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3. Acceptable Use"
-          }
-        }
-      }
-    },
-    "四、文件内容的责任归属" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4. Responsibility for File Content"
-          }
-        }
-      }
-    },
-    "五、知识产权" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5. Intellectual Property"
-          }
-        }
-      }
-    },
-    "六、免责声明" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "6. Disclaimer"
-          }
-        }
-      }
-    },
-    "七、协议的变更与终止" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "7. Changes and Termination"
-          }
-        }
-      }
-    },
-    "八、法律适用" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "8. Governing Law"
-          }
-        }
-      }
-    },
     "通过设备相机扫描发送端屏幕的彩色动画码" : {
       "localizations" : {
         "en" : {
@@ -2503,152 +2507,82 @@
         }
       }
     },
-    "在本机完成数据重组并保存到本应用的文档目录" : {
+    "重命名" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reassembling the data on the device and saving it to the app's Documents folder"
+            "value" : "Rename"
           }
         }
       }
     },
-    "提供文件预览、分享、重命名、删除等管理能力" : {
+    "重新扫描" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Previewing, sharing, renaming and deleting received files"
+            "value" : "Scan Again"
           }
         }
       }
     },
-    "传输或接收任何违反中国法律法规的内容" : {
+    "隐私政策" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Send or receive any content that violates applicable laws or regulations"
+            "value" : "Privacy Policy"
           }
         }
       }
     },
-    "传输商业机密、国家秘密、他人隐私等敏感信息（详见隐私政策中的安全声明）" : {
+    "需要相机权限" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transfer sensitive information such as trade secrets, state secrets or other people's private data (see the Security Notice in the Privacy Policy)"
+            "value" : "Camera Access Needed"
           }
         }
       }
     },
-    "传输侵犯他人知识产权的文件" : {
+    "靠近些，让动画码占满大部分取景框" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transfer files that infringe anyone's intellectual property"
+            "value" : "Move closer so the code fills most of the viewfinder"
           }
         }
       }
     },
-    "传输含有计算机病毒、木马等恶意代码的文件" : {
+    "预览" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transfer files containing viruses, trojans or other malicious code"
+            "value" : "Preview"
           }
         }
       }
     },
-    "利用本应用从事任何形式的非法活动" : {
+    "高清采集" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carry out any illegal activity of any kind"
+            "value" : "HD Capture"
           }
         }
       }
     },
-    "接收到的文件仅保存在您本机设备上" : {
+    "，" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Received files are stored only on your device"
-          }
-        }
-      }
-    },
-    "您应自行判断文件来源是否可信" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You are responsible for judging whether a file's source is trustworthy"
-          }
-        }
-      }
-    },
-    "因接收非法文件、病毒文件造成的任何损失，由您自行承担" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You bear any loss caused by receiving illegal or infected files"
-          }
-        }
-      }
-    },
-    "我们对您接收的文件内容不负任何审查义务和责任" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We have no duty to review, and no liability for, the content of files you receive"
-          }
-        }
-      }
-    },
-    "传输过程的成功率（受光照、距离、设备性能等多种因素影响）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The success rate of transfers (which depends on lighting, distance, device performance and other factors)"
-          }
-        }
-      }
-    },
-    "接收文件的完整性和正确性" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The completeness and correctness of received files"
-          }
-        }
-      }
-    },
-    "应用功能在所有 iOS 设备及版本上的兼容性" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compatibility with every iOS device and version"
-          }
-        }
-      }
-    },
-    "应用持续可用、无中断、无错误" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuous, uninterrupted or error-free availability"
+            "value" : ", "
           }
         }
       }

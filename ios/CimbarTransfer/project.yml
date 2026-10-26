@@ -73,6 +73,7 @@ targets:
         DEVELOPMENT_TEAM: DF24DNZFWX
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: Support/Info.plist
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_VERSION: 5.0
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_OBJC_BRIDGING_HEADER: App/CimbarTransfer-Bridging-Header.h

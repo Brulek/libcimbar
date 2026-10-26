@@ -1,5 +1,6 @@
 import CryptoKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct FileDetailScreen: View {
     @ObservedObject var store: ReceivedFileCacheStore
@@ -16,6 +17,7 @@ struct FileDetailScreen: View {
     @State private var renameText = ""
     @State private var deleteConfirm = false
     @State private var photoSaveMessage: String?
+    @State private var photoSaved = false
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
     /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
@@ -43,69 +45,45 @@ struct FileDetailScreen: View {
         ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.originalName ?? file.fileName
     }
 
+    /// 系统给出的类型名，如「PNG 图像」「PDF 文稿」
+    private var kindDescription: String {
+        UTType(filenameExtension: file.fileExtension)?.localizedDescription
+            ?? file.fileExtension.uppercased()
+    }
+
+    private var canSaveToPhotos: Bool {
+        PhotoLibrarySaver.canSave(extension: file.fileExtension)
+    }
+
     var body: some View {
         List {
             Section {
-                HStack(spacing: 16) {
-                    FileThumbnailView(
-                        url: file.url,
-                        cacheKey: "detail-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
-                        cornerRadius: 16,
-                        generationSide: 160
-                    )
-                    .frame(width: 72, height: 72)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(file.displayName)
-                            .font(.headline)
-                            .lineLimit(2)
-                        Text(file.sizeDescription)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(.vertical, 6)
+                header
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                actions
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
             }
 
-            Section("详情") {
-                LabeledContent("接收时间", value: file.receivedAt.formatted(date: .abbreviated, time: .standard))
-                LabeledContent("原始文件名") {
-                    Text(originalName)
-                        .multilineTextAlignment(.trailing)
-                        .textSelection(.enabled)
+            Section("信息") {
+                LabeledContent("类型", value: kindDescription)
+                LabeledContent("大小") {
+                    Text(file.sizeDescription)
+                        .monospacedDigit()
                 }
-                LabeledContent("保存文件名") {
-                    Text(file.fileName)
-                        .multilineTextAlignment(.trailing)
-                        .textSelection(.enabled)
+                LabeledContent("接收时间", value: file.receivedAt.formatted(date: .abbreviated, time: .shortened))
+                // 发送端原名与当前文件名不同（重命名过/同名去重）时才值得展示
+                if originalName != file.fileName {
+                    LabeledContent("原始文件名") {
+                        Text(originalName)
+                            .multilineTextAlignment(.trailing)
+                            .textSelection(.enabled)
+                    }
                 }
                 checksumRow
-            }
-
-            Section {
-                Button {
-                    onPreview(file.url)
-                } label: {
-                    Label("预览", systemImage: "eye")
-                }
-                Button {
-                    onShare(file.url)
-                } label: {
-                    Label("分享", systemImage: "square.and.arrow.up")
-                }
-                if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
-                    Button {
-                        Task { await saveToPhotos() }
-                    } label: {
-                        Label("存到相册", systemImage: "photo.on.rectangle")
-                    }
-                }
-                Button {
-                    renameText = file.displayName
-                    renamePresented = true
-                } label: {
-                    Label("重命名", systemImage: "pencil")
-                }
             }
 
             Section {
@@ -114,9 +92,10 @@ struct FileDetailScreen: View {
                 } label: {
                     Label("删除文件", systemImage: "trash")
                 }
+                .tint(.red)
             }
         }
-        .navigationTitle("文件详情")
+        .navigationTitle("简介")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: file.fileName) {
             await loadChecksum()
@@ -143,32 +122,83 @@ struct FileDetailScreen: View {
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变")
+            Text("扩展名会保留")
         }
-        .alert("重命名失败", isPresented: $renameFailed) {
+        .alert("没能重命名", isPresented: $renameFailed) {
             Button("好", role: .cancel) {}
         } message: {
-            Text("重命名失败，请换一个名称重试")
+            Text("换个名称试试")
         }
-        .alert("删除文件", isPresented: $deleteConfirm) {
+        .alert("删除这个文件？", isPresented: $deleteConfirm) {
             Button("删除", role: .destructive) {
                 store.deleteFiles(ids: [file.id])
                 dismiss()
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("将删除「\(file.displayName)」，无法恢复。")
+            Text("「\(file.displayName)」删除后无法恢复。")
         }
-        .alert("存到相册", isPresented: Binding(
+        .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveMessage != nil },
             set: { if !$0 { photoSaveMessage = nil } }
         )) {
             if photoSaveNeedsSettings {
-                Button("打开设置") { AppSettingsOpener.open() }
+                Button("去设置") { AppSettingsOpener.open() }
             }
             Button("好", role: .cancel) {}
         } message: {
             Text(photoSaveMessage ?? "")
+        }
+    }
+
+    private var header: some View {
+        VStack(spacing: 12) {
+            Button {
+                onPreview(file.url)
+            } label: {
+                FileThumbnailView(
+                    url: file.url,
+                    cacheKey: "detail-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
+                    cornerRadius: 20,
+                    generationSide: 320
+                )
+                .frame(width: 132, height: 132)
+                .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("预览")
+
+            Text(file.displayName)
+                .font(.title3.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .textSelection(.enabled)
+                .padding(.horizontal, 16)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var actions: some View {
+        HStack(spacing: 10) {
+            DetailActionButton(title: "预览", systemImage: "eye") {
+                onPreview(file.url)
+            }
+            DetailActionButton(title: "分享", systemImage: "square.and.arrow.up") {
+                onShare(file.url)
+            }
+            if canSaveToPhotos {
+                DetailActionButton(
+                    title: photoSaved ? "已存入" : "存相册",
+                    systemImage: photoSaved ? "checkmark" : "photo.on.rectangle"
+                ) {
+                    Task { await saveToPhotos() }
+                }
+                .disabled(photoSaved)
+            }
+            DetailActionButton(title: "重命名", systemImage: "pencil") {
+                renameText = file.displayName
+                renamePresented = true
+            }
         }
     }
 
@@ -256,11 +286,36 @@ struct FileDetailScreen: View {
     private func saveToPhotos() async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
-            photoSaveNeedsSettings = false
-            photoSaveMessage = String(localized: "已保存到相册")
+            withAnimation { photoSaved = true }
         } catch {
             photoSaveNeedsSettings = PhotoLibrarySaver.isPermissionDenied(error)
             photoSaveMessage = (error as? LocalizedError)?.errorDescription ?? String(localized: "保存失败")
         }
+    }
+}
+
+/// 简介页顶部的图标 + 文字操作块（类似「通讯录」联系人页的快捷操作）
+private struct DetailActionButton: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.title3)
+                    .frame(height: 24)
+                Text(title)
+                    .font(.caption.weight(.medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .foregroundStyle(.tint)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
     }
 }

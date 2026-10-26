@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingScreen: View {
-    /// 从「设置 → 查看使用指南」打开时为 true：可随时关闭、不要求重新勾选承诺
+    /// 从「设置 → 使用须知」打开时为 true：可随时关闭、不要求重新勾选承诺
     var isHelpMode: Bool = false
     let onFinished: () -> Void
 
@@ -12,7 +12,7 @@ struct OnboardingScreen: View {
 
     var body: some View {
         ZStack {
-            backgroundGradient
+            background
             VStack(spacing: 0) {
                 TabView(selection: $pageIndex) {
                     ForEach(pages.indices, id: \.self) { index in
@@ -32,14 +32,16 @@ struct OnboardingScreen: View {
                 actionRow
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
-                    .padding(.top, 8)
+                    .padding(.top, 12)
+                    .frame(maxWidth: 520)
             }
-            .padding(.top, 32)
+            .padding(.top, 24)
 
             if isHelpMode {
                 closeButton
             }
         }
+        .environment(\.colorScheme, .dark)
         .onAppear {
             if isHelpMode {
                 confidentialAcknowledged = AppPreferences.shared.hasAcknowledgedConfidentialWarning
@@ -52,10 +54,11 @@ struct OnboardingScreen: View {
             HStack {
                 Spacer()
                 Button(action: onFinished) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.white.opacity(0.6))
-                        .padding(12)
+                    Image(systemName: "xmark")
+                        .font(.headline)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .frame(width: 40, height: 40)
+                        .background(.white.opacity(0.12), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("关闭")
@@ -63,30 +66,36 @@ struct OnboardingScreen: View {
             Spacer()
         }
         .padding(.top, 8)
-        .padding(.trailing, 8)
+        .padding(.trailing, 16)
     }
 
-    private var backgroundGradient: some View {
-        LinearGradient(
-            colors: [Color(red: 0.05, green: 0.07, blue: 0.18),
-                     Color(red: 0.16, green: 0.1, blue: 0.32),
-                     Color(red: 0.04, green: 0.05, blue: 0.12)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+    /// 与 App 图标同色的夜空，顶部一团萤火光晕
+    private var background: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Brand.night, Brand.nightDeep],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            RadialGradient(
+                colors: [Brand.glow.opacity(0.22), .clear],
+                center: UnitPoint(x: 0.5, y: 0.18),
+                startRadius: 10,
+                endRadius: 320
+            )
+        }
         .ignoresSafeArea()
     }
 
     private var pageDots: some View {
         HStack(spacing: 8) {
             ForEach(pages.indices, id: \.self) { index in
-                Circle()
-                    .fill(index == pageIndex ? Color.white : Color.white.opacity(0.3))
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(index == pageIndex ? 1.2 : 1.0)
-                    .animation(.spring(duration: 0.25), value: pageIndex)
+                Capsule()
+                    .fill(index == pageIndex ? Brand.glow : Color.white.opacity(0.25))
+                    .frame(width: index == pageIndex ? 20 : 8, height: 8)
             }
         }
+        .animation(.spring(duration: 0.3), value: pageIndex)
         .padding(.vertical, 8)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("第 \(pageIndex + 1) 页，共 \(pages.count) 页")
@@ -94,43 +103,25 @@ struct OnboardingScreen: View {
     }
 
     private var actionRow: some View {
-        VStack(spacing: 12) {
-            if isLastPage {
-                Button(action: complete) {
-                    Text(isHelpMode ? "完成" : "我已了解，开始使用")
+        HStack(spacing: 12) {
+            if !isLastPage {
+                Button(action: skip) {
+                    Text("跳过")
                         .font(.headline)
+                        .foregroundStyle(.white.opacity(0.7))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(canFinish ? Color.white : Color.white.opacity(0.35))
-                        .foregroundStyle(canFinish ? Color(red: 0.16, green: 0.1, blue: 0.32) : .white.opacity(0.5))
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                .disabled(!canFinish)
-            } else {
-                HStack(spacing: 12) {
-                    Button(action: skip) {
-                        Text("跳过")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white.opacity(0.7))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: next) {
-                        Text("下一步")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.white)
-                            .foregroundStyle(Color(red: 0.16, green: 0.1, blue: 0.32))
-                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                }
             }
+
+            Button(action: isLastPage ? complete : next) {
+                Text(isLastPage ? (isHelpMode ? "完成" : "开始使用") : "继续")
+            }
+            .buttonStyle(.brandPrimary)
+            .disabled(!canFinish)
         }
+        .animation(.easeInOut(duration: 0.2), value: isLastPage)
     }
 
     private var isLastPage: Bool { pageIndex == pages.count - 1 }
@@ -162,12 +153,16 @@ struct OnboardingPage: Identifiable {
         case ready
     }
 
+    enum Hero {
+        case brandMark
+        case symbol(String)
+    }
+
     let id = UUID()
     let role: Role
-    let symbol: String
-    let symbolColor: Color
+    let hero: Hero
     let title: String
-    let subtitle: String
+    let subtitle: String?
     let bullets: [Bullet]
 
     struct Bullet: Identifiable {
@@ -179,37 +174,34 @@ struct OnboardingPage: Identifiable {
     static let all: [OnboardingPage] = [
         OnboardingPage(
             role: .welcome,
-            symbol: "viewfinder.circle.fill",
-            symbolColor: Color(red: 0.55, green: 0.85, blue: 1.0),
-            title: String(localized: "欢迎使用萤传"),
-            subtitle: String(localized: "一款基于 libcimbar 协议的离线文件接收工具"),
+            hero: .brandMark,
+            title: String(localized: "萤传"),
+            subtitle: String(localized: "扫一扫屏幕上的动画码，文件就到手"),
             bullets: [
-                Bullet(symbol: "wifi.slash", text: String(localized: "无需网络，无需配对，全程离线")),
-                Bullet(symbol: "lock.shield.fill", text: String(localized: "数据不上传服务器，文件只在你的设备上")),
-                Bullet(symbol: "doc.fill", text: String(localized: "支持任意文件类型：图片、文档、压缩包等"))
+                Bullet(symbol: "wifi.slash", text: String(localized: "不联网、不配对，两台设备离得近就行")),
+                Bullet(symbol: "lock.fill", text: String(localized: "文件只存在这台设备上")),
+                Bullet(symbol: "doc.on.doc.fill", text: String(localized: "照片、文档、压缩包，什么格式都能收"))
             ]
         ),
         OnboardingPage(
             role: .howToReceive,
-            symbol: "iphone.gen3.radiowaves.left.and.right",
-            symbolColor: Color(red: 0.65, green: 1.0, blue: 0.78),
-            title: String(localized: "怎么收文件"),
-            subtitle: String(localized: "对方用支持 cimbar 的发送端，本机扫一扫即可"),
+            hero: .symbol("laptopcomputer.and.iphone"),
+            title: String(localized: "三步收文件"),
+            subtitle: nil,
             bullets: [
-                Bullet(symbol: "1.circle.fill", text: String(localized: "发送方在另一台设备上打开 libcimbar 网页或客户端，选择要发送的文件，会显示一段彩色动画码")),
-                Bullet(symbol: "2.circle.fill", text: String(localized: "本机切到「扫码」页，将取景框对准对方屏幕")),
-                Bullet(symbol: "3.circle.fill", text: String(localized: "保持稳定数秒，进度条到 100% 即接收完成")),
-                Bullet(symbol: "4.circle.fill", text: String(localized: "完成后可直接预览、分享，或在「我的文件」中再次打开"))
+                Bullet(symbol: "1.circle.fill", text: String(localized: "发送方用浏览器打开 cimbar.org，选好文件")),
+                Bullet(symbol: "2.circle.fill", text: String(localized: "把屏幕上的动画码放进取景框")),
+                Bullet(symbol: "3.circle.fill", text: String(localized: "进度走到 100%，文件就收好了"))
             ]
         ),
         OnboardingPage(
             role: .ready,
-            symbol: "checkmark.seal.fill",
-            symbolColor: Color(red: 0.65, green: 1.0, blue: 0.78),
-            title: String(localized: "准备就绪"),
-            subtitle: String(localized: "请阅读以下提醒并勾选确认"),
+            hero: .symbol("hand.raised.fill"),
+            title: String(localized: "使用须知"),
+            subtitle: nil,
             bullets: [
-                Bullet(symbol: "exclamationmark.shield.fill", text: String(localized: "请勿传输、存储、处理任何涉密文件"))
+                Bullet(symbol: "eye.fill", text: String(localized: "动画码显示在屏幕上，附近的人也能拍到")),
+                Bullet(symbol: "exclamationmark.shield.fill", text: String(localized: "请勿用萤传传输、存储或处理涉密文件"))
             ]
         )
     ]
@@ -221,11 +213,9 @@ private struct OnboardingPageView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 28) {
+            VStack(spacing: 32) {
                 hero
-                if !page.bullets.isEmpty {
-                    content
-                }
+                content
                 if page.role == .howToReceive {
                     senderLink
                 }
@@ -234,99 +224,99 @@ private struct OnboardingPageView: View {
                 }
                 Spacer(minLength: 16)
             }
-            .padding(.vertical, 16)
+            .padding(.vertical, 24)
+            .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
         }
     }
 
     private var senderLink: some View {
         Link(destination: URL(string: "https://cimbar.org")!) {
-            Label("发送端：在对方设备浏览器打开 cimbar.org", systemImage: "safari")
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(Color(red: 0.55, green: 0.85, blue: 1.0))
+            Label("打开 cimbar.org", systemImage: "safari")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Brand.glow)
                 .padding(.vertical, 10)
-                .padding(.horizontal, 16)
-                .background(.white.opacity(0.06), in: Capsule())
+                .padding(.horizontal, 18)
+                .background(Brand.glow.opacity(0.12), in: Capsule())
+        }
+    }
+
+    @ViewBuilder
+    private var heroImage: some View {
+        switch page.hero {
+        case .brandMark:
+            Image("BrandMark")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 120, height: 120)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .shadow(color: Brand.glow.opacity(0.45), radius: 30, y: 8)
+        case .symbol(let name):
+            Image(systemName: name)
+                .font(.system(size: 52, weight: .regular))
+                .foregroundStyle(Brand.glow)
+                .frame(width: 120, height: 120)
+                .background(Brand.glow.opacity(0.12), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
     }
 
     private var hero: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(page.symbolColor.opacity(0.16))
-                    .frame(width: 132, height: 132)
-                Image(systemName: page.symbol)
-                    .font(.system(size: 64, weight: .light))
-                    .foregroundStyle(page.symbolColor)
-            }
-            VStack(spacing: 6) {
+        VStack(spacing: 18) {
+            heroImage
+                .accessibilityHidden(true)
+            VStack(spacing: 8) {
                 Text(page.title)
-                    .font(.title.weight(.bold))
+                    .font(.largeTitle.weight(.bold))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
-                Text(page.subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
+                if let subtitle = page.subtitle {
+                    Text(subtitle)
+                        .font(.body)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
             }
             .padding(.horizontal, 8)
         }
+        .padding(.top, 24)
     }
 
     private var content: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 18) {
             ForEach(page.bullets) { bullet in
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
                     Image(systemName: bullet.symbol)
-                        .font(.subheadline)
-                        .foregroundStyle(page.symbolColor)
-                        .frame(width: 24, alignment: .center)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Brand.glow)
+                        .frame(width: 26, alignment: .center)
                     Text(bullet.text)
-                        .font(.subheadline)
+                        .font(.body)
                         .foregroundStyle(.white.opacity(0.92))
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                .accessibilityElement(children: .combine)
             }
         }
-        .padding(20)
+        .padding(.horizontal, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: 1)
-        )
     }
 
     private var confirmationToggle: some View {
-        VStack(spacing: 16) {
-            Toggle(isOn: $confidentialAcknowledged) {
-                Text("我已阅读上述提醒，承诺不使用本应用传输机密信息")
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.leading)
-            }
-            .toggleStyle(.switch)
-            .tint(.green)
-            .padding(16)
-            .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(confidentialAcknowledged ? Color.green.opacity(0.6) : .white.opacity(0.18), lineWidth: 1)
-            )
-
-            VStack(spacing: 8) {
-                Text("接下来你将看到")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.7))
-                Label("自动开启相机扫描动画码", systemImage: "viewfinder")
-                    .foregroundStyle(.white.opacity(0.85))
-                    .font(.footnote)
-                Label("接收完成的文件可在「我的文件」标签查看", systemImage: "folder.fill")
-                    .foregroundStyle(.white.opacity(0.85))
-                    .font(.footnote)
-            }
+        Toggle(isOn: $confidentialAcknowledged) {
+            Text("我已了解，不用萤传传输涉密文件")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.leading)
         }
+        .toggleStyle(.switch)
+        .tint(Brand.glow)
+        .padding(16)
+        .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(confidentialAcknowledged ? Brand.glow.opacity(0.6) : .white.opacity(0.15), lineWidth: 1)
+        )
+        .animation(.easeInOut(duration: 0.2), value: confidentialAcknowledged)
     }
 }

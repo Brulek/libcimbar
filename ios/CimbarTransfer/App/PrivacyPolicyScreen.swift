@@ -28,7 +28,7 @@ struct PrivacyPolicyScreen: View {
                     Text("接收到的文件保存在本应用的「文档」目录（Documents/CimbarTransfer/Inbox）。这些文件：")
                     PolicyBullet("仅保存在您本机设备上，不会被上传或同步到任何云端")
                     PolicyBullet("可在系统「文件」App 中浏览")
-                    PolicyBullet("您可随时在应用内手动删除，或在「设置 → 保留策略」中配置自动清理规则")
+                    PolicyBullet("您可随时在应用内手动删除，或在「设置 → 自动清理」中设置自动删除")
                     PolicyBullet("卸载本应用时，这些文件会随应用一并删除")
                 }
 

@@ -10,6 +10,13 @@
 @implementation NativeCimbarDecodeOutput
 @end
 
+// 自动模式按 cimbar.org 接收端的做法逐帧轮换候选模式，某一帧解出数据即锁定。
+// 8C 是旧版模式，发送端已不再提供，只保留手动选择
+static const int kAutoDetectModes[] = {68, 67, 66, 4};
+static const NSUInteger kAutoDetectModeCount = sizeof(kAutoDetectModes) / sizeof(kAutoDetectModes[0]);
+// 锁定后连续这么多帧（约 5 秒）解不出数据、且传输从未产生进度，视为误锁，重新轮换
+static const NSUInteger kAutoUnlockFrames = 150;
+
 @implementation NativeCimbarDecoder {
     std::vector<unsigned char> _scanBuffer;
     std::vector<unsigned char> _decompressBuffer;
@@ -22,6 +29,10 @@
     // 落盘/解压失败是一次性事件，但相机每 33ms 就有新帧刷状态文案；
     // 把错误锁存在这里，持续覆盖展示，直到重置或有文件成功接收
     NSString *_stickyErrorText;
+    // 自动模式：已锁定的模式（0 = 仍在轮换）及误锁检测
+    int _lockedMode;
+    NSUInteger _framesWithoutData;
+    BOOL _hasProgress;
 }
 
 - (instancetype)init {
@@ -29,17 +40,31 @@
     if (self) {
         _emittedFileIDs = [NSMutableSet set];
         _progressRegex = [NSRegularExpression regularExpressionWithPattern:@"([0-9]+(?:\\.[0-9]+)?)" options:0 error:nil];
-        _decodeMode = 68;
+        _decodeMode = 0;
         [self reset];
     }
     return self;
 }
 
+- (BOOL)isAutoMode {
+    return _decodeMode <= 0;
+}
+
 - (void)reset {
     cimbard_reset();
-    cimbard_configure_decode(_decodeMode);
 
-    const int scanBufferSize = cimbard_get_bufsize();
+    // 每帧缓冲区大小随模式而变；自动模式会轮换，按候选模式里最大的分配
+    int scanBufferSize = 0;
+    if (self.isAutoMode) {
+        for (NSUInteger i = 0; i < kAutoDetectModeCount; ++i) {
+            cimbard_configure_decode(kAutoDetectModes[i]);
+            scanBufferSize = MAX(scanBufferSize, cimbard_get_bufsize());
+        }
+        cimbard_configure_decode(kAutoDetectModes[0]);
+    } else {
+        cimbard_configure_decode(_decodeMode);
+        scanBufferSize = cimbard_get_bufsize();
+    }
     _scanBuffer.assign(MAX(scanBufferSize, 0), 0);
 
     const int decompressBufferSize = cimbard_get_decompress_bufsize();
@@ -51,12 +76,14 @@
     _processedFrameCount = 0;
     _detectedFrameCount = 0;
     _stickyErrorText = nil;
+    _lockedMode = 0;
+    _framesWithoutData = 0;
+    _hasProgress = NO;
 }
 
 - (void)latchError:(NSString *)message into:(NativeCimbarDecodeOutput *)output {
-    NSString *full = [NSString stringWithFormat:NSLocalizedString(@"%@。点按「继续扫码」可重试", nil), message];
-    _stickyErrorText = full;
-    output.statusText = full;
+    _stickyErrorText = message;
+    output.statusText = message;
 }
 
 - (NativeCimbarDecodeOutput *)processPixelBuffer:(CVPixelBufferRef)pixelBuffer {
@@ -78,7 +105,7 @@
     }
 
     NativeCimbarDecodeOutput *failure = [NativeCimbarDecodeOutput new];
-    failure.statusText = NSLocalizedString(@"解码遇到异常，已自动恢复，请继续保持取景", nil);
+    failure.statusText = NSLocalizedString(@"解码出错，已自动恢复", nil);
     return failure;
 }
 
@@ -118,6 +145,12 @@
 }
 
 - (NativeCimbarDecodeOutput *)decodeCurrentFrame {
+    int probingMode = 0;
+    if (self.isAutoMode && _lockedMode == 0) {
+        probingMode = kAutoDetectModes[_processedFrameCount % kAutoDetectModeCount];
+        cimbard_configure_decode(probingMode);
+    }
+
     const int bytes = cimbard_scan_extract_decode(
         _rgbBuffer.data,
         static_cast<unsigned>(_rgbBuffer.cols),
@@ -129,29 +162,40 @@
     _processedFrameCount += 1;
 
     if (bytes <= 0) {
+        if (self.isAutoMode && _lockedMode != 0 && !_hasProgress
+            && ++_framesWithoutData > kAutoUnlockFrames) {
+            _lockedMode = 0;
+            _framesWithoutData = 0;
+        }
         if ((_processedFrameCount % 20) == 0) {
             NativeCimbarDecodeOutput *idle = [NativeCimbarDecodeOutput new];
-            idle.statusText = _stickyErrorText ?: NSLocalizedString(@"正在扫描，尚未识别到有效码帧", nil);
-            idle.progressLabel = NSLocalizedString(@"请保持发送端动画码完整放入取景框", nil);
+            idle.isIdle = YES;
+            idle.statusText = _stickyErrorText ?: NSLocalizedString(@"正在寻找动画码", nil);
             idle.hasStickyError = (_stickyErrorText != nil);
+            idle.detectedMode = self.isAutoMode ? _lockedMode : 0;
             return idle;
         }
         return nil;
     }
 
+    if (probingMode != 0) {
+        _lockedMode = probingMode;
+    }
+    _framesWithoutData = 0;
     _detectedFrameCount += 1;
     NativeCimbarDecodeOutput *output = [NativeCimbarDecodeOutput new];
     output.detectedFrameCount = _detectedFrameCount;
-    output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已识别到码帧，正在解码（%lu）", nil), (unsigned long)_detectedFrameCount];
-    output.progressLabel = NSLocalizedString(@"已检测到传输，正在重组数据", nil);
+    output.detectedMode = self.isAutoMode ? _lockedMode : 0;
+    output.statusText = NSLocalizedString(@"正在接收", nil);
 
     const int64_t decodeResult = cimbard_fountain_decode(_scanBuffer.data(), static_cast<unsigned>(bytes));
     [self fillProgressFromReportInto:output];
+    if (output.progressFraction.doubleValue > 0) {
+        _hasProgress = YES;
+    }
 
     if (decodeResult > 0) {
         [self recoverFileWithID:static_cast<uint32_t>(decodeResult) into:output];
-    } else if (output.progressFraction == nil && output.progressLabel == nil) {
-        output.progressLabel = NSLocalizedString(@"已检测到传输，正在重组数据", nil);
     }
 
     // 锁存的错误优先于逐帧状态文案，避免失败提示一闪而过
@@ -160,9 +204,6 @@
     }
     output.hasStickyError = (_stickyErrorText != nil);
 
-    if (output.statusText == nil && output.progressFraction == nil && output.fileURL == nil) {
-        return nil;
-    }
     return output;
 }
 
@@ -180,13 +221,11 @@
     }
 
     if (_progressRegex == nil) {
-        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
     NSArray<NSTextCheckingResult *> *matches = [_progressRegex matchesInString:report options:0 range:NSMakeRange(0, report.length)];
     if (matches.count == 0) {
-        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
@@ -202,14 +241,10 @@
     }
 
     if (count == 0) {
-        output.statusText = NSLocalizedString(@"已识别到数据帧", nil);
         return;
     }
 
-    double average = total / (double)count;
-    output.progressFraction = @(average);
-    output.progressLabel = [NSString stringWithFormat:NSLocalizedString(@"扫码解码 %ld%%", nil), lround(average * 100.0)];
-    output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已接收喷泉流进度，继续保持取景（%lu 路）", nil), (unsigned long)count];
+    output.progressFraction = @(total / (double)count);
 }
 
 - (NSString *)currentReport {
@@ -228,14 +263,14 @@
 - (void)recoverFileWithID:(uint32_t)fileID into:(NativeCimbarDecodeOutput *)output {
     NSNumber *boxedID = @(fileID);
     if ([_emittedFileIDs containsObject:boxedID]) {
-        output.statusText = NSLocalizedString(@"文件已接收，可直接分享", nil);
+        output.statusText = NSLocalizedString(@"文件已收到", nil);
         return;
     }
 
     char filenameBuffer[512] = {0};
     const int filenameLength = cimbard_get_filename(fileID, filenameBuffer, sizeof(filenameBuffer));
     if (filenameLength < 0) {
-        [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件数据重组失败（错误 %d），可能是传输受损", nil), filenameLength] into:output];
+        [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件重组失败（错误 %d），传输可能受损", nil), filenameLength] into:output];
         return;
     }
 
@@ -251,14 +286,14 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *tmpURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]]];
     if (![fileManager createFileAtPath:tmpURL.path contents:nil attributes:nil]) {
-        [self latchError:NSLocalizedString(@"无法写入接收文件", nil) into:output];
+        [self latchError:NSLocalizedString(@"无法保存文件", nil) into:output];
         return;
     }
 
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:tmpURL.path];
     if (handle == nil) {
         [fileManager removeItemAtURL:tmpURL error:nil];
-        [self latchError:NSLocalizedString(@"无法写入接收文件", nil) into:output];
+        [self latchError:NSLocalizedString(@"无法保存文件", nil) into:output];
         return;
     }
 
@@ -289,9 +324,9 @@
     if (readSize < 0) {
         [fileManager removeItemAtURL:tmpURL error:nil];
         if (writeFailed) {
-            [self latchError:NSLocalizedString(@"写入文件失败，请检查设备可用存储空间", nil) into:output];
+            [self latchError:NSLocalizedString(@"保存失败，请检查剩余存储空间", nil) into:output];
         } else {
-            [self latchError:[NSString stringWithFormat:NSLocalizedString(@"接收的数据无法解压（错误 %d），可能是传输受损", nil), readSize] into:output];
+            [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件解压失败（错误 %d），传输可能受损", nil), readSize] into:output];
         }
         return;
     }
@@ -318,7 +353,7 @@
     }
     if (fileURL == nil) {
         [fileManager removeItemAtURL:tmpURL error:nil];
-        [self latchError:(lastError.localizedDescription ?: NSLocalizedString(@"无法保存接收文件", nil)) into:output];
+        [self latchError:(lastError.localizedDescription ?: NSLocalizedString(@"无法保存文件", nil)) into:output];
         return;
     }
     NSString *safeName = fileURL.lastPathComponent;
@@ -328,14 +363,13 @@
     output.fileURL = fileURL;
     output.originalFilename = filename;
     output.progressFraction = @(1.0);
-    output.progressLabel = NSLocalizedString(@"文件接收 100%", nil);
 
     NSDictionary<NSFileAttributeKey, id> *attributes = [fileManager attributesOfItemAtPath:fileURL.path error:nil];
     NSNumber *fileSize = attributes[NSFileSize];
     if (fileSize != nil) {
-        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"解码完成: %@ (%@)", nil), safeName, [NSByteCountFormatter stringFromByteCount:fileSize.longLongValue countStyle:NSByteCountFormatterCountStyleFile]];
+        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已收到 %@（%@）", nil), safeName, [NSByteCountFormatter stringFromByteCount:fileSize.longLongValue countStyle:NSByteCountFormatterCountStyleFile]];
     } else {
-        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"解码完成: %@", nil), safeName];
+        output.statusText = [NSString stringWithFormat:NSLocalizedString(@"已收到 %@", nil), safeName];
     }
 }
 

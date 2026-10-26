@@ -13,7 +13,7 @@ struct CacheActionFeedback: Identifiable, Equatable {
 
 @MainActor
 final class ReceivedFileCacheStore: ObservableObject {
-    @Published private(set) var cacheSummary: String = String(localized: "扫描中...")
+    @Published private(set) var cacheSummary: String = String(localized: "读取中…")
     @Published private(set) var cachedFiles: [CachedReceivedFile] = []
     @Published private(set) var feedback: CacheActionFeedback?
     @Published var retentionPolicy: ReceivedFileRetentionPolicy = ReceivedFileCache.retentionPolicy

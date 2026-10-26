@@ -3,11 +3,11 @@ import UIKit
 import LinkPresentation
 
 struct ShareSheet: UIViewControllerRepresentable {
-    let fileURL: URL
+    let fileURLs: [URL]
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(
-            activityItems: [SharedFileItemSource(fileURL: fileURL)],
+            activityItems: fileURLs.map { SharedFileItemSource(fileURL: $0) },
             applicationActivities: nil
         )
         controller.excludedActivityTypes = [.assignToContact]

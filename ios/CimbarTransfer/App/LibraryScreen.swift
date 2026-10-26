@@ -10,40 +10,65 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .dateDescending: return String(localized: "时间（最近）")
-        case .dateAscending:  return String(localized: "时间（最早）")
-        case .nameAscending:  return String(localized: "名称（A→Z）")
-        case .sizeDescending: return String(localized: "体积（大→小）")
+        case .dateDescending: return String(localized: "最新优先")
+        case .dateAscending:  return String(localized: "最早优先")
+        case .nameAscending:  return String(localized: "名称")
+        case .sizeDescending: return String(localized: "大小")
         }
     }
+
+    var symbol: String {
+        switch self {
+        case .dateDescending: return "arrow.down"
+        case .dateAscending:  return "arrow.up"
+        case .nameAscending:  return "textformat"
+        case .sizeDescending: return "internaldrive"
+        }
+    }
+
+    var isByDate: Bool {
+        self == .dateDescending || self == .dateAscending
+    }
+}
+
+/// 按接收日期分组的列表分段
+private struct LibrarySection: Identifiable {
+    let id: String
+    let title: String?
+    let files: [CachedReceivedFile]
 }
 
 struct LibraryScreen: View {
     @ObservedObject var store: ReceivedFileCacheStore
-    let onShare: (URL) -> Void
-    let onPreview: (URL) -> Void
+    let onShareFiles: ([URL]) -> Void
+    let onPreviewFiles: ([URL], Int) -> Void
+    let onGoToScan: () -> Void
 
+    @AppStorage("org.cimbar.library-sort") private var sortOption: LibrarySortOption = .dateDescending
     @State private var searchText = ""
-    @State private var sortOption: LibrarySortOption = .dateDescending
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""
     @State private var deleteTarget: CachedReceivedFile?
-    @State private var isMultiSelect: Bool = false
+    @State private var isSelecting: Bool = false
     @State private var selectedIDs: Set<String> = []
     @State private var bulkDeleteConfirm = false
     @State private var saveToast: SaveToast?
     @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
 
+    private var trimmedSearch: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private var filteredFiles: [CachedReceivedFile] {
-        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let query = trimmedSearch
         let base: [CachedReceivedFile]
-        if trimmed.isEmpty {
+        if query.isEmpty {
             base = store.cachedFiles
         } else {
             base = store.cachedFiles.filter { file in
-                file.displayName.localizedCaseInsensitiveContains(trimmed)
-                    || file.fileName.localizedCaseInsensitiveContains(trimmed)
+                file.displayName.localizedCaseInsensitiveContains(query)
+                    || file.fileName.localizedCaseInsensitiveContains(query)
             }
         }
         return sorted(base)
@@ -53,9 +78,52 @@ struct LibraryScreen: View {
         switch sortOption {
         case .dateDescending: return files.sorted { $0.receivedAt > $1.receivedAt }
         case .dateAscending:  return files.sorted { $0.receivedAt < $1.receivedAt }
-        case .nameAscending:  return files.sorted { $0.displayName.localizedCompare($1.displayName) == .orderedAscending }
+        case .nameAscending:  return files.sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
         case .sizeDescending: return files.sorted { $0.fileSize > $1.fileSize }
         }
+    }
+
+    /// 按日期排序时分成「今天 / 昨天 / 近 7 天 / 更早」，其余排序不分组
+    private func sections(for files: [CachedReceivedFile]) -> [LibrarySection] {
+        guard sortOption.isByDate, trimmedSearch.isEmpty else {
+            return [LibrarySection(id: "all", title: nil, files: files)]
+        }
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let weekAgo = calendar.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
+
+        func bucket(_ date: Date) -> Int {
+            if calendar.isDateInToday(date) { return 0 }
+            if calendar.isDateInYesterday(date) { return 1 }
+            if date >= weekAgo { return 2 }
+            return 3
+        }
+        let titles = [
+            String(localized: "今天"),
+            String(localized: "昨天"),
+            String(localized: "近 7 天"),
+            String(localized: "更早"),
+        ]
+        var result: [LibrarySection] = []
+        for file in files {
+            let index = bucket(file.receivedAt)
+            if result.last?.id == "bucket-\(index)" {
+                let last = result.removeLast()
+                result.append(LibrarySection(id: last.id, title: last.title, files: last.files + [file]))
+            } else {
+                result.append(LibrarySection(id: "bucket-\(index)", title: titles[index], files: [file]))
+            }
+        }
+        return result
+    }
+
+    private var allVisibleSelected: Bool {
+        let visible = Set(filteredFiles.map(\.id))
+        return !visible.isEmpty && visible.isSubset(of: selectedIDs)
+    }
+
+    private var selectedFiles: [CachedReceivedFile] {
+        filteredFiles.filter { selectedIDs.contains($0.id) }
     }
 
     var body: some View {
@@ -75,7 +143,7 @@ struct LibraryScreen: View {
     private var content: some View {
         Group {
             if store.cachedFiles.isEmpty {
-                EmptyStateView()
+                LibraryEmptyState(onGoToScan: onGoToScan)
             } else {
                 fileList
             }
@@ -98,12 +166,12 @@ struct LibraryScreen: View {
                 FileDetailScreen(
                     store: store,
                     initialFile: target,
-                    onShare: onShare,
-                    onPreview: onPreview
+                    onShare: { onShareFiles([$0]) },
+                    onPreview: { onPreviewFiles([$0], 0) }
                 )
             }
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "搜索文件名")
+        .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
         .toolbar { toolbarContent }
         .refreshable {
             store.refresh(cleanup: false)
@@ -113,44 +181,51 @@ struct LibraryScreen: View {
             presentToast(SaveToast(message: feedback.message, style: .failure))
             store.clearFeedback()
         }
-        .alert("存到相册失败", isPresented: $photoPermissionAlert) {
-            Button("打开设置") { AppSettingsOpener.open() }
+        .onChange(of: store.cachedFiles) { files in
+            // 已被删除的文件不能还算在选中项里，否则底栏计数与批量操作对不上
+            let present = Set(files.map(\.id))
+            selectedIDs.formIntersection(present)
+            if files.isEmpty { isSelecting = false }
+        }
+        .alert("没能存到相册", isPresented: $photoPermissionAlert) {
+            Button("去设置") { AppSettingsOpener.open() }
             Button("好", role: .cancel) {}
         } message: {
-            Text("未授予相册写入权限")
+            Text("请在设置中允许萤传添加照片")
         }
     }
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Button(isMultiSelect ? "完成" : "选择") {
-                withAnimation {
-                    isMultiSelect.toggle()
-                    if !isMultiSelect { selectedIDs.removeAll() }
-                }
-            }
-            .disabled(store.cachedFiles.isEmpty)
-        }
-
-        ToolbarItem(placement: .topBarTrailing) {
-            Menu {
-                Picker("排序方式", selection: $sortOption) {
-                    ForEach(LibrarySortOption.allCases) { option in
-                        Text(option.displayName).tag(option)
+        if isSelecting {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(allVisibleSelected ? "取消全选" : "全选") {
+                    if allVisibleSelected {
+                        selectedIDs.subtract(filteredFiles.map(\.id))
+                    } else {
+                        selectedIDs.formUnion(filteredFiles.map(\.id))
                     }
                 }
-            } label: {
-                Image(systemName: "arrow.up.arrow.down")
             }
-            .accessibilityLabel("排序方式")
-        }
-
-        if isMultiSelect {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("完成") { endSelection() }
+            }
             ToolbarItemGroup(placement: .bottomBar) {
-                Text(selectedIDs.isEmpty ? "未选择" : "已选 \(selectedIDs.count) 项")
-                    .foregroundStyle(.secondary)
+                Button {
+                    onShareFiles(selectedFiles.map(\.url))
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .accessibilityLabel("分享所选文件")
+                .disabled(selectedIDs.isEmpty)
+
                 Spacer()
+                Text(selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个"))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Spacer()
+
                 Button(role: .destructive) {
                     bulkDeleteConfirm = true
                 } label: {
@@ -159,92 +234,123 @@ struct LibraryScreen: View {
                 .accessibilityLabel("删除所选文件")
                 .disabled(selectedIDs.isEmpty)
             }
+        } else if !store.cachedFiles.isEmpty {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        withAnimation { isSelecting = true }
+                    } label: {
+                        Label("选择", systemImage: "checkmark.circle")
+                    }
+                    Section("排序") {
+                        Picker("排序", selection: $sortOption) {
+                            ForEach(LibrarySortOption.allCases) { option in
+                                Label(option.displayName, systemImage: option.symbol).tag(option)
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+                .accessibilityLabel("更多")
+            }
         }
     }
 
     private var fileList: some View {
-        List {
-            Section {
-                ForEach(filteredFiles) { file in
-                    Button {
-                        handleTap(file)
-                    } label: {
-                        LibraryRow(
-                            file: file,
-                            isSelecting: isMultiSelect,
-                            isSelected: selectedIDs.contains(file.id),
-                            onDetail: { detailTarget = file }
-                        )
+        let files = filteredFiles
+        let sections = sections(for: files)
+        return List {
+            if files.isEmpty {
+                SearchEmptyRow(query: trimmedSearch)
+            }
+            ForEach(sections) { section in
+                Section {
+                    ForEach(section.files) { file in
+                        row(for: file, in: files)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(isMultiSelect ? "轻点切换选中" : "轻点预览文件")
-                    .accessibilityAddTraits(isMultiSelect && selectedIDs.contains(file.id) ? [.isSelected] : [])
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            deleteTarget = file
-                        } label: {
-                            Label("删除", systemImage: "trash")
-                        }
-                        Button {
-                            beginRename(file)
-                        } label: {
-                            Label("重命名", systemImage: "pencil")
-                        }
-                        .tint(.indigo)
-                        Button {
-                            onShare(file.url)
-                        } label: {
-                            Label("分享", systemImage: "square.and.arrow.up")
-                        }
-                        .tint(.blue)
+                } header: {
+                    if let title = section.title {
+                        Text(title)
                     }
-                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                        if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
-                            Button {
-                                Task { await saveImageToPhotos(file) }
-                            } label: {
-                                Label("存到相册", systemImage: "photo.on.rectangle")
-                            }
-                            .tint(.pink)
-                        }
+                } footer: {
+                    if section.id == sections.last?.id, trimmedSearch.isEmpty {
+                        Text(store.cacheSummary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 8)
                     }
-                    .contextMenu {
-                        Button {
-                            detailTarget = file
-                        } label: { Label("详情", systemImage: "info.circle") }
-                        Button {
-                            onPreview(file.url)
-                        } label: { Label("预览", systemImage: "eye") }
-                        Button {
-                            onShare(file.url)
-                        } label: { Label("分享", systemImage: "square.and.arrow.up") }
-                        if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
-                            Button {
-                                Task { await saveImageToPhotos(file) }
-                            } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
-                        }
-                        Button {
-                            beginRename(file)
-                        } label: { Label("重命名", systemImage: "pencil") }
-                        Button(role: .destructive) {
-                            deleteTarget = file
-                        } label: { Label("删除", systemImage: "trash") }
-                    }
-                }
-            } header: {
-                if !store.cachedFiles.isEmpty {
-                    Text(store.cacheSummary)
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .animation(.default, value: sortOption)
     }
 
-    private func handleTap(_ file: CachedReceivedFile) {
-        if isMultiSelect {
-            toggleSelection(for: file.id)
-        } else {
-            onPreview(file.url)
+    private func row(for file: CachedReceivedFile, in files: [CachedReceivedFile]) -> some View {
+        Button {
+            if isSelecting {
+                toggleSelection(for: file.id)
+            } else if let index = files.firstIndex(of: file) {
+                // 传入当前列表，预览里可以左右滑动看相邻文件
+                onPreviewFiles(files.map(\.url), index)
+            }
+        } label: {
+            LibraryRow(
+                file: file,
+                isSelecting: isSelecting,
+                isSelected: selectedIDs.contains(file.id),
+                onDetail: { detailTarget = file }
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(isSelecting ? "轻点切换选中" : "轻点预览")
+        .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if !isSelecting {
+                Button(role: .destructive) {
+                    deleteTarget = file
+                } label: {
+                    Label("删除", systemImage: "trash")
+                }
+                Button {
+                    onShareFiles([file.url])
+                } label: {
+                    Label("分享", systemImage: "square.and.arrow.up")
+                }
+                .tint(.blue)
+            }
+        }
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            if !isSelecting, PhotoLibrarySaver.canSave(extension: file.fileExtension) {
+                Button {
+                    Task { await saveImageToPhotos(file) }
+                } label: {
+                    Label("存到相册", systemImage: "photo.on.rectangle")
+                }
+                .tint(.pink)
+            }
+        }
+        .contextMenu {
+            if !isSelecting {
+                Button {
+                    onShareFiles([file.url])
+                } label: { Label("分享", systemImage: "square.and.arrow.up") }
+                if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
+                    Button {
+                        Task { await saveImageToPhotos(file) }
+                    } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
+                }
+                Button {
+                    beginRename(file)
+                } label: { Label("重命名", systemImage: "pencil") }
+                Button {
+                    detailTarget = file
+                } label: { Label("简介", systemImage: "info.circle") }
+                Divider()
+                Button(role: .destructive) {
+                    deleteTarget = file
+                } label: { Label("删除", systemImage: "trash") }
+            }
         }
     }
 
@@ -253,6 +359,13 @@ struct LibraryScreen: View {
             selectedIDs.remove(id)
         } else {
             selectedIDs.insert(id)
+        }
+    }
+
+    private func endSelection() {
+        withAnimation {
+            isSelecting = false
+            selectedIDs.removeAll()
         }
     }
 
@@ -267,7 +380,7 @@ struct LibraryScreen: View {
         store.rename(file: file, to: renameText) { renamed in
             // 空名/非法名/移动失败不能无声无息——弹窗已关，用 toast 告知
             if renamed == nil {
-                presentToast(SaveToast(message: String(localized: "重命名失败，请换一个名称重试"), style: .failure))
+                presentToast(SaveToast(message: String(localized: "没能重命名，换个名称试试"), style: .failure))
             }
         }
     }
@@ -280,17 +393,16 @@ struct LibraryScreen: View {
 
     private func commitBulkDelete() {
         store.deleteFiles(ids: selectedIDs)
-        selectedIDs.removeAll()
-        isMultiSelect = false
+        endSelection()
     }
 
     @MainActor
     private func saveImageToPhotos(_ file: CachedReceivedFile) async {
         do {
             try await PhotoLibrarySaver.save(fileURL: file.url)
-            presentToast(SaveToast(message: String(localized: "已保存到相册"), style: .success))
+            presentToast(SaveToast(message: String(localized: "已存到相册"), style: .success))
         } catch {
-            // 权限被拒用 alert 给「打开设置」补救入口；瞬时 toast 无法承载操作
+            // 权限被拒用 alert 给「去设置」补救入口；瞬时 toast 无法承载操作
             if PhotoLibrarySaver.isPermissionDenied(error) {
                 photoPermissionAlert = true
                 return
@@ -310,6 +422,20 @@ struct LibraryScreen: View {
                     saveToast = nil
                 }
             }
+        }
+    }
+}
+
+/// 没有文件时不显示搜索框：对空列表搜索没有意义
+private struct LibrarySearchModifier: ViewModifier {
+    let isEnabled: Bool
+    @Binding var text: String
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.searchable(text: $text, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "搜索")
+        } else {
+            content
         }
     }
 }
@@ -337,6 +463,7 @@ private struct ToastView: View {
         .background(.regularMaterial, in: Capsule())
         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
         .padding(.horizontal, 24)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -346,61 +473,117 @@ private struct LibraryRow: View {
     let isSelected: Bool
     var onDetail: (() -> Void)?
 
+    @ScaledMetric(relativeTo: .body) private var thumbnailSide: CGFloat = 46
+
+    /// 今天/昨天收到的只显示时间（分组标题已经说明了日期），更早的显示日期
+    private var dateText: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(file.receivedAt) || calendar.isDateInYesterday(file.receivedAt) {
+            return file.receivedAt.formatted(date: .omitted, time: .shortened)
+        }
+        if calendar.isDate(file.receivedAt, equalTo: Date(), toGranularity: .year) {
+            return file.receivedAt.formatted(.dateTime.month(.abbreviated).day())
+        }
+        return file.receivedAt.formatted(date: .abbreviated, time: .omitted)
+    }
+
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             if isSelecting {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .font(.title3)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
             }
             FileThumbnailView(
                 url: file.url,
-                cacheKey: "row-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)"
+                cacheKey: "row-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
+                cornerRadius: 10
             )
-            .frame(width: 44, height: 44)
-            VStack(alignment: .leading, spacing: 4) {
+            .frame(width: thumbnailSide, height: thumbnailSide)
+            VStack(alignment: .leading, spacing: 3) {
+                // 中间截断：长文件名也能看到扩展名
                 Text(file.displayName)
                     .font(.body)
                     .lineLimit(1)
-                Text("\(file.sizeDescription) · \(file.receivedAt.formatted(date: .abbreviated, time: .shortened))")
-                    .font(.caption)
+                    .truncationMode(.middle)
+                Text("\(file.sizeDescription) · \(dateText)")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .monospacedDigit()
             }
-            Spacer()
+            Spacer(minLength: 0)
             if !isSelecting, let onDetail {
-                // 行点按是「预览」；详情页需要一个显式可见的入口，
+                // 行点按是「预览」；简介页需要一个显式可见的入口，
                 // 不能只藏在长按菜单里（chevron 的导航语义与预览行为矛盾）
                 Button(action: onDetail) {
                     Image(systemName: "info.circle")
-                        .font(.body)
+                        .font(.title3)
                         .foregroundStyle(.tint)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 36, height: 36)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
-                .accessibilityLabel("详情")
+                .accessibilityLabel("简介")
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
+        .contentShape(Rectangle())
+        .animation(.easeInOut(duration: 0.2), value: isSelecting)
     }
 }
 
-private struct EmptyStateView: View {
+private struct SearchEmptyRow: View {
+    let query: String
+
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tray")
-                .font(.system(size: 56, weight: .light))
+        VStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.title2)
                 .foregroundStyle(.tertiary)
-            Text("还没有接收到文件")
+            Text("没有找到“\(query)”")
                 .font(.headline)
-            Text("切换到「扫码」标签，对准发送端动画码即可开始接收")
+            Text("换个关键词试试")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
+        .listRowBackground(Color.clear)
+    }
+}
+
+private struct LibraryEmptyState: View {
+    let onGoToScan: () -> Void
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image("BrandMark")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 88, height: 88)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .shadow(color: Brand.glow.opacity(0.25), radius: 16, y: 4)
+                .accessibilityHidden(true)
+            Text("还没有收到文件")
+                .font(.title3.weight(.semibold))
+                .padding(.top, 6)
+            Text("扫描别人屏幕上的动画码，收到的文件会出现在这里。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Text("发送端：在对方设备浏览器打开 cimbar.org")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+                .frame(maxWidth: 280)
+            Button(action: onGoToScan) {
+                Label("去扫码", systemImage: "viewfinder")
+                    .font(.headline)
+                    .padding(.horizontal, 8)
+            }
+            .buttonStyle(.borderedProminent)
+            .foregroundStyle(Brand.ink)
+            .controlSize(.large)
+            .padding(.top, 8)
         }
+        .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
@@ -427,9 +610,9 @@ private struct LibraryAlertsModifier: ViewModifier {
                 Button("保存", action: onCommitRename)
                 Button("取消", role: .cancel) { renameTarget = nil }
             } message: {
-                Text("将同步重命名磁盘上的文件，分享与「文件」App 中一致；扩展名保持不变")
+                Text("扩展名会保留")
             }
-            .alert("删除文件", isPresented: Binding(
+            .alert("删除这个文件？", isPresented: Binding(
                 get: { deleteTarget != nil },
                 set: { if !$0 { deleteTarget = nil } }
             )) {
@@ -437,12 +620,14 @@ private struct LibraryAlertsModifier: ViewModifier {
                 Button("取消", role: .cancel) { deleteTarget = nil }
             } message: {
                 if let target = deleteTarget {
-                    Text("将删除「\(target.displayName)」，无法恢复。")
+                    Text("「\(target.displayName)」删除后无法恢复。")
                 }
             }
-            .confirmationDialog("删除所选文件？", isPresented: $bulkDeleteConfirm, titleVisibility: .visible) {
-                Button("删除 \(selectedCount) 个", role: .destructive, action: onCommitBulkDelete)
+            .confirmationDialog("删除 \(selectedCount) 个文件？", isPresented: $bulkDeleteConfirm, titleVisibility: .visible) {
+                Button("删除", role: .destructive, action: onCommitBulkDelete)
                 Button("取消", role: .cancel) {}
+            } message: {
+                Text("删除后无法恢复。")
             }
     }
 }

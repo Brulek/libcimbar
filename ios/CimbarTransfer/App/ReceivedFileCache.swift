@@ -28,9 +28,9 @@ enum ReceivedFileRetentionPolicy: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
-        case .keepAll: return String(localized: "永久保留")
-        case .days30: return String(localized: "保留 30 天")
-        case .days7:  return String(localized: "保留 7 天")
+        case .keepAll: return String(localized: "从不")
+        case .days30: return String(localized: "30 天后")
+        case .days7:  return String(localized: "7 天后")
         }
     }
 
