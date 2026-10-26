@@ -267,7 +267,7 @@ private struct OnboardingPageView: View {
                         .foregroundStyle(.white.opacity(0.7))
                         .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .center : .leading)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? nil : 150, alignment: .leading)
+                        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? nil : 176, alignment: .leading)
                 }
             }
             ShareLink(item: SenderSite.url) {
