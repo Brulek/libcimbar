@@ -234,15 +234,34 @@ private struct OnboardingPageView: View {
         }
     }
 
-    /// 发送端在另一台设备上，在本机打开网页没用；让用户把网址转给发送方
+    /// 发送端在另一台设备上，在本机打开网页没用：发送方是手机就扫码打开，否则把网址转过去
     private var senderLink: some View {
-        ShareLink(item: URL(string: "https://cimbar.org")!) {
-            Label("把网址发给发送方", systemImage: "square.and.arrow.up")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Brand.glow)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 18)
-                .background(Brand.glow.opacity(0.12), in: Capsule())
+        VStack(spacing: 16) {
+            if let qrImage = SenderSite.qrImage {
+                HStack(spacing: 14) {
+                    Image(uiImage: qrImage)
+                        .interpolation(.none)
+                        .resizable()
+                        .frame(width: 76, height: 76)
+                        .padding(6)
+                        .background(Color.white, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .accessibilityIgnoresInvertColors()
+                        .accessibilityLabel("cimbar.org 的二维码")
+                    Text("发送方是手机：用它的相机扫这个码")
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 150, alignment: .leading)
+                }
+            }
+            ShareLink(item: SenderSite.url) {
+                Label("把网址发给发送方", systemImage: "square.and.arrow.up")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Brand.glow)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 18)
+                    .background(Brand.glow.opacity(0.12), in: Capsule())
+            }
         }
     }
 

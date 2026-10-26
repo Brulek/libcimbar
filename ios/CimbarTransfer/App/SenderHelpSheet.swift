@@ -6,7 +6,6 @@ struct SenderHelpSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var copied = false
 
-    private static let senderURL = URL(string: "https://cimbar.org")!
 
     var body: some View {
         NavigationStack {
@@ -21,7 +20,7 @@ struct SenderHelpSheet: View {
 
                 Section {
                     // 发送方是另一台手机时，用它的相机扫一下就能打开，不用手打网址
-                    if let qrImage = Self.qrImage {
+                    if let qrImage = SenderSite.qrImage {
                         HStack(spacing: 16) {
                             Image(uiImage: qrImage)
                                 .interpolation(.none)
@@ -39,12 +38,12 @@ struct SenderHelpSheet: View {
                         .padding(.vertical, 4)
                     }
                     Button {
-                        UIPasteboard.general.url = Self.senderURL
+                        UIPasteboard.general.url = SenderSite.url
                         withAnimation { copied = true }
                     } label: {
                         Label(copied ? "已复制网址" : "复制网址", systemImage: copied ? "checkmark" : "doc.on.doc")
                     }
-                    ShareLink(item: Self.senderURL) {
+                    ShareLink(item: SenderSite.url) {
                         Label("把网址发给发送方", systemImage: "square.and.arrow.up")
                     }
                 }
@@ -73,18 +72,6 @@ struct SenderHelpSheet: View {
         .presentationDetents([.medium, .large])
     }
 
-    /// 网址是固定的，只生成一次
-    private static let qrImage: UIImage? = makeQRCode(for: senderURL.absoluteString)
-
-    /// 本机生成，不联网
-    private static func makeQRCode(for string: String) -> UIImage? {
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(string.utf8)
-        filter.correctionLevel = "M"
-        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 10, y: 10)),
-              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
-    }
 }
 
 private struct StepRow: View {
@@ -103,4 +90,19 @@ private struct StepRow: View {
         }
         .padding(.vertical, 2)
     }
+}
+
+/// 发送端网页：网址和它的二维码（引导页、「怎么发送文件」共用）
+enum SenderSite {
+    static let url = URL(string: "https://cimbar.org")!
+
+    /// 网址是固定的，只生成一次；本机生成，不联网
+    static let qrImage: UIImage? = {
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(url.absoluteString.utf8)
+        filter.correctionLevel = "M"
+        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 10, y: 10)),
+              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }()
 }

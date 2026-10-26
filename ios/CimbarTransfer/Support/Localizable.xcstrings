@@ -741,6 +741,16 @@
         }
       }
     },
+    "发送方是手机：用它的相机扫这个码" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sending from a phone? Scan this with its camera"
+          }
+        }
+      }
+    },
     "发送方是手机：用它的相机扫这个码，直接打开 cimbar.org" : {
       "localizations" : {
         "en" : {
