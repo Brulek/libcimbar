@@ -831,6 +831,16 @@
         }
       }
     },
+    "复制文字" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Text"
+          }
+        }
+      }
+    },
     "复制网址" : {
       "localizations" : {
         "en" : {

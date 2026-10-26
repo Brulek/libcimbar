@@ -19,6 +19,7 @@ struct FileDetailScreen: View {
     @State private var renameText = ""
     @State private var photoSaveMessage: String?
     @State private var photoSaved = false
+    @State private var textCopied = false
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
     @State private var mediaDetail: MediaDetail?
@@ -215,6 +216,16 @@ struct FileDetailScreen: View {
                 }
                 .tint(photoSaved ? .green : nil)
                 .allowsHitTesting(!photoSaved)
+            } else if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
+                DetailActionButton(
+                    title: textCopied ? "已复制" : "复制文字",
+                    systemImage: textCopied ? "checkmark" : "doc.on.doc"
+                ) {
+                    if TextClipboard.copy(file.url) {
+                        withAnimation { textCopied = true }
+                    }
+                }
+                .tint(textCopied ? .green : nil)
             }
             DetailActionButton(title: "重命名", systemImage: "pencil") {
                 renameText = file.renameStem

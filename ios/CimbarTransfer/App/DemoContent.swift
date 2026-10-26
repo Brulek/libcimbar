@@ -6,7 +6,7 @@ import UIKit
 /// - `-SeedDemoFiles YES`：启动时往接收目录写入几份示例文件（已存在则跳过）
 /// - `-DemoDetail YES`：直接打开最新文件的简介页
 /// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
-/// - `-DemoScan waiting|receiving|lost|stalled|error|paused|done`：扫码页跳过相机，直接展示对应状态；
+/// - `-DemoScan waiting|receiving|lost|stalled|error|paused|done|done-text`：扫码页跳过相机，直接展示对应状态；
 ///   容器的 Library/Caches 里有 demo-screen.png 时把它当作对准的发送端屏幕画进取景框
 enum DemoContent {
     static var scanState: String? {
@@ -57,11 +57,12 @@ enum DemoContent {
         }),
     ]
 
-    /// 「完成」演示状态用的文件
-    static func completedSampleURL() -> URL? {
+    /// 「完成」演示状态用的文件：图片，或 text 为 true 时用文本
+    static func completedSampleURL(text: Bool = false) -> URL? {
         seedFilesIfRequested(force: true)
         guard let directory = try? ReceivedFileCache.directoryURL() else { return nil }
-        return directory.appendingPathComponent(isEnglish ? samples[0].en : samples[0].zh)
+        let sample = samples[text ? 3 : 0]
+        return directory.appendingPathComponent(isEnglish ? sample.en : sample.zh)
     }
 
     static func seedFilesIfRequested(force: Bool = false) {

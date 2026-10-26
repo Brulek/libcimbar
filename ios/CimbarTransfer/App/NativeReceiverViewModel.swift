@@ -703,10 +703,10 @@ extension NativeReceiverViewModel {
                 self.statusText = String(format: NSLocalizedString("文件解压失败（错误 %d），传输可能受损", comment: ""), -15)
             case "paused":
                 self.isIdlePaused = true
-            case "done":
+            case "done", "done-text":
                 self.progressValue = 1
                 self.transferDuration = 23
-                self.receivedFileURL = DemoContent.completedSampleURL()
+                self.receivedFileURL = DemoContent.completedSampleURL(text: name == "done-text")
             default:
                 break
             }

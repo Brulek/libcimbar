@@ -223,6 +223,8 @@ private struct CompletedTransferCard: View {
     @State private var photoSaved = false
     @State private var photoSaveError: String?
     @State private var photoSaveNeedsSettings = false
+    @State private var canCopyText = false
+    @State private var textCopied = false
 
     private var canSaveToPhotos: Bool {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
@@ -261,6 +263,17 @@ private struct CompletedTransferCard: View {
             // 存好后不再可点，但不用 disabled：灰掉的样子像出错，绿色对勾才像「完成了」
             .disabled(photoSaving)
             .allowsHitTesting(!photoSaved)
+        } else if canCopyText {
+            Button {
+                if TextClipboard.copy(fileURL) {
+                    withAnimation { textCopied = true }
+                }
+            } label: {
+                Label(textCopied ? "已复制" : "复制文字", systemImage: textCopied ? "checkmark" : "doc.on.doc")
+                    .frame(maxWidth: .infinity, minHeight: 34)
+            }
+            .buttonStyle(.bordered)
+            .tint(textCopied ? .green : nil)
         }
 
         Button(action: onShare) {
@@ -339,6 +352,8 @@ private struct CompletedTransferCard: View {
             photoSaving = false
             photoSaved = PhotoLibrarySaver.savedPaths.contains(fileURL.path)
             photoSaveError = nil
+            canCopyText = TextClipboard.canCopy(fileURL)
+            textCopied = false
             if AppPreferences.shared.autoSaveToPhotos, canSaveToPhotos, !isDuplicate, !photoSaved {
                 await saveToPhotos()
             }
