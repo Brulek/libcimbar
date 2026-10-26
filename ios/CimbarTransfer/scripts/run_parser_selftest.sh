@@ -39,6 +39,14 @@ with zipfile.ZipFile('book.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
 with zipfile.ZipFile('deck.pptx', 'w', zipfile.ZIP_DEFLATED) as z:
     for n, t in [(1, '封面标题'), (10, '第十页'), (2, '第二页')]:
         z.writestr(f'ppt/slides/slide{n}.xml', f'<p:sld><a:p><a:r><a:t>{t}</a:t></a:r></a:p></p:sld>')
+with zipfile.ZipFile('pages.docx', 'w', zipfile.ZIP_DEFLATED) as z:
+    z.writestr('word/document.xml', '<w:document><w:body><w:p><w:r><w:t>x</w:t></w:r></w:p></w:body></w:document>')
+    z.writestr('docProps/app.xml', '<Properties><Pages>12</Pages><Words>300</Words></Properties>')
+with zipfile.ZipFile('sheets.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
+    z.writestr('xl/sharedStrings.xml', '<sst><si><t>a</t></si></sst>')
+    for i in (1, 2, 3):
+        z.writestr(f'xl/worksheets/sheet{i}.xml', '<worksheet/>')
+    z.writestr('xl/worksheets/_rels/sheet1.xml.rels', '<Relationships/>')
 # 磁盘上 0.5 MB、解开 500 MB 的幻灯片
 with zipfile.ZipFile('bomb.pptx', 'w', zipfile.ZIP_DEFLATED) as z:
     filler = ' ' * (10 * 1024 * 1024)

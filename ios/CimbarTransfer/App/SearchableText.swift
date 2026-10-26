@@ -102,6 +102,34 @@ enum OfficeText {
         return trimmed.isEmpty ? nil : trimmed
     }
 
+    enum Count: Equatable {
+        case pages(Int), slides(Int), sheets(Int)
+    }
+
+    /// Word 页数（Word 存盘时写进 docProps/app.xml，没写就没有）、幻灯片张数、工作表个数；后台调用
+    static func count(_ url: URL) -> Count? {
+        guard let entries = ZipArchive.entries(of: url) else { return nil }
+        func parts(prefix: String) -> Int {
+            entries.filter { $0.name.hasPrefix(prefix) && $0.name.hasSuffix(".xml") && !$0.name.contains("/_rels/") }.count
+        }
+        switch url.pathExtension.lowercased() {
+        case "pptx":
+            let slides = parts(prefix: "ppt/slides/slide")
+            return slides > 0 ? .slides(slides) : nil
+        case "xlsx":
+            let sheets = parts(prefix: "xl/worksheets/sheet")
+            return sheets > 0 ? .sheets(sheets) : nil
+        default:
+            guard let app = entries.first(where: { $0.name == "docProps/app.xml" }),
+                  let data = ZipArchive.data(of: app, in: url, maxSize: 256 * 1024) else { return nil }
+            let xml = String(decoding: data, as: UTF8.self)
+            guard let start = xml.range(of: "<Pages>"),
+                  let end = xml.range(of: "</Pages>", range: start.upperBound..<xml.endIndex),
+                  let pages = Int(xml[start.upperBound..<end.lowerBound]), pages > 0 else { return nil }
+            return .pages(pages)
+        }
+    }
+
     private static func extract(_ xml: String, kind: Kind) -> String {
         let text = NSRegularExpression.escapedPattern(for: kind.textTag)
         let paragraph = NSRegularExpression.escapedPattern(for: kind.breakTag)

@@ -526,27 +526,13 @@ struct MediaDetail: Equatable {
         return nil
     }
 
-    /// Word 页数（Word 存盘时写进 docProps/app.xml）、幻灯片张数、工作表个数
+    /// Word 页数、幻灯片张数、工作表个数
     private static func officeCount(_ url: URL) -> MediaDetail? {
-        guard let entries = ZipArchive.entries(of: url) else { return nil }
-        func count(prefix: String) -> Int {
-            entries.filter { $0.name.hasPrefix(prefix) && $0.name.hasSuffix(".xml") && !$0.name.contains("/_rels/") }.count
-        }
-        switch url.pathExtension.lowercased() {
-        case "pptx":
-            let slides = count(prefix: "ppt/slides/slide")
-            return slides > 0 ? MediaDetail(label: String(localized: "幻灯片"), value: String(localized: "\(slides) 张")) : nil
-        case "xlsx":
-            let sheets = count(prefix: "xl/worksheets/sheet")
-            return sheets > 0 ? MediaDetail(label: String(localized: "工作表"), value: String(localized: "\(sheets) 个")) : nil
-        default:
-            guard let app = entries.first(where: { $0.name == "docProps/app.xml" }),
-                  let data = ZipArchive.data(of: app, in: url, maxSize: 256 * 1024) else { return nil }
-            let xml = String(decoding: data, as: UTF8.self)
-            guard let range = xml.range(of: "<Pages>"),
-                  let end = xml.range(of: "</Pages>", range: range.upperBound..<xml.endIndex),
-                  let pages = Int(xml[range.upperBound..<end.lowerBound]), pages > 0 else { return nil }
-            return MediaDetail(label: String(localized: "页数"), value: "\(pages)")
+        switch OfficeText.count(url) {
+        case .pages(let pages): return MediaDetail(label: String(localized: "页数"), value: "\(pages)")
+        case .slides(let slides): return MediaDetail(label: String(localized: "幻灯片"), value: String(localized: "\(slides) 张"))
+        case .sheets(let sheets): return MediaDetail(label: String(localized: "工作表"), value: String(localized: "\(sheets) 个"))
+        case nil: return nil
         }
     }
 

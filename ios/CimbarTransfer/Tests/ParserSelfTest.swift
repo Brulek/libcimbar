@@ -53,6 +53,11 @@ enum ParserSelfTest {
         check("pptx order", pptx.components(separatedBy: "\n").filter { $0.hasPrefix("第") || $0.hasPrefix("封") } == ["封面标题", "第二页", "第十页"],
               pptx.debugDescription)
 
+        check("Word pages", OfficeText.count(file("pages.docx")) == .pages(12), "")
+        check("no page count", OfficeText.count(file("doc.docx")) == nil, "")
+        check("sheet count", OfficeText.count(file("sheets.xlsx")) == .sheets(3), "")
+        check("slide count", OfficeText.count(file("deck.pptx")) == .slides(3), "")
+
         let start = Date()
         let bomb = OfficeText.read(file("bomb.pptx")) ?? ""
         let seconds = Date().timeIntervalSince(start)
