@@ -247,6 +247,37 @@ bool runRepeatTest() {
     return ok;
 }
 
+// 发送端给的文件名是外部数据：路径分隔符、空名、点开头、换行、超长名都要落在收件目录里且名字可用
+bool runFilenameTest() {
+    std::string longName;
+    for (int i = 0; i < 120; ++i) longName += "长";
+    longName += ".txt";
+    const std::vector<std::string> names = {"../../evil.txt", "", ".hidden", "a\nb.txt", longName};
+    bool ok = true;
+    for (size_t i = 0; i < names.size(); ++i) {
+        std::vector<CVPixelBufferRef> frames = cameraFrames(encodeFrames(67, names[i], makePayload(2048), 30, 110 + i));
+        std::thread worker([&] {
+            @autoreleasepool {
+                NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+                NativeCimbarDecodeOutput *out = feedUntilFile(decoder, frames);
+                NSString *name = out.fileURL.lastPathComponent;
+                NSString *parent = out.fileURL.URLByDeletingLastPathComponent.lastPathComponent;
+                const bool good = out.fileURL != nil && name.length > 0 && ![name hasPrefix:@"."]
+                    && [parent isEqualToString:@"Inbox"]
+                    && [name lengthOfBytesUsingEncoding:NSUTF8StringEncoding] <= 255
+                    && [name rangeOfString:@"/"].location == NSNotFound
+                    && [name rangeOfCharacterFromSet:NSCharacterSet.newlineCharacterSet].location == NSNotFound;
+                if (!good) ok = false;
+                printf("%s  filename %zu -> %s\n", good ? "PASS" : "FAIL", i, name.UTF8String ?: "-");
+                if (out.fileURL) [[NSFileManager defaultManager] removeItemAtURL:out.fileURL error:nil];
+            }
+        });
+        worker.join();
+        for (CVPixelBufferRef buffer : frames) CVPixelBufferRelease(buffer);
+    }
+    return ok;
+}
+
 // 发送端中途换模式：先收到一部分 B，再全部换成 Bm。自动模式应跟上，最终收到 Bm 那份文件
 bool runModeSwitchTest() {
     const std::string first = makePayload(24 * 1024);
@@ -504,6 +535,9 @@ int main(int argc, char **argv) {
         }
         gDegrade = false;
         if (!runRepeatTest()) {
+            ++failures;
+        }
+        if (!runFilenameTest()) {
             ++failures;
         }
         if (!runModeSwitchTest()) {
