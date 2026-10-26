@@ -13,12 +13,21 @@ enum FilesExport {
 }
 
 struct FilesExportPicker: UIViewControllerRepresentable {
-    let fileURL: URL
+    let fileURLs: [URL]
     /// true：用户选好位置存进去了；false：取消
     var onFinish: (Bool) -> Void
 
+    init(fileURLs: [URL], onFinish: @escaping (Bool) -> Void) {
+        self.fileURLs = fileURLs
+        self.onFinish = onFinish
+    }
+
+    init(fileURL: URL, onFinish: @escaping (Bool) -> Void) {
+        self.init(fileURLs: [fileURL], onFinish: onFinish)
+    }
+
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
+        let picker = UIDocumentPickerViewController(forExporting: fileURLs, asCopy: true)
         picker.delegate = context.coordinator
         return picker
     }

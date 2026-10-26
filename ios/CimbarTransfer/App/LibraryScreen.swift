@@ -56,6 +56,8 @@ struct LibraryScreen: View {
     @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
     @State private var batchSaving = false
+    /// 多选「存到文件」时要导出的文件；非空即弹出系统的存储位置选择器
+    @State private var filesExportURLs: [URL] = []
 
     private var trimmedSearch: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -210,6 +212,17 @@ struct LibraryScreen: View {
             selectedIDs.formIntersection(present)
             if files.isEmpty { isSelecting = false }
         }
+        .sheet(isPresented: Binding(
+            get: { !filesExportURLs.isEmpty },
+            set: { if !$0 { filesExportURLs = [] } }
+        )) {
+            FilesExportPicker(fileURLs: filesExportURLs) { [count = filesExportURLs.count] saved in
+                guard saved else { return }
+                presentToast(SaveToast(message: String(localized: "已存 \(count) 个到「文件」"), style: .success))
+                endSelection()
+            }
+            .ignoresSafeArea()
+        }
         .alert("没能存到相册", isPresented: $photoPermissionAlert) {
             Button("去设置") { AppSettingsOpener.open() }
             Button("好", role: .cancel) {}
@@ -240,6 +253,14 @@ struct LibraryScreen: View {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .accessibilityLabel("分享所选文件")
+                .disabled(selectedIDs.isEmpty)
+
+                Button {
+                    filesExportURLs = selectedFiles.map(\.url)
+                } label: {
+                    Image(systemName: "folder")
+                }
+                .accessibilityLabel("把所选文件存到「文件」")
                 .disabled(selectedIDs.isEmpty)
 
                 if selectedFiles.contains(where: { PhotoLibrarySaver.canSave(extension: $0.fileExtension) }) {

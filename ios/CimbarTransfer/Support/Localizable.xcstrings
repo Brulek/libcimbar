@@ -1073,6 +1073,28 @@
         }
       }
     },
+    "已存 %lld 个到「文件」" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Saved %lld item to Files"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Saved %lld items to Files"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "已存 %lld 个到相册" : {
       "localizations" : {
         "en" : {
@@ -1471,6 +1493,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fit the animated code inside the viewfinder"
+          }
+        }
+      }
+    },
+    "把所选文件存到「文件」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Selected Files to Files"
           }
         }
       }
