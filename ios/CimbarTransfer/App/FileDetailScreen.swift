@@ -11,6 +11,7 @@ struct FileDetailScreen: View {
     let onPreview: (URL) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     @State private var sha256: String?
     @State private var checksumFailed = false
@@ -20,6 +21,8 @@ struct FileDetailScreen: View {
     @State private var photoSaveMessage: String?
     @State private var photoSaved = false
     @State private var textCopied = false
+    /// 文件内容只是一个网址：第一个按钮改成「打开链接」
+    @State private var webLink: URL?
     @State private var filesExportURLs: [URL] = []
     @State private var savedToFiles = false
     @State private var photoSaveNeedsSettings = false
@@ -117,6 +120,14 @@ struct FileDetailScreen: View {
         .task(id: file.fileName) {
             mediaDetail = await MediaDetail.load(for: file.url)
         }
+        .task(id: file.fileName) {
+            guard TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) else {
+                webLink = nil
+                return
+            }
+            let url = file.url
+            webLink = await Task.detached(priority: .userInitiated) { TextClipboard.singleWebLink(url) }.value
+        }
         .onChange(of: store.cachedFiles) { files in
             // 文件被外部删除/清空后自动退出，避免变成预览分享全是死链的僵尸页。
             // （重命名场景不受影响：store.rename 先回调新文件名再发布新列表）
@@ -205,7 +216,13 @@ struct FileDetailScreen: View {
     @ViewBuilder
     private var actionButtons: some View {
         Group {
-            if !FilesExport.isArchive(file.fileExtension) {
+            if let webLink {
+                DetailActionButton(title: "打开链接", systemImage: "safari") {
+                    openURL(webLink)
+                }
+                .accessibilityLabel("打开网址")
+                .accessibilityHint(Text(verbatim: webLink.host ?? ""))
+            } else if !FilesExport.isArchive(file.fileExtension) {
                 DetailActionButton(title: "预览", systemImage: "eye") {
                     onPreview(file.url)
                 }
