@@ -161,6 +161,9 @@ struct ReceiverScreen: View {
         .background(Color.black)
         // 相机界面始终用深色外观，与取景画面一致，不跟随系统浅色
         .environment(\.colorScheme, .dark)
+        // 强制深色后，资源里的强调色在「增强对比度」下会取到浅色模式那一档（深棕），
+        // 按钮在深色卡片上像是不可点；扫码页直接用品牌琥珀色
+        .tint(Brand.glow)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showingSenderHelp) {
             SenderHelpSheet()

@@ -293,7 +293,8 @@ private struct CompletedTransferCard: View {
                     .frame(maxWidth: .infinity, minHeight: 34)
             }
             .buttonStyle(.bordered)
-            .tint(photoSaved ? .green : nil)
+            // 不能写 nil：nil 会退回资源里的强调色，强制深色+增强对比度时是深棕
+            .tint(photoSaved ? .green : Brand.glow)
             // 存好后不再可点，但不用 disabled：灰掉的样子像出错，绿色对勾才像「完成了」
             .disabled(photoSaving)
             .allowsHitTesting(!photoSaved)
@@ -309,7 +310,7 @@ private struct CompletedTransferCard: View {
                     .frame(maxWidth: .infinity, minHeight: 34)
             }
             .buttonStyle(.bordered)
-            .tint(textCopied ? .green : nil)
+            .tint(textCopied ? .green : Brand.glow)
         } else {
             Button {
                 filesExportURLs = [fileURL]
@@ -318,7 +319,7 @@ private struct CompletedTransferCard: View {
                     .frame(maxWidth: .infinity, minHeight: 34)
             }
             .buttonStyle(.bordered)
-            .tint(savedToFiles ? .green : nil)
+            .tint(savedToFiles ? .green : Brand.glow)
             // 英文按钮上只放得下 Save，由文件夹图标表示存到哪；读屏读全称
             .accessibilityLabel(savedToFiles ? "已存入「文件」" : "存到「文件」")
         }
