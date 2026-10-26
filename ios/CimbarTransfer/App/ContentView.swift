@@ -47,6 +47,8 @@ struct ContentView: View {
     }()
     @State private var shareRequest: ShareRequest?
     @State private var previewRequest: PreviewRequest?
+    /// 从扫码页要打开简介的文件名，「我的文件」打开后清掉
+    @State private var libraryDetailRequest: String?
     @State private var autoJumpTask: Task<Void, Never>?
     /// 本次打开「我的文件」之前的上次访问时间：之后收到的文件在列表里标为新
     @State private var libraryNewSince: Date = AppPreferences.shared.libraryLastViewed
@@ -81,7 +83,15 @@ struct ContentView: View {
                 ReceiverScreen(
                     viewModel: viewModel,
                     onShare: { presentShare(for: [$0]) },
-                    onPreview: { presentPreview(for: [$0], at: 0) }
+                    onPreview: { url in
+                        // 压缩包这类系统预览只有图标的：去「我的文件」打开简介，那里能看包里有什么、存到「文件」
+                        if FilesExport.hasUsefulPreview(url.pathExtension) {
+                            presentPreview(for: [url], at: 0)
+                        } else {
+                            libraryDetailRequest = url.lastPathComponent
+                            selectedTab = .library
+                        }
+                    }
                 )
             }
             .tabItem {
@@ -276,7 +286,8 @@ struct ContentView: View {
             onPreviewFiles: { presentPreview(for: $0, at: $1) },
             newSince: libraryNewSince,
             onGoToScan: { selectedTab = .scan },
-            splitDetail: splitDetail
+            splitDetail: splitDetail,
+            detailRequest: $libraryDetailRequest
         )
     }
 

@@ -29,6 +29,8 @@ struct LibraryScreen: View {
     @State private var detailTarget: CachedReceivedFile?
     /// iPad 分栏：简介显示在右栏，由外面持有选中的文件；为 nil 时照旧推入简介页
     var splitDetail: Binding<CachedReceivedFile?>?
+    /// 扫码页点了预览不了的文件（压缩包等）：切过来后打开它的简介，打开后清掉
+    var detailRequest: Binding<String?>?
     @State private var batchSaving = false
     /// 多选「存到文件」时要导出的文件；非空即弹出系统的存储位置选择器
     @State private var filesExportURLs: [URL] = []
@@ -205,6 +207,9 @@ struct LibraryScreen: View {
         .refreshable {
             store.refresh(cleanup: false)
         }
+        .onAppear(perform: openRequestedDetail)
+        .onChange(of: detailRequest?.wrappedValue) { _ in openRequestedDetail() }
+        .onChange(of: store.cachedFiles) { _ in openRequestedDetail() }
         .onChange(of: store.feedback) { feedback in
             guard let feedback, feedback.source == .delete else { return }
             presentToast(SaveToast(message: feedback.message, style: .failure))
@@ -531,6 +536,16 @@ struct LibraryScreen: View {
 
     private func isOpenInSplit(_ file: CachedReceivedFile) -> Bool {
         !isSelecting && splitDetail?.wrappedValue?.id == file.id
+    }
+
+    /// 刚收到的文件可能还没进列表（切标签时才刷新），列表更新后再试
+    private func openRequestedDetail() {
+        guard let name = detailRequest?.wrappedValue,
+              let file = store.cachedFiles.first(where: { $0.fileName == name }) else { return }
+        detailRequest?.wrappedValue = nil
+        isSelecting = false
+        searchText = ""
+        showDetail(file)
     }
 
     private func showDetail(_ file: CachedReceivedFile) {

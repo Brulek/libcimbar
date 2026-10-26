@@ -373,8 +373,8 @@ private struct CompletedTransferCard: View {
             .buttonStyle(.plain)
             .accessibilityLabel("已收到 \(fileURL.lastPathComponent)")
             .accessibilityValue(detailText)
-            .accessibilityHint(hasNoPreview ? Text(verbatim: "") : Text("轻点预览"))
-            .allowsHitTesting(!hasNoPreview)
+            // 预览不了的（压缩包等）点了去「我的文件」看简介
+            .accessibilityHint(hasNoPreview ? Text("轻点查看简介") : Text("轻点预览"))
 
             // 大字号下三个按钮并排放不下，改为竖排，不截断文字
             ViewThatFits(in: .horizontal) {
