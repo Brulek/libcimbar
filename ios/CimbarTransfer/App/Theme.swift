@@ -68,7 +68,8 @@ private struct ReadableListWidth: ViewModifier {
             GeometryReader { proxy in
                 content.contentMargins(
                     .horizontal,
-                    max(0, (proxy.size.width - Self.maxWidth) / 2),
+                    // 窄于可读宽度时保留内缩分组列表本来的边距（iPad 分栏的右栏就窄于 720）
+                    max(20, (proxy.size.width - Self.maxWidth) / 2),
                     for: .scrollContent
                 )
             }

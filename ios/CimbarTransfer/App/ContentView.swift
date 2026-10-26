@@ -33,6 +33,9 @@ struct ContentView: View {
     @StateObject private var cacheStore = ReceivedFileCacheStore()
     @StateObject private var preferences = AppPreferences.shared
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    /// iPad 分栏时右栏显示的文件
+    @State private var libraryDetail: CachedReceivedFile?
     // 调试/自动化钩子：launch argument `-InitialTab library|settings` 可指定初始标签
     // （launch args 会进 UserDefaults 的 argument domain，正常使用不受影响）
     @State private var selectedTab: AppTab = {
@@ -86,15 +89,7 @@ struct ContentView: View {
             }
             .tag(AppTab.scan)
 
-            NavigationStack {
-                LibraryScreen(
-                    store: cacheStore,
-                    onShareFiles: { presentShare(for: $0) },
-                    onPreviewFiles: { presentPreview(for: $0, at: $1) },
-                    newSince: libraryNewSince,
-                    onGoToScan: { selectedTab = .scan }
-                )
-            }
+            libraryTab
             .tabItem {
                 Label("我的文件", systemImage: "folder")
             }
@@ -227,6 +222,48 @@ struct ContentView: View {
             .contains { $0.isKeyWindow && $0.rootViewController?.presentedViewController != nil }
     }
 
+    /// iPad 全屏（宽尺寸）时左边列表、右边简介；iPhone 和分屏变窄时照旧推入简介页
+    @ViewBuilder
+    private var libraryTab: some View {
+        if horizontalSizeClass == .regular {
+            NavigationSplitView {
+                libraryScreen(splitDetail: $libraryDetail)
+                    // 默认侧栏太窄：文件名被截断、日期折行
+                    .navigationSplitViewColumnWidth(min: 360, ideal: 420, max: 520)
+            } detail: {
+                NavigationStack {
+                    if let file = libraryDetail {
+                        FileDetailScreen(
+                            store: cacheStore,
+                            initialFile: file,
+                            onShare: { presentShare(for: [$0]) },
+                            onPreview: { presentPreview(for: [$0], at: 0) },
+                            onClose: { libraryDetail = nil }
+                        )
+                        .id(file.id)
+                    } else {
+                        LibraryDetailPlaceholder()
+                    }
+                }
+            }
+        } else {
+            NavigationStack {
+                libraryScreen(splitDetail: nil)
+            }
+        }
+    }
+
+    private func libraryScreen(splitDetail: Binding<CachedReceivedFile?>?) -> some View {
+        LibraryScreen(
+            store: cacheStore,
+            onShareFiles: { presentShare(for: $0) },
+            onPreviewFiles: { presentPreview(for: $0, at: $1) },
+            newSince: libraryNewSince,
+            onGoToScan: { selectedTab = .scan },
+            splitDetail: splitDetail
+        )
+    }
+
     private func resumeScanIfAppropriate() {
         // 接收完成后解码链已刻意停住（省电），关闭分享/预览面板不应重新拉起；
         // 用户点「继续扫码」时 resetScan 会恢复
@@ -258,4 +295,20 @@ struct PreviewRequest: Identifiable {
     let id = UUID()
     let urls: [URL]
     let index: Int
+}
+
+/// iPad 分栏右栏还没选文件时
+private struct LibraryDetailPlaceholder: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "info.circle")
+                .font(.system(size: 44))
+                .foregroundStyle(.tertiary)
+            Text("轻点文件右边的 ⓘ 查看简介")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
+    }
 }

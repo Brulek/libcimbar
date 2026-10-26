@@ -93,6 +93,8 @@ struct LibraryScreen: View {
     @State private var saveToast: SaveToast?
     @State private var photoPermissionAlert = false
     @State private var detailTarget: CachedReceivedFile?
+    /// iPad 分栏：简介显示在右栏，由外面持有选中的文件；为 nil 时照旧推入简介页
+    var splitDetail: Binding<CachedReceivedFile?>?
     @State private var batchSaving = false
     /// 多选「存到文件」时要导出的文件；非空即弹出系统的存储位置选择器
     @State private var filesExportURLs: [URL] = []
@@ -251,8 +253,8 @@ struct LibraryScreen: View {
         }
         #if DEBUG
         .onChange(of: store.cachedFiles.first?.id) { _ in
-            if DemoContent.opensDetail, detailTarget == nil {
-                detailTarget = sorted(store.cachedFiles).first
+            if DemoContent.opensDetail, detailTarget == nil, splitDetail?.wrappedValue == nil {
+                if let first = sorted(store.cachedFiles).first { showDetail(first) }
             }
         }
         #endif
@@ -392,7 +394,7 @@ struct LibraryScreen: View {
                 toggleSelection(for: file.id)
             } else if !FilesExport.hasUsefulPreview(file.fileExtension) {
                 // 预览不了的类型（压缩包等）打开简介页，那里能「存到文件」再解压/安装
-                detailTarget = file
+                showDetail(file)
             } else {
                 // 传入当前列表，预览里可以左右滑动看相邻文件；跳过预览不了的，免得滑到空白页
                 let previewable = files.filter { FilesExport.hasUsefulPreview($0.fileExtension) }
@@ -407,7 +409,7 @@ struct LibraryScreen: View {
                 isSelecting: isSelecting,
                 isSelected: selectedIDs.contains(file.id),
                 dayShownInHeader: sortOption.isByDate && trimmedSearch.isEmpty,
-                onDetail: { detailTarget = file }
+                onDetail: { showDetail(file) }
             )
         }
         .buttonStyle(.plain)
@@ -476,13 +478,21 @@ struct LibraryScreen: View {
                 beginRename(file)
             } label: { Label("重命名", systemImage: "pencil") }
             Button {
-                detailTarget = file
+                showDetail(file)
             } label: { Label("简介", systemImage: "info.circle") }
             Divider()
             Button(role: .destructive) {
                 delete(file)
             } label: { Label("删除", systemImage: "trash") }
         })
+    }
+
+    private func showDetail(_ file: CachedReceivedFile) {
+        if let splitDetail {
+            splitDetail.wrappedValue = file
+        } else {
+            detailTarget = file
+        }
     }
 
     private func toggleSelection(for id: String) {

@@ -9,6 +9,8 @@ struct FileDetailScreen: View {
     let initialFile: CachedReceivedFile
     let onShare: (URL) -> Void
     let onPreview: (URL) -> Void
+    /// iPad 分栏时简介页不在导航栈里，dismiss() 什么也不做，由外面清掉选中项
+    var onClose: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -35,12 +37,14 @@ struct FileDetailScreen: View {
         store: ReceivedFileCacheStore,
         initialFile: CachedReceivedFile,
         onShare: @escaping (URL) -> Void,
-        onPreview: @escaping (URL) -> Void
+        onPreview: @escaping (URL) -> Void,
+        onClose: (() -> Void)? = nil
     ) {
         self.store = store
         self.initialFile = initialFile
         self.onShare = onShare
         self.onPreview = onPreview
+        self.onClose = onClose
         _trackedFileName = State(initialValue: initialFile.fileName)
     }
 
@@ -119,6 +123,8 @@ struct FileDetailScreen: View {
                 }
             }
         }
+        // 明确用内缩分组：iPad 分栏右栏里自动样式会变成通栏，操作按钮贴到两边
+        .listStyle(.insetGrouped)
         .readableListWidth()
         .navigationTitle("简介")
         .navigationBarTitleDisplayMode(.inline)
@@ -140,7 +146,7 @@ struct FileDetailScreen: View {
             // 文件被外部删除/清空后自动退出，避免变成预览分享全是死链的僵尸页。
             // （重命名场景不受影响：store.rename 先回调新文件名再发布新列表）
             if !files.contains(where: { $0.fileName == trackedFileName }) {
-                dismiss()
+                if let onClose { onClose() } else { dismiss() }
             }
         }
         .filesExport(urls: $filesExportURLs) { _ in

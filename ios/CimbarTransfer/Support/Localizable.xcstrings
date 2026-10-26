@@ -2853,6 +2853,16 @@
         }
       }
     },
+    "轻点文件右边的 ⓘ 查看简介" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap ⓘ next to a file to see its info"
+          }
+        }
+      }
+    },
     "轻点查看简介" : {
       "localizations" : {
         "en" : {
