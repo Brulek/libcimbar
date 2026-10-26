@@ -165,6 +165,10 @@ struct ContentView: View {
                 libraryNewSince = preferences.libraryLastViewed
                 preferences.libraryLastViewed = Date()
             }
+            // 要打开的简介没等到（文件已被删）：离开「我的文件」就作废，免得以后突然弹出来
+            if newValue != .library {
+                libraryDetailRequest = nil
+            }
             switch newValue {
             case .scan:
                 // 撤销条只在「我的文件」里：离开就真的删掉。否则撤销窗口内收到同一个文件，
