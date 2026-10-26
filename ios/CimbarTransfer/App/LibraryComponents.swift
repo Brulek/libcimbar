@@ -48,15 +48,22 @@ struct LibraryRow: View {
     let isNew: Bool
     let isSelecting: Bool
     let isSelected: Bool
+    /// 列表按日期分组时，「昨天」已经写在分组标题上
+    var dayShownInHeader = false
     var onDetail: (() -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var thumbnailSide: CGFloat = 46
 
-    /// 今天/昨天收到的只显示时间（分组标题已经说明了日期），更早的显示日期
+    /// 今天的只显示时间；昨天的在没有日期分组时加「昨天」；更早的显示日期
     private var dateText: String {
         let calendar = Calendar.current
-        if calendar.isDateInToday(file.receivedAt) || calendar.isDateInYesterday(file.receivedAt) {
-            return file.receivedAt.formatted(date: .omitted, time: .shortened)
+        let time = file.receivedAt.formatted(date: .omitted, time: .shortened)
+        if calendar.isDateInToday(file.receivedAt) {
+            return time
+        }
+        // 按名称/大小/类型排序或搜索时没有「昨天」分组标题，光写时间会被当成今天
+        if calendar.isDateInYesterday(file.receivedAt) {
+            return dayShownInHeader ? time : String(localized: "昨天 \(time)")
         }
         if calendar.isDate(file.receivedAt, equalTo: Date(), toGranularity: .year) {
             return file.receivedAt.formatted(.dateTime.month(.abbreviated).day())

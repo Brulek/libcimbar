@@ -5,6 +5,7 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
     case dateAscending
     case nameAscending
     case sizeDescending
+    case kind
 
     var id: String { rawValue }
 
@@ -14,6 +15,7 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
         case .dateAscending:  return String(localized: "最早优先")
         case .nameAscending:  return String(localized: "名称")
         case .sizeDescending: return String(localized: "大小")
+        case .kind:           return String(localized: "类型")
         }
     }
 
@@ -23,11 +25,47 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
         case .dateAscending:  return "arrow.up"
         case .nameAscending:  return "abc"
         case .sizeDescending: return "internaldrive"
+        case .kind:           return "square.grid.2x2"
         }
     }
 
     var isByDate: Bool {
         self == .dateDescending || self == .dateAscending
+    }
+}
+
+/// 按「类型」排序时的分组，顺序即显示顺序
+private enum LibraryFileKind: Int, CaseIterable {
+    case media, document, audio, archive, other
+
+    private static let documentExtensions: Set<String> = [
+        "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pages", "numbers", "key",
+        "txt", "md", "rtf", "csv", "json", "xml", "yaml", "yml", "log", "html", "htm",
+    ]
+    private static let audioExtensions: Set<String> = ["mp3", "wav", "aac", "flac", "m4a"]
+
+    init(fileExtension: String) {
+        if PhotoLibrarySaver.canSave(extension: fileExtension) {
+            self = .media
+        } else if Self.documentExtensions.contains(fileExtension) {
+            self = .document
+        } else if Self.audioExtensions.contains(fileExtension) {
+            self = .audio
+        } else if FilesExport.isArchive(fileExtension) {
+            self = .archive
+        } else {
+            self = .other
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .media:    return String(localized: "照片和视频")
+        case .document: return String(localized: "文档")
+        case .audio:    return String(localized: "音频")
+        case .archive:  return String(localized: "压缩包")
+        case .other:    return String(localized: "其他")
+        }
     }
 }
 
@@ -85,11 +123,24 @@ struct LibraryScreen: View {
         case .dateAscending:  return files.sorted { $0.receivedAt < $1.receivedAt }
         case .nameAscending:  return files.sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
         case .sizeDescending: return files.sorted { $0.fileSize > $1.fileSize }
+        case .kind:
+            // 同类里新的在前
+            return files.sorted {
+                let lhs = LibraryFileKind(fileExtension: $0.fileExtension).rawValue
+                let rhs = LibraryFileKind(fileExtension: $1.fileExtension).rawValue
+                return lhs != rhs ? lhs < rhs : $0.receivedAt > $1.receivedAt
+            }
         }
     }
 
-    /// 按日期排序时分成「今天 / 昨天 / 近 7 天 / 更早」，其余排序不分组
+    /// 按日期排序时分成「今天 / 昨天 / 近 7 天 / 更早」，按类型排序时按类型分组，其余排序不分组
     private func sections(for files: [CachedReceivedFile]) -> [LibrarySection] {
+        if sortOption == .kind, trimmedSearch.isEmpty {
+            return LibraryFileKind.allCases.compactMap { kind in
+                let members = files.filter { LibraryFileKind(fileExtension: $0.fileExtension) == kind }
+                return members.isEmpty ? nil : LibrarySection(id: "kind-\(kind.rawValue)", title: kind.title, files: members)
+            }
+        }
         guard sortOption.isByDate, trimmedSearch.isEmpty else {
             return [LibrarySection(id: "all", title: nil, files: files)]
         }
@@ -352,6 +403,7 @@ struct LibraryScreen: View {
                 isNew: file.receivedAt > newSince,
                 isSelecting: isSelecting,
                 isSelected: selectedIDs.contains(file.id),
+                dayShownInHeader: sortOption.isByDate && trimmedSearch.isEmpty,
                 onDetail: { detailTarget = file }
             )
         }

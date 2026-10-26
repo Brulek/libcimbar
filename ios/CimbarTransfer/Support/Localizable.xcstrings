@@ -521,6 +521,16 @@
         }
       }
     },
+    "其他" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        }
+      }
+    },
     "分享" : {
       "localizations" : {
         "en" : {
@@ -617,6 +627,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Are deleted together with the app when you delete it"
+          }
+        }
+      }
+    },
+    "压缩包" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archives"
           }
         }
       }
@@ -1767,6 +1787,16 @@
         }
       }
     },
+    "文档" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documents"
+          }
+        }
+      }
+    },
     "新" : {
       "localizations" : {
         "en" : {
@@ -1823,6 +1853,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday"
+          }
+        }
+      }
+    },
+    "昨天 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday %@"
           }
         }
       }
@@ -2259,6 +2299,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Photos, documents, archives — any file type works"
+          }
+        }
+      }
+    },
+    "照片和视频" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos & Videos"
           }
         }
       }
@@ -2949,6 +2999,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Move closer so the code fills most of the viewfinder"
+          }
+        }
+      }
+    },
+    "音频" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
           }
         }
       }
