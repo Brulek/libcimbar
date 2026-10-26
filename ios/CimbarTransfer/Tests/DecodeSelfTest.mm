@@ -473,6 +473,8 @@ int main(int argc, char **argv) {
             {"auto  <- 4C", 4, 0, true, 4, false},
             {"B     <- B ", 68, 68, true, 0, false},
             {"Bm    <- Bm", 67, 67, true, 0, false},
+            // 旧版 8C：自动识别只轮换 B/Bm/Bu/4C，手动选 8C 时要能收
+            {"8C    <- 8C", 8, 8, true, 0, false},
             {"B     <- Bu", 66, 68, false, 0, false},
             // 拍摄质量变差（倾斜、模糊、偏暗、噪点）：自动模式要和对应的手动模式一样能收完
             {"~auto <- B ", 68, 0, true, 68, true},
