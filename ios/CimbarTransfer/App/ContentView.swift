@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 enum AppTab: Hashable {
@@ -6,8 +7,29 @@ enum AppTab: Hashable {
     case settings
 }
 
+/// 只负责持有扫码 VM，本身从不发布变化。
+/// 扫码时 VM 每秒发布约 10 次进度；若 ContentView 直接用 @StateObject 观察它，
+/// 整个 TabView（连同「我的文件」列表）都会跟着每秒重算 10 次。
+/// 只有扫码页观察 VM，这里需要的「收到文件」事件单独转发
+private final class ReceiverHolder: ObservableObject {
+    let viewModel = NativeReceiverViewModel()
+    /// 不能直接 onReceive(viewModel.$receivedFileURL)：SwiftUI 每次刷新都会重新订阅，
+    /// @Published 又会给新订阅者重放当前值，于是「刷新列表 → 重绘 → 重放 → 再刷新」停不下来。
+    /// PassthroughSubject 只在值真正变化时发一次
+    let receivedFileChanges = PassthroughSubject<URL?, Never>()
+    private var subscription: AnyCancellable?
+
+    init() {
+        subscription = viewModel.$receivedFileURL
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] url in self?.receivedFileChanges.send(url) }
+    }
+}
+
 struct ContentView: View {
-    @StateObject private var viewModel = NativeReceiverViewModel()
+    @StateObject private var receiverHolder = ReceiverHolder()
+    private var viewModel: NativeReceiverViewModel { receiverHolder.viewModel }
     @StateObject private var cacheStore = ReceivedFileCacheStore()
     @StateObject private var preferences = AppPreferences.shared
     @Environment(\.scenePhase) private var scenePhase
@@ -94,7 +116,7 @@ struct ContentView: View {
             #endif
             cacheStore.refresh(cleanup: true)
         }
-        .onChange(of: viewModel.receivedFileURL) { newURL in
+        .onReceive(receiverHolder.receivedFileChanges) { newURL in
             // URL 变 nil 说明用户点了「继续扫码」重置，同样要取消待执行的跳转
             autoJumpTask?.cancel()
             guard newURL != nil else { return }
