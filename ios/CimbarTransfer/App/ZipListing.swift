@@ -1,3 +1,4 @@
+import Compression
 import Foundation
 
 /// 压缩包里有什么：只读 zip 末尾的中央目录（文件名和大小），不解压。
@@ -11,11 +12,39 @@ struct ZipListing: Equatable {
     let names: [String]
 
     static let maxNames = 8
-    /// 中央目录最多读这么多：再大的包只看前面，不为一个列表读几十 MB
-    private static let maxDirectoryBytes = 4 * 1024 * 1024
 
     /// `maxNames`：简介页只列几个；按内容搜索时要全部文件名
     static func read(_ url: URL, maxNames: Int = maxNames) -> ZipListing? {
+        guard let entries = ZipArchive.entries(of: url) else { return nil }
+        let files = entries.filter { !$0.name.hasSuffix("/") && !isMacJunk($0.name) }
+        return ZipListing(
+            fileCount: files.count,
+            totalSize: files.reduce(0) { $0 + Int64(clamping: $1.uncompressedSize) },
+            names: files.prefix(maxNames).map(\.name)
+        )
+    }
+
+    private static func isMacJunk(_ name: String) -> Bool {
+        name.hasPrefix("__MACOSX/") || name == ".DS_Store" || name.hasSuffix("/.DS_Store")
+    }
+}
+
+/// 只读的 zip 读取：中央目录里的条目，以及解出单个条目（存储或 deflate）。
+/// 给压缩包列表和 Office 文档（docx/pptx/xlsx 本身就是 zip）的文字搜索用
+enum ZipArchive {
+    struct Entry: Equatable {
+        let name: String
+        let method: UInt16
+        let isEncrypted: Bool
+        let compressedSize: UInt64
+        let uncompressedSize: UInt64
+        let localHeaderOffset: UInt64
+    }
+
+    /// 中央目录最多读这么多：再大的包只看前面，不为一个列表读几十 MB
+    private static let maxDirectoryBytes = 4 * 1024 * 1024
+
+    static func entries(of url: URL) -> [Entry]? {
         guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
         defer { try? handle.close() }
         guard let fileSize = try? handle.seekToEnd(), fileSize >= 22,
@@ -23,7 +52,47 @@ struct ZipListing: Equatable {
         let length = min(directory.size, UInt64(maxDirectoryBytes))
         guard (try? handle.seek(toOffset: directory.offset)) != nil,
               let data = try? handle.read(upToCount: Int(length)) else { return nil }
-        return parseEntries(data, count: directory.count, maxNames: maxNames)
+        let entries = parseEntries([UInt8](data), count: directory.count)
+        return entries.isEmpty ? nil : entries
+    }
+
+    /// 解出一个条目；超过 `maxSize`、加密、或不是存储/deflate 的返回 nil
+    static func data(of entry: Entry, in url: URL, maxSize: Int) -> Data? {
+        guard !entry.isEncrypted, entry.uncompressedSize <= UInt64(maxSize),
+              entry.compressedSize <= UInt64(maxSize),
+              let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? handle.close() }
+        guard (try? handle.seek(toOffset: entry.localHeaderOffset)) != nil,
+              let header = try? handle.read(upToCount: 30), header.count == 30 else { return nil }
+        let h = [UInt8](header)
+        guard le32(h, 0) == 0x0403_4b50 else { return nil }
+        // 本地头里的文件名、扩展字段长度可能和中央目录里的不一样，按本地头跳
+        let dataOffset = entry.localHeaderOffset + 30 + UInt64(le16(h, 26)) + UInt64(le16(h, 28))
+        guard (try? handle.seek(toOffset: dataOffset)) != nil,
+              let compressed = try? handle.read(upToCount: Int(entry.compressedSize)),
+              compressed.count == Int(entry.compressedSize) else { return nil }
+        switch entry.method {
+        case 0:
+            return compressed
+        case 8:
+            return inflate(compressed, expectedSize: Int(entry.uncompressedSize))
+        default:
+            return nil
+        }
+    }
+
+    /// zip 的 deflate 是不带头的原始流，正是 Compression 框架的 COMPRESSION_ZLIB
+    private static func inflate(_ data: Data, expectedSize: Int) -> Data? {
+        guard expectedSize > 0 else { return Data() }
+        var output = Data(count: expectedSize)
+        let written = output.withUnsafeMutableBytes { (dst: UnsafeMutableRawBufferPointer) -> Int in
+            data.withUnsafeBytes { (src: UnsafeRawBufferPointer) -> Int in
+                guard let dstBase = dst.bindMemory(to: UInt8.self).baseAddress,
+                      let srcBase = src.bindMemory(to: UInt8.self).baseAddress else { return 0 }
+                return compression_decode_buffer(dstBase, expectedSize, srcBase, data.count, nil, COMPRESSION_ZLIB)
+            }
+        }
+        return written == expectedSize ? output : nil
     }
 
     // MARK: - 结尾记录
@@ -64,49 +133,54 @@ struct ZipListing: Equatable {
 
     // MARK: - 中央目录
 
-    private static func parseEntries(_ data: Data, count: UInt64, maxNames: Int) -> ZipListing? {
-        let bytes = [UInt8](data)
+    private static func parseEntries(_ bytes: [UInt8], count: UInt64) -> [Entry] {
+        var entries: [Entry] = []
         var position = 0
-        var fileCount = 0
-        var totalSize: Int64 = 0
-        var names: [String] = []
-        var parsed: UInt64 = 0
-        while parsed < count, position + 46 <= bytes.count, le32(bytes, position) == 0x0201_4b50 {
+        while UInt64(entries.count) < count, position + 46 <= bytes.count, le32(bytes, position) == 0x0201_4b50 {
             let flags = le16(bytes, position + 8)
+            var compressed = UInt64(le32(bytes, position + 20))
             var uncompressed = UInt64(le32(bytes, position + 24))
             let nameLength = Int(le16(bytes, position + 28))
             let extraLength = Int(le16(bytes, position + 30))
             let commentLength = Int(le16(bytes, position + 32))
+            var localOffset = UInt64(le32(bytes, position + 42))
             let nameStart = position + 46
             let extraStart = nameStart + nameLength
             guard extraStart + extraLength <= bytes.count else { break }
 
-            if uncompressed == 0xFFFF_FFFF {
-                uncompressed = zip64Size(bytes, from: extraStart, length: extraLength) ?? 0
-            }
-            let name = decodeName(Array(bytes[nameStart..<extraStart]), utf8Flag: flags & 0x0800 != 0)
-            if !name.hasSuffix("/"), !isMacJunk(name) {
-                fileCount += 1
-                totalSize += Int64(clamping: uncompressed)
-                if names.count < maxNames {
-                    names.append(name)
+            // ZIP64 扩展字段（0x0001）：只有在中央目录里填了 0xFFFFFFFF 的值才出现，顺序固定
+            if let field = zip64Field(bytes, from: extraStart, length: extraLength) {
+                var cursor = field.start
+                func nextWide() -> UInt64? {
+                    guard cursor + 8 <= field.end else { return nil }
+                    defer { cursor += 8 }
+                    return le64(bytes, cursor)
                 }
+                if uncompressed == 0xFFFF_FFFF, let wide = nextWide() { uncompressed = wide }
+                if compressed == 0xFFFF_FFFF, let wide = nextWide() { compressed = wide }
+                if localOffset == 0xFFFF_FFFF, let wide = nextWide() { localOffset = wide }
             }
+
+            entries.append(Entry(
+                name: decodeName(Array(bytes[nameStart..<extraStart]), utf8Flag: flags & 0x0800 != 0),
+                method: le16(bytes, position + 10),
+                isEncrypted: flags & 0x0001 != 0,
+                compressedSize: compressed,
+                uncompressedSize: uncompressed,
+                localHeaderOffset: localOffset
+            ))
             position = extraStart + extraLength + commentLength
-            parsed += 1
         }
-        guard parsed > 0 else { return nil }
-        return ZipListing(fileCount: fileCount, totalSize: totalSize, names: names)
+        return entries
     }
 
-    /// ZIP64 扩展字段（0x0001）里的第一个值是解压后大小
-    private static func zip64Size(_ bytes: [UInt8], from start: Int, length: Int) -> UInt64? {
+    private static func zip64Field(_ bytes: [UInt8], from start: Int, length: Int) -> (start: Int, end: Int)? {
         var position = start
         while position + 4 <= start + length {
             let id = le16(bytes, position)
             let size = Int(le16(bytes, position + 2))
-            if id == 0x0001, size >= 8, position + 12 <= bytes.count {
-                return le64(bytes, position + 4)
+            if id == 0x0001 {
+                return (position + 4, min(position + 4 + size, bytes.count))
             }
             position += 4 + size
         }
@@ -125,14 +199,10 @@ struct ZipListing: Equatable {
         return String(data: data, encoding: gb18030) ?? String(decoding: data, as: UTF8.self)
     }
 
-    private static func isMacJunk(_ name: String) -> Bool {
-        name.hasPrefix("__MACOSX/") || name == ".DS_Store" || name.hasSuffix("/.DS_Store")
-    }
-
     // MARK: - 小端整数
 
     private static func le16(_ b: [UInt8], _ i: Int) -> UInt16 {
-        guard i + 2 <= b.count else { return 0 }
+        guard i >= 0, i + 2 <= b.count else { return 0 }
         return UInt16(b[i]) | UInt16(b[i + 1]) << 8
     }
 

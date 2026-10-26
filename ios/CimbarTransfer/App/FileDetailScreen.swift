@@ -190,6 +190,14 @@ struct FileDetailScreen: View {
             guard TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) else {
                 webLink = nil
                 textSnippet = nil
+                // Word / PowerPoint / Excel：开头几段文字也直接给看
+                if ["docx", "pptx", "xlsx"].contains(file.fileExtension.lowercased()),
+                   SearchableText.canIndexDocument(fileExtension: file.fileExtension, size: file.fileSize) {
+                    let url = file.url
+                    textSnippet = await Task.detached(priority: .userInitiated) {
+                        OfficeText.read(url).map { String($0.prefix(600)) }
+                    }.value
+                }
                 return
             }
             let url = file.url
