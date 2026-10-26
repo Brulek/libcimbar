@@ -159,7 +159,12 @@ struct ContentView: View {
                 viewModel.stop()
             }
         }
-        .onChange(of: cacheStore.cachedFiles) { _ in
+        .onChange(of: cacheStore.cachedFiles) { files in
+            // iPad 分栏右边在看的文件被删了（包括删掉最后一个、换成单栏布局时简介页来不及自己关），
+            // 选中项要清掉，否则下次分栏会显示一个已删除文件的简介
+            if let shown = libraryDetail, !files.contains(where: { $0.id == shown.id }) {
+                libraryDetail = nil
+            }
             // 停在「我的文件」时新到的文件当场就看到了，不再算作未读
             if selectedTab == .library {
                 preferences.libraryLastViewed = Date()

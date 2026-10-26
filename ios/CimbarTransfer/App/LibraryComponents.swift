@@ -50,6 +50,8 @@ struct LibraryRow: View {
     let isSelected: Bool
     /// 列表按日期分组时，「昨天」已经写在分组标题上
     var dayShownInHeader = false
+    /// 「今天/昨天」相对哪一天算：由列表传入，过了午夜会换，行跟着重画
+    var referenceDay = Date()
     var onDetail: (() -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var thumbnailSide: CGFloat = 46
@@ -59,14 +61,15 @@ struct LibraryRow: View {
     private var dateText: String {
         let calendar = Calendar.current
         let time = file.receivedAt.formatted(date: .omitted, time: .shortened)
-        if calendar.isDateInToday(file.receivedAt) {
+        if calendar.isDate(file.receivedAt, inSameDayAs: referenceDay) {
             return time
         }
         // 按名称/大小/类型排序或搜索时没有「昨天」分组标题，光写时间会被当成今天
-        if calendar.isDateInYesterday(file.receivedAt) {
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: referenceDay),
+           calendar.isDate(file.receivedAt, inSameDayAs: yesterday) {
             return dayShownInHeader ? time : String(localized: "昨天 \(time)")
         }
-        if calendar.isDate(file.receivedAt, equalTo: Date(), toGranularity: .year) {
+        if calendar.isDate(file.receivedAt, equalTo: referenceDay, toGranularity: .year) {
             return file.receivedAt.formatted(.dateTime.month(.abbreviated).day())
         }
         return file.receivedAt.formatted(date: .abbreviated, time: .omitted)

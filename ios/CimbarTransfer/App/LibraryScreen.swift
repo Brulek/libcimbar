@@ -100,6 +100,7 @@ struct LibraryScreen: View {
     @State private var filesExportURLs: [URL] = []
     /// 过了午夜「今天/昨天」要重新分组：系统在跨天、改时区时发通知，换个值让列表重算
     @State private var dayStamp = Date()
+    @Environment(\.scenePhase) private var scenePhase
 
     private var trimmedSearch: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -155,13 +156,14 @@ struct LibraryScreen: View {
             return [LibrarySection(id: "all", title: nil, files: files)]
         }
         let calendar = Calendar.current
-        _ = dayStamp // 跨天时由通知更新，让分组跟着重算
-        let startOfToday = calendar.startOfDay(for: Date())
+        // 跨天时 dayStamp 由通知更新，分组跟着重算
+        let startOfToday = calendar.startOfDay(for: dayStamp)
         let weekAgo = calendar.date(byAdding: .day, value: -6, to: startOfToday) ?? startOfToday
 
         func bucket(_ date: Date) -> Int {
-            if calendar.isDateInToday(date) { return 0 }
-            if calendar.isDateInYesterday(date) { return 1 }
+            if date >= startOfToday { return 0 }
+            if let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday),
+               date >= startOfYesterday { return 1 }
             if date >= weekAgo { return 2 }
             return 3
         }
@@ -283,6 +285,12 @@ struct LibraryScreen: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
             dayStamp = Date()
+        }
+        .onChange(of: scenePhase) { phase in
+            // 挂在后台时跨了天，回前台也要重算
+            if phase == .active, !Calendar.current.isDate(dayStamp, inSameDayAs: Date()) {
+                dayStamp = Date()
+            }
         }
         .filesExport(urls: $filesExportURLs) { count in
             presentToast(SaveToast(message: String(localized: "已存 \(count) 个到「文件」"), style: .success))
@@ -429,6 +437,7 @@ struct LibraryScreen: View {
                 isSelecting: isSelecting,
                 isSelected: selectedIDs.contains(file.id),
                 dayShownInHeader: sortOption.isByDate && trimmedSearch.isEmpty,
+                referenceDay: dayStamp,
                 onDetail: { showDetail(file) }
             )
         }
@@ -492,8 +501,10 @@ struct LibraryScreen: View {
             }
             if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
                 Button {
-                    if TextClipboard.copy(file.url) {
-                        presentToast(SaveToast(message: String(localized: "已复制文字"), style: .success))
+                    Task {
+                        if await TextClipboard.copy(file.url) {
+                            presentToast(SaveToast(message: String(localized: "已复制文字"), style: .success))
+                        }
                     }
                 } label: { Label("复制文字", systemImage: "doc.on.doc") }
             }
@@ -546,6 +557,10 @@ struct LibraryScreen: View {
         defer { renameTarget = nil }
         guard let file = renameTarget else { return }
         store.rename(file: file, to: renameText) { renamed in
+            // 改的正是 iPad 右边在看的那个：文件名（也是 id）变了，选中项跟着换，右边不会当成已删除而关掉
+            if let renamed, let splitDetail, splitDetail.wrappedValue?.id == file.id {
+                splitDetail.wrappedValue = renamed
+            }
             // 空名/非法名/移动失败不能无声无息——弹窗已关，用 toast 告知
             if renamed == nil {
                 presentToast(SaveToast(message: String(localized: "没能重命名，换个名称试试"), style: .failure))

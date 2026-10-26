@@ -58,10 +58,12 @@ enum TextClipboard {
         return link
     }
 
-    /// 复制成功返回 true（文件读不出来或编码不认识时返回 false）
-    @discardableResult
-    static func copy(_ url: URL) -> Bool {
-        guard let text = readText(url) else { return false }
+    /// 复制成功返回 true（文件读不出来或编码不认识时返回 false）。
+    /// 读文件和猜编码（最大 512 KB）放在后台，只有写剪贴板回主线程
+    @MainActor
+    static func copy(_ url: URL) async -> Bool {
+        let text = await Task.detached(priority: .userInitiated) { readText(url) }.value
+        guard let text else { return false }
         UIPasteboard.general.string = text
         return true
     }

@@ -263,8 +263,10 @@ struct FileDetailScreen: View {
                     title: textCopied ? "已复制" : "复制文字",
                     systemImage: textCopied ? "checkmark" : "doc.on.doc"
                 ) {
-                    if TextClipboard.copy(file.url) {
-                        withAnimation { textCopied = true }
+                    Task {
+                        if await TextClipboard.copy(file.url) {
+                            withAnimation { textCopied = true }
+                        }
                     }
                 }
                 .tint(textCopied ? .green : nil)

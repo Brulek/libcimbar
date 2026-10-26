@@ -283,8 +283,10 @@ private struct CompletedTransferCard: View {
             .allowsHitTesting(!photoSaved)
         } else if canCopyText {
             Button {
-                if TextClipboard.copy(fileURL) {
-                    withAnimation { textCopied = true }
+                Task {
+                    if await TextClipboard.copy(fileURL) {
+                        withAnimation { textCopied = true }
+                    }
                 }
             } label: {
                 Label(textCopied ? "已复制" : "复制文字", systemImage: textCopied ? "checkmark" : "doc.on.doc")

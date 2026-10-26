@@ -5,7 +5,6 @@ import SwiftUI
 struct SenderHelpSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var copied = false
-    @State private var qrImage: UIImage?
 
     private static let senderURL = URL(string: "https://cimbar.org")!
 
@@ -22,7 +21,7 @@ struct SenderHelpSheet: View {
 
                 Section {
                     // 发送方是另一台手机时，用它的相机扫一下就能打开，不用手打网址
-                    if let qrImage {
+                    if let qrImage = Self.qrImage {
                         HStack(spacing: 16) {
                             Image(uiImage: qrImage)
                                 .interpolation(.none)
@@ -70,10 +69,10 @@ struct SenderHelpSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .task {
-            qrImage = Self.makeQRCode(for: Self.senderURL.absoluteString)
-        }
     }
+
+    /// 网址是固定的，只生成一次
+    private static let qrImage: UIImage? = makeQRCode(for: senderURL.absoluteString)
 
     /// 本机生成，不联网
     private static func makeQRCode(for string: String) -> UIImage? {
