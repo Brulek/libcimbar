@@ -13,6 +13,14 @@ enum Brand {
     static let ink = Color(red: 0.13, green: 0.09, blue: 0.02)
 }
 
+extension Brand {
+    /// 传输进度的颜色：取景框边线和底部进度条共用。有问题（停滞/相机异常）橙、正在读到码绿、码不在琥珀
+    static func progressTint(isTracking: Bool, hasWarning: Bool) -> Color {
+        if hasWarning { return .orange }
+        return isTracking ? signal : glow
+    }
+}
+
 /// 琥珀实心主按钮，整宽
 struct BrandPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled

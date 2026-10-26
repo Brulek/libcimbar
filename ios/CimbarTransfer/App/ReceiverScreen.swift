@@ -66,6 +66,11 @@ struct ReceiverScreen: View {
                         scanState: scanState,
                         showCheckmark: showCheckmark,
                         isPaused: viewModel.isIdlePaused,
+                        progress: viewModel.receivedFileURL == nil ? viewModel.progressValue : nil,
+                        progressTint: Brand.progressTint(
+                            isTracking: viewModel.isTracking,
+                            hasWarning: viewModel.stallHint != nil || viewModel.cameraErrorText != nil
+                        ),
                         reveal: showCheckmark ? nil : reveal,
                         onTapReveal: { onPreview($0) }
                     )

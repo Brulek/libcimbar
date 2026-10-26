@@ -26,6 +26,9 @@ struct ScanFrameOverlay: View {
     var scanState: ScanState = .idle
     var showCheckmark: Bool = false
     var isPaused: Bool = false
+    /// 传输进度（0~1）：取景框边线按进度点亮，看着取景框也知道收到哪了
+    var progress: Double?
+    var progressTint: Color = Brand.glow
     /// 打勾动画结束后，把收到的图片/PDF/视频缩略图放进取景框
     var reveal: RevealedFile?
     var onTapReveal: (URL) -> Void = { _ in }
@@ -45,6 +48,20 @@ struct ScanFrameOverlay: View {
                 showCheckmark: showCheckmark,
                 isPaused: isPaused || reveal != nil
             )
+            .overlay {
+                if let progress, !showCheckmark, reveal == nil {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .trim(from: 0, to: max(0.002, min(progress, 1)))
+                        .stroke(progressTint.opacity(0.9), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .shadow(color: progressTint.opacity(0.6), radius: 6)
+                        .frame(width: side, height: side)
+                        // RoundedRectangle 的路径从右边中点起笔；正方形转 -90° 后改从顶边中点顺时针走
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeOut(duration: 0.3), value: progress)
+                        .transition(.opacity)
+                        .accessibilityHidden(true)
+                }
+            }
             .overlay {
                 if let reveal {
                     Button {

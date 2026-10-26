@@ -157,7 +157,7 @@ private struct ProgressCard: View {
 
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
-                .tint(stallHint == nil && cameraError == nil ? Color.accentColor : .orange)
+                .tint(Brand.progressTint(isTracking: isTracking, hasWarning: stallHint != nil || cameraError != nil))
 
             if let warning = cameraError ?? stallHint {
                 Label(warning, systemImage: "exclamationmark.triangle.fill")
