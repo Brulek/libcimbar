@@ -51,7 +51,7 @@ struct PrivacyPolicyScreen: View {
                     Text("如对本政策有任何疑问，请通过 App Store 评价或开发者邮箱联系我们。")
                 }
 
-                Text("最后更新时间：2026 年 5 月")
+                Text("最后更新时间：2026 年 10 月")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .padding(.top, 12)

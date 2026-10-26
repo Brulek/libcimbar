@@ -1805,6 +1805,16 @@
         }
       }
     },
+    "最后更新时间：2026 年 10 月" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last updated: October 2026"
+          }
+        }
+      }
+    },
     "最后更新时间：2026 年 5 月" : {
       "localizations" : {
         "en" : {
