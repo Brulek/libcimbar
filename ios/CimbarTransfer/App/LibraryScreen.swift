@@ -426,13 +426,22 @@ struct LibraryScreen: View {
             }
         }
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
-            if !isSelecting, PhotoLibrarySaver.canSave(extension: file.fileExtension) {
-                Button {
-                    Task { await saveImageToPhotos(file) }
-                } label: {
-                    Label("存到相册", systemImage: "photo.on.rectangle")
+            if !isSelecting {
+                if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
+                    Button {
+                        Task { await saveImageToPhotos(file) }
+                    } label: {
+                        Label("存到相册", systemImage: "photo.on.rectangle")
+                    }
+                    .tint(.pink)
+                } else {
+                    Button {
+                        filesExportURLs = [file.url]
+                    } label: {
+                        Label("存到「文件」", systemImage: "folder")
+                    }
+                    .tint(.cyan)
                 }
-                .tint(.pink)
             }
         }
         // iPad 分屏时可以把文件直接拖进「文件」、邮件、备忘录等 App
