@@ -325,7 +325,7 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
     char filenameBuffer[512] = {0};
     const int filenameLength = cimbard_get_filename(fileID, filenameBuffer, sizeof(filenameBuffer));
     if (filenameLength < 0) {
-        [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件重组失败（错误 %d），传输可能受损", nil), filenameLength] into:output];
+        [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件没能收完整（错误 %d）", nil), filenameLength] into:output];
         return;
     }
 
@@ -381,7 +381,7 @@ static const NSUInteger kStuckFramesBeforeProbe = 90;
         if (writeFailed) {
             [self latchError:NSLocalizedString(@"保存失败，请检查剩余存储空间", nil) into:output];
         } else {
-            [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件解压失败（错误 %d），传输可能受损", nil), readSize] into:output];
+            [self latchError:[NSString stringWithFormat:NSLocalizedString(@"文件收到了，但解不开（错误 %d）", nil), readSize] into:output];
         }
         return;
     }

@@ -1807,22 +1807,22 @@
         }
       }
     },
-    "文件解压失败（错误 %d），传输可能受损" : {
+    "文件收到了，但解不开（错误 %d）" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Couldn't decompress the file (error %d). The transfer may be damaged."
+            "value" : "The file arrived but couldn't be unpacked (error %d)."
           }
         }
       }
     },
-    "文件重组失败（错误 %d），传输可能受损" : {
+    "文件没能收完整（错误 %d）" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Couldn't reassemble the file (error %d). The transfer may be damaged."
+            "value" : "The file didn't come through complete (error %d)."
           }
         }
       }

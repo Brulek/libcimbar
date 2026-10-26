@@ -734,7 +734,7 @@ extension NativeReceiverViewModel {
                 self.stallHint = String(localized: "试试靠近些、避开反光，或调亮发送端屏幕")
             case "error":
                 self.scanErrorLatched = true
-                self.statusText = String(format: NSLocalizedString("文件解压失败（错误 %d），传输可能受损", comment: ""), -15)
+                self.statusText = String(format: NSLocalizedString("文件收到了，但解不开（错误 %d）", comment: ""), -15)
             case "paused":
                 self.isIdlePaused = true
             case "done", "done-text":
