@@ -111,6 +111,7 @@ struct SettingsScreen: View {
                             Image("BrandMark")
                                 .resizable()
                                 .scaledToFit()
+                                .accessibilityIgnoresInvertColors()
                                 .frame(width: 29, height: 29)
                                 .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                         }

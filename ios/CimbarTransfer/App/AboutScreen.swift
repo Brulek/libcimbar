@@ -54,6 +54,7 @@ private struct AppIdentityHeader: View {
             Image("BrandMark")
                 .resizable()
                 .scaledToFit()
+                .accessibilityIgnoresInvertColors()
                 .frame(width: 96, height: 96)
                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .shadow(color: Brand.glow.opacity(0.3), radius: 18, y: 6)

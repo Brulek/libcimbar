@@ -146,6 +146,7 @@ struct LibraryEmptyState: View {
             Image("BrandMark")
                 .resizable()
                 .scaledToFit()
+                .accessibilityIgnoresInvertColors()
                 .frame(width: 88, height: 88)
                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .shadow(color: Brand.glow.opacity(0.25), radius: 16, y: 4)

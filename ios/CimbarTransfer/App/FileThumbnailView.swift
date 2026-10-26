@@ -75,6 +75,8 @@ struct FileThumbnailView: View {
                         Image(uiImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
+                            // 「智能反转」下照片和文档缩略图保持原色
+                            .accessibilityIgnoresInvertColors()
                     }
             } else {
                 FileKindIcon(fileExtension: fileExtension, cornerRadius: cornerRadius)

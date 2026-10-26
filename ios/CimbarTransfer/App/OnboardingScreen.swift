@@ -249,6 +249,7 @@ private struct OnboardingPageView: View {
             Image("BrandMark")
                 .resizable()
                 .scaledToFit()
+                .accessibilityIgnoresInvertColors()
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                 .shadow(color: Brand.glow.opacity(0.45), radius: 30, y: 8)

@@ -42,6 +42,7 @@ struct ReceiverScreen: View {
                 onDoubleTap: { viewModel.resetZoom() }
             )
                 .ignoresSafeArea()
+                .accessibilityIgnoresInvertColors()
                 .accessibilityLabel("相机取景，轻点对焦，捏合缩放")
                 .accessibilityElement(children: .ignore)
                 #if DEBUG
