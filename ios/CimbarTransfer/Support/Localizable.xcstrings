@@ -1822,7 +1822,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The file didn't come through complete (error %d)."
+            "value" : "Part of the file is missing (error %d)."
           }
         }
       }
