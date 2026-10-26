@@ -11,7 +11,11 @@ struct LibraryScreen: View {
     @AppStorage(LibrarySortOption.defaultsKey) private var sortOption: LibrarySortOption = .dateDescending
     @State private var searchText = ""
     /// 搜索时才建：小文本的全文（文件名 → 内容），能按内容搜到「那条有 Wi-Fi 密码的笔记」
-    @State private var textIndex: [String: String] = [:]
+    @State private var textIndex: [String: IndexedText] = [:]
+    /// 当前搜索词按内容命中的文件名：在后台算好，过滤时只查集合，不在主线程上每次渲染重扫全文
+    @State private var contentHits: Set<String> = []
+    /// 索引每重建一次加一，用作算命中的 task 的 id（比较整份索引太贵）
+    @State private var textIndexVersion = 0
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""
     @State private var isSelecting: Bool = false
@@ -34,8 +38,14 @@ struct LibraryScreen: View {
 
     /// 开始搜索、或搜索时文件有增删改名，重建内容索引
     private var textIndexKey: String {
-        trimmedSearch.isEmpty ? "" : store.cachedFiles.map(\.fileName).joined(separator: "\u{1}")
+        // 带上修改时间：同名文件被替换（在「文件」App 里改过、删了再收一个同名的）也要重读
+        trimmedSearch.isEmpty ? "" : store.cachedFiles
+            .map { "\($0.fileName)\u{2}\($0.modifiedAt.timeIntervalSince1970)" }
+            .joined(separator: "\u{1}")
     }
+
+    /// 过滤和「命中的那一行」用同一种比较，两边结论才一致
+    fileprivate static let contentSearchOptions: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]
 
     private var filteredFiles: [CachedReceivedFile] {
         let query = trimmedSearch
@@ -48,7 +58,7 @@ struct LibraryScreen: View {
                     || file.fileName.localizedCaseInsensitiveContains(query)
                     // 改过名的文件也能按发送端的原名搜到
                     || file.originalName.localizedCaseInsensitiveContains(query)
-                    || (textIndex[file.fileName]?.localizedCaseInsensitiveContains(query) ?? false)
+                    || contentHits.contains(file.fileName)
             }
         }
         return sorted(base)
@@ -137,18 +147,39 @@ struct LibraryScreen: View {
                     TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize)
                         || SearchableText.canIndexPDF(fileExtension: $0.fileExtension, size: $0.fileSize)
                 }
-                .map { (name: $0.fileName, url: $0.url) }
+                .map { (name: $0.fileName, url: $0.url, stamp: $0.modifiedAt) }
             let known = textIndex
-            // 读文件、猜编码放后台；已经读过的不再读
-            let built = await Task.detached(priority: .userInitiated) { () -> [String: String] in
-                var index: [String: String] = [:]
+            // 读文件、猜编码放后台；已经读过且没改过的不再读，读不出的也记下（空文字），免得每次重读
+            let built = await Task.detached(priority: .userInitiated) { () -> [String: IndexedText] in
+                var index: [String: IndexedText] = [:]
                 for file in files {
                     if Task.isCancelled { break }
-                    index[file.name] = known[file.name] ?? SearchableText.read(file.url)
+                    if let old = known[file.name], old.stamp == file.stamp {
+                        index[file.name] = old
+                    } else {
+                        index[file.name] = IndexedText(stamp: file.stamp, text: SearchableText.read(file.url) ?? "")
+                    }
                 }
                 return index
             }.value
-            if !Task.isCancelled { textIndex = built }
+            if !Task.isCancelled {
+                textIndex = built
+                textIndexVersion &+= 1
+            }
+        }
+        .task(id: "\(textIndexVersion)\u{1}\(trimmedSearch)") {
+            let query = trimmedSearch
+            guard !query.isEmpty else {
+                contentHits = []
+                return
+            }
+            let index = textIndex
+            let hits = await Task.detached(priority: .userInitiated) { () -> Set<String> in
+                Set(index.compactMap { name, entry in
+                    entry.text.range(of: query, options: Self.contentSearchOptions) != nil ? name : nil
+                })
+            }.value
+            if !Task.isCancelled { contentHits = hits }
         }
         .toolbar { toolbarContent }
         // 多选时底部是操作栏；iOS 26 的悬浮标签栏会和它挤在同一行、挡住中间的按钮，
@@ -351,9 +382,7 @@ struct LibraryScreen: View {
         .accessibilityHint(isSelecting ? "轻点切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "轻点查看简介" : "轻点预览")
         .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
         // 行里的 ⓘ 嵌在行按钮里，VoiceOver 不一定能单独聚焦到；给一个具名操作（左滑的分享/删除系统会自动列出）
-        .accessibilityAction(named: Text("简介")) {
-            if !isSelecting { showDetail(file) }
-        }
+        .modifier(DetailAccessibilityAction(isEnabled: !isSelecting) { showDetail(file) })
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             if !isSelecting {
                 Button(role: .destructive) {
@@ -434,12 +463,12 @@ struct LibraryScreen: View {
         guard !query.isEmpty,
               !file.displayName.localizedCaseInsensitiveContains(query),
               !file.originalName.localizedCaseInsensitiveContains(query),
-              let text = textIndex[file.fileName],
-              let range = text.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) else { return nil }
+              let text = textIndex[file.fileName]?.text,
+              let range = text.range(of: query, options: Self.contentSearchOptions) else { return nil }
         let line = text.lineRange(for: range)
         var snippet = text[line].trimmingCharacters(in: .whitespacesAndNewlines)
         // 一行很长时只留命中处前后一段
-        if snippet.count > 60, let hit = snippet.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) {
+        if snippet.count > 60, let hit = snippet.range(of: query, options: Self.contentSearchOptions) {
             let start = snippet.index(hit.lowerBound, offsetBy: -20, limitedBy: snippet.startIndex) ?? snippet.startIndex
             let end = snippet.index(hit.upperBound, offsetBy: 30, limitedBy: snippet.endIndex) ?? snippet.endIndex
             snippet = (start > snippet.startIndex ? "…" : "") + String(snippet[start..<end]) + (end < snippet.endIndex ? "…" : "")
@@ -567,6 +596,26 @@ struct LibraryScreen: View {
                     saveToast = nil
                 }
             }
+        }
+    }
+}
+
+/// 内容索引里的一项：修改时间变了就重读；读不出文字的记成空串
+struct IndexedText: Equatable {
+    let stamp: Date
+    let text: String
+}
+
+/// 行上的「简介」读屏操作：多选时不提供（点了也不会打开）
+private struct DetailAccessibilityAction: ViewModifier {
+    let isEnabled: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.accessibilityAction(named: Text("简介"), action)
+        } else {
+            content
         }
     }
 }

@@ -57,7 +57,7 @@ struct LibraryRow: View {
     private var highlightedMatch: AttributedString {
         var text = AttributedString(contentMatch ?? "")
         if !searchQuery.isEmpty,
-           let range = text.range(of: searchQuery, options: [.caseInsensitive, .diacriticInsensitive]) {
+           let range = text.range(of: searchQuery, options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]) {
             text[range].font = .footnote.weight(.semibold)
             text[range].foregroundColor = .primary
         }
