@@ -241,8 +241,9 @@ struct LibraryScreen: View {
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
         .toolbar { toolbarContent }
         // 多选时底部是操作栏；iOS 26 的悬浮标签栏会和它挤在同一行、挡住中间的按钮，
-        // 和「照片」「文件」一样选择期间收起标签栏
-        .toolbar(isSelecting ? .hidden : .automatic, for: .tabBar)
+        // 和「照片」「文件」一样选择期间收起标签栏。iPad 分栏时标签栏在顶上，不挡，留着
+        //（不能看 horizontalSizeClass：分栏的侧栏本身是窄尺寸）
+        .toolbar(isSelecting && splitDetail == nil ? .hidden : .automatic, for: .tabBar)
         .refreshable {
             store.refresh(cleanup: false)
         }
@@ -255,6 +256,10 @@ struct LibraryScreen: View {
         .onChange(of: store.cachedFiles.first?.id) { _ in
             if DemoContent.opensDetail, detailTarget == nil, splitDetail?.wrappedValue == nil {
                 if let first = sorted(store.cachedFiles).first { showDetail(first) }
+            }
+            if DemoContent.opensSelection, !isSelecting {
+                isSelecting = true
+                selectedIDs = Set(sorted(store.cachedFiles).prefix(2).map(\.id))
             }
         }
         #endif
