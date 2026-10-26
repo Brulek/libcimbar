@@ -53,6 +53,7 @@ struct LibraryRow: View {
     var onDetail: (() -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var thumbnailSide: CGFloat = 46
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     /// 今天的只显示时间；昨天的在没有日期分组时加「昨天」；更早的显示日期
     private var dateText: String {
@@ -93,10 +94,10 @@ struct LibraryRow: View {
                             .frame(width: 8, height: 8)
                             .accessibilityLabel("新")
                     }
-                    // 中间截断：长文件名也能看到扩展名
+                    // 中间截断：长文件名也能看到扩展名。辅助功能字号下一行只剩几个字，允许折行
                     Text(file.displayName)
                         .font(.body)
-                        .lineLimit(1)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
                         .truncationMode(.middle)
                 }
                 Text("\(file.sizeDescription) · \(dateText)")
