@@ -23,8 +23,11 @@ struct RevealedFile: Equatable {
         isText = TextClipboard.canCopy(fileExtension: url.pathExtension, size: size)
         guard isText || ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
         // 最多 512 KB，收完一个文件才读一次
+        // 只有空白的文件和认不出编码的一样处理，显示类型图标而不是一张白纸
         textSnippet = isText
-            ? TextClipboard.readText(url).map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500)) }
+            ? TextClipboard.readText(url)
+                .map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(1500)) }
+                .flatMap { $0.isEmpty ? nil : $0 }
             : nil
         let modified = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
         self.url = url
