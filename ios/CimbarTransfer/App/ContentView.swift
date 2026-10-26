@@ -23,6 +23,8 @@ struct ContentView: View {
     @State private var shareRequest: ShareRequest?
     @State private var previewRequest: PreviewRequest?
     @State private var autoJumpTask: Task<Void, Never>?
+    /// 本次打开「我的文件」之前的上次访问时间：之后收到的文件在列表里标为新
+    @State private var libraryNewSince: Date = AppPreferences.shared.libraryLastViewed
 
     private var newFileCount: Int {
         guard selectedTab != .library else { return 0 }
@@ -67,6 +69,7 @@ struct ContentView: View {
                     store: cacheStore,
                     onShareFiles: { presentShare(for: $0) },
                     onPreviewFiles: { presentPreview(for: $0, at: $1) },
+                    newSince: libraryNewSince,
                     onGoToScan: { selectedTab = .scan }
                 )
             }
@@ -113,6 +116,7 @@ struct ContentView: View {
             autoJumpTask?.cancel()
             if newValue == .library {
                 cacheStore.refresh(cleanup: false)
+                libraryNewSince = preferences.libraryLastViewed
                 preferences.libraryLastViewed = Date()
             }
             switch newValue {
@@ -138,6 +142,12 @@ struct ContentView: View {
         }
         .onChange(of: preferences.highResolutionCapture) { enabled in
             viewModel.setHighResolutionCapture(enabled)
+        }
+        .onReceive(AppNavigator.shared.$scanRequest.compactMap { $0 }) { _ in
+            // 快捷指令 / 操作按钮：回到扫码页；正在看的预览、分享面板先收起
+            shareRequest = nil
+            previewRequest = nil
+            selectedTab = .scan
         }
         .onChange(of: scenePhase) { newPhase in
             // 回前台只在「扫码」页恢复相机，避免其他页面后台开启相机

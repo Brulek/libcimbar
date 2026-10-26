@@ -69,9 +69,10 @@ struct ReceiverScreen: View {
                     highResolution: $preferences.highResolutionCapture,
                     detectedMode: viewModel.detectedMode,
                     zoomFactor: viewModel.zoomFactor,
+                    canQuickZoom: viewModel.canQuickZoom,
                     torchAvailable: viewModel.torchAvailable,
                     torchActive: viewModel.torchActive,
-                    onResetZoom: { viewModel.resetZoom() },
+                    onToggleZoom: { viewModel.toggleQuickZoom() },
                     onToggleTorch: { viewModel.toggleTorch() }
                 )
                 Spacer()
@@ -174,10 +175,19 @@ private struct ReceiverTopBar: View {
     @Binding var highResolution: Bool
     let detectedMode: Int
     let zoomFactor: CGFloat
+    let canQuickZoom: Bool
     let torchAvailable: Bool
     let torchActive: Bool
-    let onResetZoom: () -> Void
+    let onToggleZoom: () -> Void
     let onToggleTorch: () -> Void
+
+    private var isZoomed: Bool { zoomFactor > 1.01 }
+
+    private var zoomText: String {
+        // 整数倍不带小数：1×、2×；捏合出来的非整数倍保留一位
+        let rounded = (zoomFactor * 10).rounded() / 10
+        return rounded == rounded.rounded() ? "\(Int(rounded))×" : String(format: "%.1f×", rounded)
+    }
 
     @ScaledMetric(relativeTo: .body) private var buttonSide: CGFloat = 44
 
@@ -223,19 +233,19 @@ private struct ReceiverTopBar: View {
 
             Spacer()
 
-            if zoomFactor > 1.01 {
-                Button(action: onResetZoom) {
-                    Text(String(format: "%.1f×", zoomFactor))
+            if canQuickZoom || isZoomed {
+                Button(action: onToggleZoom) {
+                    Text(zoomText)
                         .font(.subheadline.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(Brand.glow)
-                        .padding(.horizontal, 12)
-                        .frame(height: buttonSide)
+                        .foregroundStyle(isZoomed ? Brand.glow : .white)
+                        .frame(minWidth: buttonSide, minHeight: buttonSide)
+                        .padding(.horizontal, isZoomed && zoomText.count > 2 ? 6 : 0)
                         .glassChrome(in: Capsule())
+                        .contentTransition(.numericText())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("变焦 \(String(format: "%.1f", zoomFactor)) 倍")
-                .accessibilityHint("轻点恢复 1 倍")
-                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                .accessibilityLabel("变焦 \(zoomText)")
+                .accessibilityHint(isZoomed ? "轻点恢复 1 倍" : "轻点放大到 2 倍")
             }
 
             if torchAvailable {
@@ -250,7 +260,7 @@ private struct ReceiverTopBar: View {
                 .accessibilityLabel(torchActive ? "关闭手电筒" : "打开手电筒")
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: zoomFactor > 1.01)
+        .animation(.easeInOut(duration: 0.2), value: zoomFactor)
         .animation(.easeInOut(duration: 0.2), value: torchActive)
     }
 }

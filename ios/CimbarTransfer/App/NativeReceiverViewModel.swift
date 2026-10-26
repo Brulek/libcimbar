@@ -27,6 +27,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     @Published private(set) var torchAvailable = false
     @Published private(set) var torchActive = false
     @Published private(set) var zoomFactor: CGFloat = 1.0
+    /// 相机支持至少 2 倍变焦时，界面上常驻 1×/2× 切换按钮
+    @Published private(set) var canQuickZoom = false
 
     let session = AVCaptureSession()
 
@@ -64,6 +66,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var stallTimer: Timer?
     // 仅在主线程读写：首次识别到码帧的时间，用于计算传输用时
     private var transferStartUptime: TimeInterval?
+    // 仅在主线程读写：VoiceOver 已播报到的进度档（每 25% 一档）
+    private var announcedProgressStep = 0
 
     func start() {
         #if DEBUG
@@ -179,7 +183,11 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         if let device = videoDevice {
             maxZoomFactor = min(device.activeFormat.videoMaxZoomFactor, 5.0)
             let actualZoom = device.videoZoomFactor
-            DispatchQueue.main.async { self.zoomFactor = actualZoom }
+            let quickZoom = maxZoomFactor >= Self.quickZoomFactor
+            DispatchQueue.main.async {
+                self.zoomFactor = actualZoom
+                self.canQuickZoom = quickZoom
+            }
         }
     }
 
@@ -211,6 +219,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     func resetZoom() {
         setZoomFactor(1.0)
+    }
+
+    static let quickZoomFactor: CGFloat = 2.0
+
+    /// 1× ↔ 2× 快速切换；已经捏合放大过的，点一下回到 1×
+    func toggleQuickZoom() {
+        setZoomFactor(zoomFactor > 1.01 ? 1.0 : Self.quickZoomFactor)
     }
 
     private func setZoomFactor(_ raw: CGFloat) {
@@ -328,8 +343,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         // 超过 5x 后画质衰减明显、抖动被放大，对屏幕扫码没有增益
         maxZoomFactor = min(camera.activeFormat.videoMaxZoomFactor, 5.0)
         let hasTorch = camera.hasTorch
+        let quickZoom = maxZoomFactor >= Self.quickZoomFactor
         DispatchQueue.main.async { [weak self] in
             self?.torchAvailable = hasTorch
+            self?.canQuickZoom = quickZoom
         }
 
         let output = AVCaptureVideoDataOutput()
@@ -393,6 +410,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             }
             progressValue = fraction.doubleValue
             updateStats(fraction: fraction.doubleValue)
+            announceProgressIfNeeded(fraction.doubleValue)
         }
 
         if let fileURL = result.fileURL {
@@ -466,6 +484,16 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
     }
 
+    // 主线程调用。看不到屏幕的 VoiceOver 用户只能靠播报知道进度，每过 25% 报一次
+    private func announceProgressIfNeeded(_ fraction: Double) {
+        let step = Int(fraction * 4)
+        guard step > announcedProgressStep, step < 4 else { return }
+        announcedProgressStep = step
+        guard UIAccessibility.isVoiceOverRunning else { return }
+        let percent = (Double(step) * 0.25).formatted(.percent.precision(.fractionLength(0)))
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "已接收 \(percent)"))
+    }
+
     // 主线程调用。用最近一段时间的进度斜率估算剩余时间，避免瞬时抖动
     private func updateStats(fraction: Double) {
         let now = ProcessInfo.processInfo.systemUptime
@@ -525,6 +553,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             self.stallHint = nil
             self.progressSamples.removeAll()
             self.lastAdvanceFraction = -1
+            self.announcedProgressStep = 0
             self.statusText = String(localized: "正在寻找动画码")
         }
     }
@@ -547,6 +576,9 @@ extension NativeReceiverViewModel {
     /// 截图/界面验证用：跳过相机，直接把界面置于某个状态（见 DemoContent）
     fileprivate func applyDemoState(_ name: String) {
         DispatchQueue.main.async {
+            // 模拟器没有相机，演示时把手电筒/变焦按钮也显示出来
+            self.torchAvailable = true
+            self.canQuickZoom = true
             switch name {
             case "receiving":
                 self.progressValue = 0.62

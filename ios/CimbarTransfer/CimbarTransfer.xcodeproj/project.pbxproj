@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7059B9B7BC9454ACA509CE7C /* ScanIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */; };
 		01699EEAFFDCC0DA27055A53 /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */; };
 		A74D0AEC5B22145C18B557DE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95984C2429031F651BE7C6F /* Theme.swift */; };
 		021AD30CA6FEC927701E248E /* CimbReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 72523A31A545B291AC248582 /* CimbReader.cpp */; };
@@ -84,6 +85,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanIntent.swift; sourceTree = "<group>"; };
 		8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContent.swift; sourceTree = "<group>"; };
 		E95984C2429031F651BE7C6F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		01132593540B24982EB9A565 /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
@@ -402,6 +404,7 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */,
 				8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */,
 				E95984C2429031F651BE7C6F /* Theme.swift */,
 				24B99F504BE8073F54612041 /* AboutScreen.swift */,
@@ -567,6 +570,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7059B9B7BC9454ACA509CE7C /* ScanIntent.swift in Sources */,
 				01699EEAFFDCC0DA27055A53 /* DemoContent.swift in Sources */,
 				A74D0AEC5B22145C18B557DE /* Theme.swift in Sources */,
 				DFB3959FC937AD50E513C322 /* AboutScreen.swift in Sources */,

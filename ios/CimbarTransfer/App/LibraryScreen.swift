@@ -42,6 +42,8 @@ struct LibraryScreen: View {
     @ObservedObject var store: ReceivedFileCacheStore
     let onShareFiles: ([URL]) -> Void
     let onPreviewFiles: ([URL], Int) -> Void
+    /// 在此之后收到的文件标为新文件
+    let newSince: Date
     let onGoToScan: () -> Void
 
     @AppStorage("org.cimbar.library-sort") private var sortOption: LibrarySortOption = .dateDescending
@@ -298,6 +300,7 @@ struct LibraryScreen: View {
         } label: {
             LibraryRow(
                 file: file,
+                isNew: file.receivedAt > newSince,
                 isSelecting: isSelecting,
                 isSelected: selectedIDs.contains(file.id),
                 onDetail: { detailTarget = file }
@@ -331,28 +334,26 @@ struct LibraryScreen: View {
                 .tint(.pink)
             }
         }
-        .contextMenu {
-            if !isSelecting {
+        .modifier(FileContextMenu(file: file, isEnabled: !isSelecting) {
+            Button {
+                onShareFiles([file.url])
+            } label: { Label("分享", systemImage: "square.and.arrow.up") }
+            if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
                 Button {
-                    onShareFiles([file.url])
-                } label: { Label("分享", systemImage: "square.and.arrow.up") }
-                if PhotoLibrarySaver.canSave(extension: file.fileExtension) {
-                    Button {
-                        Task { await saveImageToPhotos(file) }
-                    } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
-                }
-                Button {
-                    beginRename(file)
-                } label: { Label("重命名", systemImage: "pencil") }
-                Button {
-                    detailTarget = file
-                } label: { Label("简介", systemImage: "info.circle") }
-                Divider()
-                Button(role: .destructive) {
-                    deleteTarget = file
-                } label: { Label("删除", systemImage: "trash") }
+                    Task { await saveImageToPhotos(file) }
+                } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
             }
-        }
+            Button {
+                beginRename(file)
+            } label: { Label("重命名", systemImage: "pencil") }
+            Button {
+                detailTarget = file
+            } label: { Label("简介", systemImage: "info.circle") }
+            Divider()
+            Button(role: .destructive) {
+                deleteTarget = file
+            } label: { Label("删除", systemImage: "trash") }
+        })
     }
 
     private func toggleSelection(for id: String) {
@@ -470,6 +471,7 @@ private struct ToastView: View {
 
 private struct LibraryRow: View {
     let file: CachedReceivedFile
+    let isNew: Bool
     let isSelecting: Bool
     let isSelected: Bool
     var onDetail: (() -> Void)?
@@ -503,11 +505,19 @@ private struct LibraryRow: View {
             )
             .frame(width: thumbnailSide, height: thumbnailSide)
             VStack(alignment: .leading, spacing: 3) {
-                // 中间截断：长文件名也能看到扩展名
-                Text(file.displayName)
-                    .font(.body)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                HStack(spacing: 6) {
+                    if isNew {
+                        Circle()
+                            .fill(Color.accentColor)
+                            .frame(width: 8, height: 8)
+                            .accessibilityLabel("新")
+                    }
+                    // 中间截断：长文件名也能看到扩展名
+                    Text(file.displayName)
+                        .font(.body)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
                 Text("\(file.sizeDescription) · \(dateText)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -643,5 +653,55 @@ struct RenameHint: View {
         } else {
             Text("扩展名 .\(fileExtension) 会保留")
         }
+    }
+}
+
+/// 长按菜单。图片/视频/PDF 带大图预览，其余类型用系统默认的行预览
+private struct FileContextMenu<MenuItems: View>: ViewModifier {
+    let file: CachedReceivedFile
+    let isEnabled: Bool
+    @ViewBuilder let menuItems: () -> MenuItems
+
+    func body(content: Content) -> some View {
+        if !isEnabled {
+            content
+        } else if ThumbnailLoader.supports(fileExtension: file.fileExtension) {
+            content.contextMenu {
+                menuItems()
+            } preview: {
+                FileContextPreview(file: file)
+            }
+        } else {
+            content.contextMenu {
+                menuItems()
+            }
+        }
+    }
+}
+
+private struct FileContextPreview: View {
+    let file: CachedReceivedFile
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            FileThumbnailView(
+                url: file.url,
+                cacheKey: "preview-\(file.fileName)-\(file.modifiedAt.timeIntervalSince1970)",
+                cornerRadius: 0,
+                generationSide: 600
+            )
+            .frame(width: 300, height: 300)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(file.displayName)
+                    .font(.headline)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text(file.sizeDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(12)
+        }
+        .frame(width: 300)
     }
 }
