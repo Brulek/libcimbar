@@ -98,7 +98,10 @@ struct ContentView: View {
             .badge(newFileCount)
 
             NavigationStack {
-                SettingsScreen(store: cacheStore)
+                SettingsScreen(store: cacheStore) {
+                    UserDefaults.standard.set(LibrarySortOption.sizeDescending.rawValue, forKey: LibrarySortOption.defaultsKey)
+                    selectedTab = .library
+                }
             }
             .tabItem {
                 Label("设置", systemImage: "gearshape")

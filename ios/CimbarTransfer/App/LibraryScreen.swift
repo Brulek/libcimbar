@@ -9,6 +9,9 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// 记住所选排序的 UserDefaults 键（设置页「已用空间」也会改它）
+    static let defaultsKey = "org.cimbar.library-sort"
+
     var displayName: String {
         switch self {
         case .dateDescending: return String(localized: "最新优先")
@@ -84,7 +87,7 @@ struct LibraryScreen: View {
     let newSince: Date
     let onGoToScan: () -> Void
 
-    @AppStorage("org.cimbar.library-sort") private var sortOption: LibrarySortOption = .dateDescending
+    @AppStorage(LibrarySortOption.defaultsKey) private var sortOption: LibrarySortOption = .dateDescending
     @State private var searchText = ""
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""

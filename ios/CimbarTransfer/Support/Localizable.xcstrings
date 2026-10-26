@@ -1607,6 +1607,16 @@
         }
       }
     },
+    "按大小查看文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows files by size"
+          }
+        }
+      }
+    },
     "振动" : {
       "localizations" : {
         "en" : {

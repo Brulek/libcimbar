@@ -3,6 +3,8 @@ import UIKit
 
 struct SettingsScreen: View {
     @ObservedObject var store: ReceivedFileCacheStore
+    /// 「已用空间」点进去：到「我的文件」按大小排，看是什么占地方
+    var onShowFilesBySize: () -> Void = {}
     @ObservedObject private var preferences = AppPreferences.shared
     @State private var clearConfirm = false
     @State private var showingOnboarding = false
@@ -45,12 +47,22 @@ struct SettingsScreen: View {
             }
 
             Section {
-                LabeledContent {
-                    Text(store.cacheSummary)
-                        .monospacedDigit()
-                } label: {
-                    TileLabel("已用空间", systemName: "internaldrive.fill", color: .gray)
+                Button(action: onShowFilesBySize) {
+                    LabeledContent {
+                        HStack(spacing: 6) {
+                            Text(store.cacheSummary)
+                                .monospacedDigit()
+                            Image(systemName: "chevron.forward")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    } label: {
+                        TileLabel("已用空间", systemName: "internaldrive.fill", color: .gray)
+                    }
                 }
+                .tint(.primary)
+                .disabled(store.cachedFiles.isEmpty)
+                .accessibilityHint("按大小查看文件")
                 Picker(selection: Binding(
                     get: { store.retentionPolicy },
                     set: { store.updateRetentionPolicy($0) }
