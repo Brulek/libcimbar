@@ -95,6 +95,7 @@ struct FileDetailScreen: View {
                 .tint(.red)
             }
         }
+        .readableListWidth()
         .navigationTitle("简介")
         .navigationBarTitleDisplayMode(.inline)
         .task(id: file.fileName) {
@@ -122,7 +123,7 @@ struct FileDetailScreen: View {
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("扩展名会保留")
+            RenameHint(fileExtension: file.fileExtension)
         }
         .alert("没能重命名", isPresented: $renameFailed) {
             Button("好", role: .cancel) {}
@@ -196,7 +197,7 @@ struct FileDetailScreen: View {
                 .disabled(photoSaved)
             }
             DetailActionButton(title: "重命名", systemImage: "pencil") {
-                renameText = file.displayName
+                renameText = file.renameStem
                 renamePresented = true
             }
         }

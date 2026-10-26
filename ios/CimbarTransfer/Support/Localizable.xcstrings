@@ -958,7 +958,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save Image"
+            "value" : "Save"
           }
         }
       }
@@ -1255,16 +1255,6 @@
         }
       }
     },
-    "打开 cimbar.org" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open cimbar.org"
-          }
-        }
-      }
-    },
     "打开手电筒" : {
       "localizations" : {
         "en" : {
@@ -1285,12 +1275,12 @@
         }
       }
     },
-    "扩展名会保留" : {
+    "扩展名 .%@ 会保留" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The file extension is kept."
+            "value" : "The .%@ extension is kept."
           }
         }
       }
@@ -1310,7 +1300,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan a screen, get the file"
+            "value" : "Scan a code, get the file"
           }
         }
       }
@@ -1865,6 +1855,16 @@
         }
       }
     },
+    "查看引导" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Intro"
+          }
+        }
+      }
+    },
     "欢迎使用「萤传」（以下简称「本应用」）。在您下载、安装或使用本应用之前，请仔细阅读本协议。一旦您开始使用本应用，即视为您已阅读、理解并同意接受本协议的全部条款。" : {
       "localizations" : {
         "en" : {
@@ -2413,6 +2413,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap to preview"
+          }
+        }
+      }
+    },
+    "输入新的文件名" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter a new file name."
           }
         }
       }

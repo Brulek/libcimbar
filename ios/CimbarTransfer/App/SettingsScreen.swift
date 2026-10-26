@@ -92,7 +92,7 @@ struct SettingsScreen: View {
                 Button {
                     showingOnboarding = true
                 } label: {
-                    NavigationRowLabel(TileLabel("使用须知", systemName: "hand.raised.fill", color: .mint))
+                    NavigationRowLabel(TileLabel("查看引导", systemName: "sparkles", color: .mint))
                 }
                 .tint(.primary)
             }
@@ -118,6 +118,7 @@ struct SettingsScreen: View {
                 }
             }
         }
+        .readableListWidth()
         .navigationTitle("设置")
         .confirmationDialog("清空所有文件？", isPresented: $clearConfirm, titleVisibility: .visible) {
             Button("清空 \(store.cachedFiles.count) 个文件", role: .destructive) {

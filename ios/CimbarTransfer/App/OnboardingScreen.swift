@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingScreen: View {
-    /// 从「设置 → 使用须知」打开时为 true：可随时关闭、不要求重新勾选承诺
+    /// 从「设置 → 查看引导」打开时为 true：可随时关闭、不要求重新勾选承诺
     var isHelpMode: Bool = false
     let onFinished: () -> Void
 
@@ -230,9 +230,10 @@ private struct OnboardingPageView: View {
         }
     }
 
+    /// 发送端在另一台设备上，在本机打开网页没用；让用户把网址转给发送方
     private var senderLink: some View {
-        Link(destination: URL(string: "https://cimbar.org")!) {
-            Label("打开 cimbar.org", systemImage: "safari")
+        ShareLink(item: URL(string: "https://cimbar.org")!) {
+            Label("把网址发给发送方", systemImage: "square.and.arrow.up")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Brand.glow)
                 .padding(.vertical, 10)

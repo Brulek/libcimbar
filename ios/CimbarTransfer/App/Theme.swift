@@ -49,6 +49,33 @@ extension View {
     }
 }
 
+/// iPad 等宽屏上把列表内容收在可读宽度内，避免一行横跨整块屏幕
+private struct ReadableListWidth: ViewModifier {
+    static let maxWidth: CGFloat = 720
+
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *), sizeClass == .regular {
+            GeometryReader { proxy in
+                content.contentMargins(
+                    .horizontal,
+                    max(0, (proxy.size.width - Self.maxWidth) / 2),
+                    for: .scrollContent
+                )
+            }
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func readableListWidth() -> some View {
+        modifier(ReadableListWidth())
+    }
+}
+
 /// 设置页风格的彩色圆角图标
 struct IconTile: View {
     let systemName: String

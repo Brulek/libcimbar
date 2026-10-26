@@ -17,6 +17,13 @@ struct CachedReceivedFile: Identifiable, Hashable {
     var fileExtension: String {
         url.pathExtension.lowercased()
     }
+
+    /// 重命名输入框的初始值：去掉扩展名，扩展名由 renameFile 自动补回
+    var renameStem: String {
+        let ext = (displayName as NSString).pathExtension
+        guard !ext.isEmpty, ext.lowercased() == fileExtension else { return displayName }
+        return (displayName as NSString).deletingPathExtension
+    }
 }
 
 enum ReceivedFileRetentionPolicy: String, CaseIterable, Identifiable {

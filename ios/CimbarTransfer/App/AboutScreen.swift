@@ -38,6 +38,7 @@ struct AboutScreen: View {
                     .padding(.top, 4)
             }
         }
+        .readableListWidth()
         .navigationTitle("关于")
         .navigationBarTitleDisplayMode(.inline)
     }

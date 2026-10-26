@@ -284,6 +284,7 @@ struct LibraryScreen: View {
         }
         .listStyle(.insetGrouped)
         .animation(.default, value: sortOption)
+        .readableListWidth()
     }
 
     private func row(for file: CachedReceivedFile, in files: [CachedReceivedFile]) -> some View {
@@ -371,7 +372,7 @@ struct LibraryScreen: View {
 
     private func beginRename(_ file: CachedReceivedFile) {
         renameTarget = file
-        renameText = file.displayName
+        renameText = file.renameStem
     }
 
     private func commitRename() {
@@ -610,7 +611,7 @@ private struct LibraryAlertsModifier: ViewModifier {
                 Button("保存", action: onCommitRename)
                 Button("取消", role: .cancel) { renameTarget = nil }
             } message: {
-                Text("扩展名会保留")
+                RenameHint(fileExtension: renameTarget?.fileExtension ?? "")
             }
             .alert("删除这个文件？", isPresented: Binding(
                 get: { deleteTarget != nil },
@@ -629,5 +630,18 @@ private struct LibraryAlertsModifier: ViewModifier {
             } message: {
                 Text("删除后无法恢复。")
             }
+    }
+}
+
+/// 重命名弹窗的说明：告诉用户哪个扩展名会被保留
+struct RenameHint: View {
+    let fileExtension: String
+
+    var body: some View {
+        if fileExtension.isEmpty {
+            Text("输入新的文件名")
+        } else {
+            Text("扩展名 .\(fileExtension) 会保留")
+        }
     }
 }

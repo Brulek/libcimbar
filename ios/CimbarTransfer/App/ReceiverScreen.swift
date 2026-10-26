@@ -381,6 +381,29 @@ private struct ProgressCard: View {
         return String(localized: "还需约 \(minutes) 分钟")
     }
 
+    private var headline: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(percentText)
+                .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
+                .contentTransition(.numericText())
+            Text("正在接收")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .fixedSize()
+    }
+
+    @ViewBuilder
+    private var remaining: some View {
+        if let remainingText {
+            Text(remainingText)
+                .font(.footnote.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .fixedSize()
+                .transition(.opacity)
+        }
+    }
+
     private var footnote: String {
         if !isTracking {
             return String(localized: "动画码已离开取景框，对准后继续")
@@ -390,19 +413,16 @@ private struct ProgressCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(percentText)
-                    .font(.system(.title, design: .rounded).weight(.bold).monospacedDigit())
-                    .contentTransition(.numericText())
-                Text("正在接收")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                if let remainingText {
-                    Text(remainingText)
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .transition(.opacity)
+            // 大字号下一行放不下时，剩余时间换到下一行
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) {
+                    headline
+                    Spacer()
+                    remaining
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    headline
+                    remaining
                 }
             }
 
@@ -489,6 +509,35 @@ private struct CompletedTransferCard: View {
         return parts.isEmpty ? String(localized: "已收到") : parts.joined(separator: " · ")
     }
 
+    @ViewBuilder
+    private var actionButtons: some View {
+        Button(action: onPreview) {
+            Label("预览", systemImage: "eye")
+                .frame(maxWidth: .infinity, minHeight: 34)
+        }
+        .buttonStyle(.bordered)
+
+        if canSaveToPhotos {
+            Button {
+                Task { await saveToPhotos() }
+            } label: {
+                Label(photoSaved ? "已存入" : "存相册", systemImage: photoSaved ? "checkmark" : "photo.on.rectangle")
+                    .frame(maxWidth: .infinity, minHeight: 34)
+            }
+            .buttonStyle(.bordered)
+            .tint(photoSaved ? .green : nil)
+            .disabled(photoSaving || photoSaved)
+        }
+
+        Button(action: onShare) {
+            Label("分享", systemImage: "square.and.arrow.up")
+                .frame(maxWidth: .infinity, minHeight: 34)
+                .foregroundStyle(Brand.ink)
+        }
+        .buttonStyle(.borderedProminent)
+        .scaleEffect(highlightShareAction ? 1.03 : 1)
+    }
+
     private static func loadFileInfo(for url: URL) -> (size: String?, modified: TimeInterval) {
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else {
             return (nil, 0)
@@ -531,32 +580,10 @@ private struct CompletedTransferCard: View {
             .accessibilityValue(detailText)
             .accessibilityHint("轻点预览")
 
-            HStack(spacing: 10) {
-                Button(action: onPreview) {
-                    Label("预览", systemImage: "eye")
-                        .frame(maxWidth: .infinity, minHeight: 34)
-                }
-                .buttonStyle(.bordered)
-
-                if canSaveToPhotos {
-                    Button {
-                        Task { await saveToPhotos() }
-                    } label: {
-                        Label(photoSaved ? "已存入" : "存相册", systemImage: photoSaved ? "checkmark" : "photo.on.rectangle")
-                            .frame(maxWidth: .infinity, minHeight: 34)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(photoSaved ? .green : nil)
-                    .disabled(photoSaving || photoSaved)
-                }
-
-                Button(action: onShare) {
-                    Label("分享", systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity, minHeight: 34)
-                        .foregroundStyle(Brand.ink)
-                }
-                .buttonStyle(.borderedProminent)
-                .scaleEffect(highlightShareAction ? 1.03 : 1)
+            // 大字号下三个按钮并排放不下，改为竖排，不截断文字
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) { actionButtons }
+                VStack(spacing: 8) { actionButtons }
             }
             .labelStyle(CompactActionLabelStyle())
             .font(.subheadline.weight(.semibold))
@@ -614,7 +641,7 @@ private struct CompactActionLabelStyle: LabelStyle {
             configuration.title
         }
         .lineLimit(1)
-        .minimumScaleFactor(0.8)
+        .fixedSize()
     }
 }
 
@@ -719,7 +746,7 @@ private struct ScanFrameOverlay: View {
     var body: some View {
         GeometryReader { proxy in
             let availableHeight = max(proxy.size.height - topReservedHeight - bottomReservedHeight, 200)
-            let side = min(proxy.size.width - 32, availableHeight, 520)
+            let side = min(proxy.size.width - 32, availableHeight, 640)
             let centerY = topReservedHeight + availableHeight / 2
             let center = CGPoint(x: proxy.size.width / 2, y: centerY)
             let cornerRadius = max(28, side * 0.08)
