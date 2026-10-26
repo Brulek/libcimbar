@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */; };
+		523B42E89FFDF80D0A48491D /* SenderHelpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */; };
+		F42DC49E0ECA9EE226AE99CA /* ReceiverPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */; };
 		DD80696BD6F2DC747C4B78FA /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 706C9E0FCF50ABA1CE9150E9 /* AppShortcuts.strings */; };
 		7059B9B7BC9454ACA509CE7C /* ScanIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */; };
 		01699EEAFFDCC0DA27055A53 /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */; };
@@ -86,6 +89,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanFrameView.swift; sourceTree = "<group>"; };
+		A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SenderHelpSheet.swift; sourceTree = "<group>"; };
+		0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverPanels.swift; sourceTree = "<group>"; };
 		6D04838440BDA68D2987C499 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		CECE24314CF3227F43A9867A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh-Hans; path = zh-Hans.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanIntent.swift; sourceTree = "<group>"; };
@@ -407,6 +413,9 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */,
+				A34E53214CCE4B98C41B8114 /* SenderHelpSheet.swift */,
+				0B4CAD120792CF8ACA3907B2 /* ReceiverPanels.swift */,
 				081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */,
 				8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */,
 				E95984C2429031F651BE7C6F /* Theme.swift */,
@@ -575,6 +584,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */,
+				523B42E89FFDF80D0A48491D /* SenderHelpSheet.swift in Sources */,
+				F42DC49E0ECA9EE226AE99CA /* ReceiverPanels.swift in Sources */,
 				7059B9B7BC9454ACA509CE7C /* ScanIntent.swift in Sources */,
 				01699EEAFFDCC0DA27055A53 /* DemoContent.swift in Sources */,
 				A74D0AEC5B22145C18B557DE /* Theme.swift in Sources */,
