@@ -327,6 +327,7 @@ private struct ReceiverBottomPanel: View {
             } else if let progress = viewModel.progressValue {
                 ProgressCard(
                     progress: progress,
+                    cameraError: viewModel.cameraErrorText,
                     isTracking: viewModel.isTracking,
                     frameCount: viewModel.detectedFrameCount,
                     remainingSeconds: viewModel.remainingSeconds,
@@ -387,6 +388,8 @@ private struct WaitingCard: View {
 
 private struct ProgressCard: View {
     let progress: Double
+    /// 传输中途相机被占用/过热，优先于停滞提示展示
+    let cameraError: String?
     let isTracking: Bool
     let frameCount: Int
     let remainingSeconds: Int?
@@ -452,10 +455,10 @@ private struct ProgressCard: View {
 
             ProgressView(value: progress)
                 .progressViewStyle(.linear)
-                .tint(stallHint == nil ? Color.accentColor : .orange)
+                .tint(stallHint == nil && cameraError == nil ? Color.accentColor : .orange)
 
-            if let stallHint {
-                Label(stallHint, systemImage: "exclamationmark.triangle.fill")
+            if let warning = cameraError ?? stallHint {
+                Label(warning, systemImage: "exclamationmark.triangle.fill")
                     .font(.footnote)
                     .foregroundStyle(.orange)
                     .transition(.opacity)
@@ -472,7 +475,7 @@ private struct ProgressCard: View {
         .animation(.easeOut(duration: 0.2), value: progress)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("正在接收")
-        .accessibilityValue([percentText, remainingText, stallHint ?? footnote].compactMap { $0 }.joined(separator: String(localized: "，")))
+        .accessibilityValue([percentText, remainingText, cameraError ?? stallHint ?? footnote].compactMap { $0 }.joined(separator: String(localized: "，")))
         .accessibilityAddTraits(.updatesFrequently)
     }
 }

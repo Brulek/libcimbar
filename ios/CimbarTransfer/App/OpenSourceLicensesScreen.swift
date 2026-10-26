@@ -25,11 +25,11 @@ struct OpenSourceLicensesScreen: View {
     var body: some View {
         List {
             Section {
-                Text("本应用使用了以下开源软件，对原作者表达诚挚谢意。")
+                Text("萤传用到了以下开源软件，感谢各位作者。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-            Section("依赖列表") {
+            Section("开源组件") {
                 ForEach(entries) { entry in
                     LicenseRow(entry: entry)
                 }

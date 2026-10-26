@@ -381,16 +381,6 @@
         }
       }
     },
-    "依赖列表" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dependencies"
-          }
-        }
-      }
-    },
     "保存" : {
       "localizations" : {
         "en" : {
@@ -1155,6 +1145,16 @@
         }
       }
     },
+    "开源组件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Components"
+          }
+        }
+      }
+    },
     "开源许可" : {
       "localizations" : {
         "en" : {
@@ -1645,26 +1645,6 @@
         }
       }
     },
-    "无法添加相机输入" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to add camera input"
-          }
-        }
-      }
-    },
-    "无法添加视频输出" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unable to add video output"
-          }
-        }
-      }
-    },
     "时长" : {
       "localizations" : {
         "en" : {
@@ -1738,9 +1718,21 @@
     "有 %lld 个文件删除失败，请稍后重试" : {
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld files couldn't be deleted. Please try again later."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld file couldn't be deleted. Please try again later."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld files couldn't be deleted. Please try again later."
+                }
+              }
+            }
           }
         }
       }
@@ -1748,9 +1740,21 @@
     "有 %lld 个文件未能清除，请稍后重试" : {
       "localizations" : {
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld files couldn't be cleared. Please try again later."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld file couldn't be cleared. Please try again later."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld files couldn't be cleared. Please try again later."
+                }
+              }
+            }
           }
         }
       }
@@ -1761,16 +1765,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Some Files Weren't Deleted"
-          }
-        }
-      }
-    },
-    "未找到可用后置相机" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No back camera found"
           }
         }
       }
@@ -1821,16 +1815,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The app has no sending feature and provides no online services."
-          }
-        }
-      }
-    },
-    "本应用使用了以下开源软件，对原作者表达诚挚谢意。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This app uses the following open-source software. Our sincere thanks to the original authors."
           }
         }
       }
@@ -2127,12 +2111,42 @@
         }
       }
     },
+    "相机暂时不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera is temporarily unavailable"
+          }
+        }
+      }
+    },
     "相机权限状态未知" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Camera permission status unknown"
+          }
+        }
+      }
+    },
+    "相机正被其他 App 使用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The camera is in use by another app"
+          }
+        }
+      }
+    },
+    "相机输入不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "camera input is unavailable"
           }
         }
       }
@@ -2292,7 +2306,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lumen · Terms of Use"
+            "value" : "Lumen · Terms of Service"
           }
         }
       }
@@ -2317,12 +2331,32 @@
         }
       }
     },
+    "萤传用到了以下开源软件，感谢各位作者。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lumen is built on the following open-source software. Thanks to their authors."
+          }
+        }
+      }
+    },
     "萤传通过相机读取屏幕上的动画码，画面不会离开这台设备。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lumen reads the animated code through the camera. The image never leaves this device."
+          }
+        }
+      }
+    },
+    "视频输出不可用" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "video output is unavailable"
           }
         }
       }
@@ -2373,6 +2407,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Full License Text"
+          }
+        }
+      }
+    },
+    "设备温度过高，相机已暂停" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The device is too warm, so the camera is paused"
           }
         }
       }
@@ -2543,6 +2587,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "About %lld s left"
+          }
+        }
+      }
+    },
+    "这台设备没有后置相机" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this device has no back camera"
           }
         }
       }

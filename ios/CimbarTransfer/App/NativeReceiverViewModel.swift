@@ -69,6 +69,51 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     // 仅在主线程读写：VoiceOver 已播报到的进度档（每 25% 一档）
     private var announcedProgressStep = 0
 
+    override init() {
+        super.init()
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(sessionWasInterrupted(_:)),
+                           name: AVCaptureSession.wasInterruptedNotification, object: session)
+        center.addObserver(self, selector: #selector(sessionInterruptionEnded(_:)),
+                           name: AVCaptureSession.interruptionEndedNotification, object: session)
+        center.addObserver(self, selector: #selector(sessionRuntimeError(_:)),
+                           name: AVCaptureSession.runtimeErrorNotification, object: session)
+    }
+
+    // MARK: - 相机被占用 / 过热 / 媒体服务重置
+
+    // 其他 App 抢走相机或设备过热时，画面会定住、什么提示都没有；把原因写到面板上
+    @objc private func sessionWasInterrupted(_ notification: Notification) {
+        guard let raw = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as? Int,
+              let reason = AVCaptureSession.InterruptionReason(rawValue: raw) else { return }
+        let message: String
+        switch reason {
+        case .videoDeviceNotAvailableInBackground:
+            return // 退到后台本来就会停，回前台自动恢复，不用提示
+        case .videoDeviceInUseByAnotherClient:
+            message = String(localized: "相机正被其他 App 使用")
+        case .videoDeviceNotAvailableDueToSystemPressure:
+            message = String(localized: "设备温度过高，相机已暂停")
+        default:
+            message = String(localized: "相机暂时不可用")
+        }
+        DispatchQueue.main.async { self.cameraErrorText = message }
+    }
+
+    @objc private func sessionInterruptionEnded(_ notification: Notification) {
+        DispatchQueue.main.async { self.cameraErrorText = nil }
+    }
+
+    // 媒体服务重置后会话不会自己恢复，需要重新 startRunning
+    @objc private func sessionRuntimeError(_ notification: Notification) {
+        guard let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError,
+              error.code == .mediaServicesWereReset else { return }
+        sessionQueue.async { [weak self] in
+            guard let self, self.isConfigured, !self.session.isRunning else { return }
+            self.session.startRunning()
+        }
+    }
+
     func start() {
         #if DEBUG
         if let demo = DemoContent.scanState {
@@ -674,11 +719,11 @@ private enum ReceiverError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .cameraUnavailable:
-            return String(localized: "未找到可用后置相机")
+            return String(localized: "这台设备没有后置相机")
         case .cannotAddInput:
-            return String(localized: "无法添加相机输入")
+            return String(localized: "相机输入不可用")
         case .cannotAddOutput:
-            return String(localized: "无法添加视频输出")
+            return String(localized: "视频输出不可用")
         }
     }
 }
