@@ -317,7 +317,6 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
     return [[NSString alloc] initWithBytes:_reportBuffer.data() length:len encoding:NSUTF8StringEncoding] ?: @"";
 }
 
-// 同一次传输（喷泉 ID 相同）且内容逐字节一致时，删掉刚写的临时文件，交回上次保存的文件
 // 换了解码器（重开 App、中间收过别的文件）后再收到同一个文件：收件目录里已有同名、内容一样的就不再另存一份
 - (BOOL)reuseStoredFileIfSame:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
     NSURL *stored = [ReceivedFileStorage storedFileMatchingContentsOf:tmpURL filename:filename];
@@ -330,6 +329,7 @@ static const NSUInteger kUnreadableFramesBeforeHint = 90;
     return YES;
 }
 
+// 同一次传输（喷泉 ID 相同）且内容逐字节一致时，交回上次保存的文件
 - (BOOL)reuseLastFileIfSame:(uint32_t)fileID tmpURL:(NSURL *)tmpURL originalName:(NSString *)filename into:(NativeCimbarDecodeOutput *)output {
     if (_lastFileURL == nil || fileID != _lastFileID) {
         return NO;
