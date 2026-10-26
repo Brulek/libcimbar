@@ -8,13 +8,15 @@ enum ScanState: Equatable {
     case received
 }
 
-/// 收完后放进取景框的文件（只给缩略图一定出得来的类型）
+/// 收完后放进取景框的文件（只给缩略图一定出得来的类型，以及能直接显示文字的小文本）
 struct RevealedFile: Equatable {
     let url: URL
     let cacheKey: String
+    let isText: Bool
 
     init?(url: URL) {
-        guard ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
+        isText = TextClipboard.canCopy(url)
+        guard isText || ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
         let modified = (try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date)?
             .timeIntervalSince1970 ?? 0
         self.url = url
@@ -69,13 +71,20 @@ struct ScanFrameOverlay: View {
                     Button {
                         onTapReveal(reveal.url)
                     } label: {
-                        FileThumbnailView(
-                            url: reveal.url,
-                            cacheKey: reveal.cacheKey,
-                            cornerRadius: cornerRadius,
-                            generationSide: side
-                        )
+                        Group {
+                            if reveal.isText {
+                                TextRevealPage(url: reveal.url)
+                            } else {
+                                FileThumbnailView(
+                                    url: reveal.url,
+                                    cacheKey: reveal.cacheKey,
+                                    cornerRadius: cornerRadius,
+                                    generationSide: side
+                                )
+                            }
+                        }
                         .frame(width: side, height: side)
+                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                                 .stroke(Color.green.opacity(0.5), lineWidth: 1.5)
@@ -283,5 +292,44 @@ private struct Firefly: View {
                 .fill(.white)
                 .frame(width: 7, height: 7)
         }
+    }
+}
+
+/// 收到的小文本把开头几段直接摊在取景框里：链接、口令、一段话，不用点开就能看到
+private struct TextRevealPage: View {
+    let url: URL
+    @State private var snippet: String?
+
+    private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
+
+    private var font: Font {
+        Self.codeExtensions.contains(url.pathExtension.lowercased())
+            ? .system(size: 14, design: .monospaced)
+            : .system(size: 16)
+    }
+
+    var body: some View {
+        Color(white: 0.97)
+            .overlay {
+                if let snippet {
+                    // 从第一行开始排，放不下的在最后一行以省略号结束
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(snippet)
+                            .font(font)
+                            .foregroundStyle(Color(white: 0.12))
+                            .lineSpacing(4)
+                            .multilineTextAlignment(.leading)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(22)
+                }
+            }
+            .task(id: url) {
+                let url = url
+                snippet = await Task.detached(priority: .userInitiated) {
+                    TextClipboard.readText(url).map { String($0.prefix(1500)) }
+                }.value
+            }
     }
 }

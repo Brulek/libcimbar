@@ -396,8 +396,9 @@ bool dumpTransfer(const char *dir, int mode, const char *inputPath, int encodeId
     }
     const std::string payload(static_cast<const char *>(data.bytes), data.length);
     const std::string name = [@(inputPath) lastPathComponent].UTF8String;
-    // 一帧大约 6 KB，多给一半冗余，回放时循环播放
-    const int count = static_cast<int>(payload.size() / 6000 * 3 / 2) + 6;
+    // 一帧大约 6 KB，多给一半冗余，回放时循环播放。小文件至少 30 帧：循环播放的是同几帧，
+    // 其中一两帧在画布上没解出来就永远凑不齐（真实发送端会一直出新帧，没有这个问题）
+    const int count = std::max(30, static_cast<int>(payload.size() / 6000 * 3 / 2) + 6);
     std::vector<cv::Mat> frames = encodeFrames(mode, name, payload, count, static_cast<uint8_t>(encodeId));
     [[NSFileManager defaultManager] createDirectoryAtPath:@(dir) withIntermediateDirectories:YES attributes:nil error:nil];
     for (size_t i = 0; i < frames.size(); ++i) {
@@ -476,6 +477,22 @@ int main(int argc, char **argv) {
             }
             printf("%s  1 MB auto<-B received=%d match=%d frames=%d  %.1f ms/frame\n",
                    ok ? "PASS" : "FAIL", r.received, r.contentMatches, r.framesFed, r.msPerFrame);
+        }
+        {
+            // 很容易压缩的小文本：压缩后远不到一帧，画面大部分是填充
+            std::string text = "Wi-Fi 与打印机设置\n访客网络：Lumen-Guest\n密码：sunset-2027\n";
+            for (int i = 1; i <= 30; ++i) {
+                text += "第 " + std::to_string(i) + " 条：备注内容，用来看文字很多时取景框里怎么显示。\n";
+            }
+            for (int mode : {68, 67, 66, 4}) {
+                Result r = runDecode(mode, 0, text, @"note.txt");
+                const bool ok = r.received && r.contentMatches && r.detectedMode == mode;
+                if (!ok) {
+                    ++failures;
+                }
+                printf("%s  small text auto<-%d received=%d match=%d detected=%d frames=%d\n",
+                       ok ? "PASS" : "FAIL", mode, r.received, r.contentMatches, r.detectedMode, r.framesFed);
+            }
         }
         gDegrade = false;
         if (!runRepeatTest()) {
