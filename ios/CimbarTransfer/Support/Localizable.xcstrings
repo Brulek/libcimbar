@@ -54,7 +54,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "**Add to Photos (optional):** used only when you choose to save a received photo or video to your library, or turn on “Save Photos and Videos Automatically”. The app never reads anything in your library."
+            "value" : "**Add to Photos (optional):** used only when you choose to save a received photo or video to your library, or turn on “Auto-Save to Photos”. The app never reads anything in your library."
           }
         }
       }
@@ -2126,7 +2126,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save Photos and Videos Automatically"
+            "value" : "Auto-Save to Photos"
           }
         }
       }
