@@ -371,7 +371,7 @@ struct LibraryScreen: View {
         selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个")
     }
 
-    /// 不分组的排序（名称、大小）在列表顶上写明排法；搜索时按相关度不显示
+    /// 不分组的排序（名称、大小）在列表顶上写明排法；搜索结果不分组，也不显示
     private var flatSortTitle: String? {
         guard trimmedSearch.isEmpty else { return nil }
         switch sortOption {
