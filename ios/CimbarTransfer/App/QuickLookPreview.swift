@@ -79,11 +79,15 @@ struct QuickLookPreview: UIViewControllerRepresentable {
                 savedCopies[original] = unique
             }
             let size = (try? fileManager.attributesOfItem(atPath: destination.path)[.size] as? NSNumber)?.int64Value ?? 0
-            // 原始文件名记成被标注的那份，简介页里就能看出是从哪个文件来的
-            _ = ReceivedFileMetadataStore.shared.register(
+            // 原始文件名记成被标注的那份，简介页里就能看出是从哪个文件来的；
+            // 接收时间也沿用原文件：标注版不是新收到的，不该算进角标、也不该被「最近收到的文件」拿到，
+            // 按时间排序时还正好挨着原文件
+            let store = ReceivedFileMetadataStore.shared
+            _ = store.register(
                 filename: destination.lastPathComponent,
                 originalName: original.lastPathComponent,
-                fileSize: size
+                fileSize: size,
+                receivedAt: store.metadata(for: original.lastPathComponent)?.receivedAt ?? Date()
             )
             DispatchQueue.main.async { self.onSavedEditedCopy(destination) }
         }
