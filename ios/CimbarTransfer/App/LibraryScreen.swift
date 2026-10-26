@@ -393,9 +393,12 @@ struct LibraryScreen: View {
             } else if !FilesExport.hasUsefulPreview(file.fileExtension) {
                 // 预览不了的类型（压缩包等）打开简介页，那里能「存到文件」再解压/安装
                 detailTarget = file
-            } else if let index = files.firstIndex(of: file) {
-                // 传入当前列表，预览里可以左右滑动看相邻文件
-                onPreviewFiles(files.map(\.url), index)
+            } else {
+                // 传入当前列表，预览里可以左右滑动看相邻文件；跳过预览不了的，免得滑到空白页
+                let previewable = files.filter { FilesExport.hasUsefulPreview($0.fileExtension) }
+                if let index = previewable.firstIndex(of: file) {
+                    onPreviewFiles(previewable.map(\.url), index)
+                }
             }
         } label: {
             LibraryRow(
