@@ -6,11 +6,25 @@ import UIKit
 /// - `-SeedDemoFiles YES`：启动时往接收目录写入几份示例文件（已存在则跳过）
 /// - `-DemoDetail YES`：直接打开最新文件的简介页
 /// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
+/// - `-DemoFrames <目录>[:<目录>…]`：回放 run_decode_selftest.sh --dump-transfer 导出的帧，代替相机；
+///   `-DemoFramesFPS 4` 调慢回放
 /// - `-DemoScan waiting|receiving|lost|stalled|error|paused|done|done-text`：扫码页跳过相机，直接展示对应状态；
 ///   容器的 Library/Caches 里有 demo-screen.png 时把它当作对准的发送端屏幕画进取景框
 enum DemoContent {
     static var scanState: String? {
         UserDefaults.standard.string(forKey: "DemoScan")
+    }
+
+    /// `-DemoFrames <目录1>:<目录2>`：不开相机，回放预先导出的动画码帧（每个目录循环两遍再换下一个）
+    static var replayFrameDirectories: [URL]? {
+        guard let value = UserDefaults.standard.string(forKey: "DemoFrames"), !value.isEmpty else { return nil }
+        return value.split(separator: ":").map { URL(fileURLWithPath: String($0), isDirectory: true) }
+    }
+
+    /// `-DemoFramesFPS 4`：回放帧率（默认 15），调慢了好截进度中的画面
+    static var replayFramesPerSecond: Double {
+        let value = UserDefaults.standard.double(forKey: "DemoFramesFPS")
+        return value > 0 ? value : 15
     }
 
     /// `-DemoDetail YES`：「我的文件」打开后直接进入最新文件的简介页

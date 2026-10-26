@@ -364,13 +364,9 @@ bool runNoCodeTest() {
 }
 
 // 截图素材：把一帧 B 模式动画码存成 PNG（模拟器的 OpenCV 切片没有 imgcodecs，用 ImageIO 写）
-bool dumpFrame(const char *path) {
-    std::vector<cv::Mat> frames = encodeFrames(68, "demo.bin", makePayload(64 * 1024), 4);
-    if (frames.size() < 4) {
-        return false;
-    }
+bool writePNG(const cv::Mat &rgbFrame, const char *path) {
     cv::Mat rgba;
-    cv::cvtColor(frames[3], rgba, cv::COLOR_RGB2RGBA);
+    cv::cvtColor(rgbFrame, rgba, cv::COLOR_RGB2RGBA);
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
     CGContextRef ctx = CGBitmapContextCreate(rgba.data, rgba.cols, rgba.rows, 8, rgba.step, space,
                                              kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);
@@ -387,10 +383,42 @@ bool dumpFrame(const char *path) {
     return ok;
 }
 
+bool dumpFrame(const char *path) {
+    std::vector<cv::Mat> frames = encodeFrames(68, "demo.bin", makePayload(64 * 1024), 4);
+    return frames.size() >= 4 && writePNG(frames[3], path);
+}
+
+// 把一个真实文件编成一整段动画码帧（000.png、001.png…），给 App 的 Debug「模拟相机」回放
+bool dumpTransfer(const char *dir, int mode, const char *inputPath, int encodeId) {
+    NSData *data = [NSData dataWithContentsOfFile:@(inputPath)];
+    if (data.length == 0) {
+        return false;
+    }
+    const std::string payload(static_cast<const char *>(data.bytes), data.length);
+    const std::string name = [@(inputPath) lastPathComponent].UTF8String;
+    // 一帧大约 6 KB，多给一半冗余，回放时循环播放
+    const int count = static_cast<int>(payload.size() / 6000 * 3 / 2) + 6;
+    std::vector<cv::Mat> frames = encodeFrames(mode, name, payload, count, static_cast<uint8_t>(encodeId));
+    [[NSFileManager defaultManager] createDirectoryAtPath:@(dir) withIntermediateDirectories:YES attributes:nil error:nil];
+    for (size_t i = 0; i < frames.size(); ++i) {
+        char path[1024];
+        snprintf(path, sizeof(path), "%s/%03zu.png", dir, i);
+        if (!writePNG(frames[i], path)) {
+            return false;
+        }
+    }
+    printf("wrote %zu frames of %s (%zu bytes, mode %d) to %s\n", frames.size(), name.c_str(), payload.size(), mode, dir);
+    return true;
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
     @autoreleasepool {
+        if (argc >= 5 && strcmp(argv[1], "--dump-transfer") == 0) {
+            // --dump-transfer <输出目录> <mode_val> <文件> [encode_id]
+            return dumpTransfer(argv[2], atoi(argv[3]), argv[4], argc >= 6 ? atoi(argv[5]) : 101) ? 0 : 1;
+        }
         if (argc == 3 && strcmp(argv[1], "--dump-frame") == 0) {
             const bool ok = dumpFrame(argv[2]);
             printf(ok ? "wrote %s\n" : "failed to write %s\n", argv[2]);

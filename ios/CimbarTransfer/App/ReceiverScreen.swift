@@ -26,7 +26,8 @@ struct ReceiverScreen: View {
     }
 
     private var scanState: ScanState {
-        viewModel.isTracking && viewModel.receivedFileURL == nil ? .detecting : .idle
+        if viewModel.receivedFileURL != nil { return .received }
+        return viewModel.isTracking ? .detecting : .idle
     }
 
     var body: some View {
@@ -46,6 +47,23 @@ struct ReceiverScreen: View {
                 .accessibilityLabel("相机取景，轻点对焦，捏合缩放")
                 .accessibilityElement(children: .ignore)
                 #if DEBUG
+                .overlay {
+                    // 帧回放：把正在喂给解码器的那一帧画进取景框，模拟拍到的屏幕
+                    // （与取景框同样的上下预留，码才落在框正中）
+                    if let frame = viewModel.replayFrame {
+                        ZStack {
+                            Color.black.ignoresSafeArea()
+                            Image(uiImage: frame)
+                                .resizable()
+                                .interpolation(.medium)
+                                .scaledToFit()
+                                .padding(.horizontal, 40)
+                                .padding(.top, topReservedHeight)
+                                .padding(.bottom, bottomReservedHeight)
+                        }
+                        .allowsHitTesting(false)
+                    }
+                }
                 .overlay {
                     if DemoContent.senderScreen != nil {
                         RadialGradient(

@@ -4,6 +4,8 @@ import SwiftUI
 enum ScanState: Equatable {
     case idle
     case detecting
+    /// 文件已收到、解码已停：萤火虫不再绕圈，免得看着像还在找码
+    case received
 }
 
 /// 收完后放进取景框的文件（只给缩略图一定出得来的类型）
@@ -127,15 +129,18 @@ private struct FireflyScanFrame: View {
         switch scanState {
         case .idle:      return Brand.glow
         case .detecting: return Brand.signal
+        case .received:  return .green
         }
     }
 
     private var orbitPeriod: Double {
         switch scanState {
-        case .idle:      return 5.5
-        case .detecting: return 2.6
+        case .idle, .received: return 5.5
+        case .detecting:       return 2.6
         }
     }
+
+    private var isResting: Bool { isPaused || scanState == .received }
 
     var body: some View {
         if reduceMotion {
@@ -148,7 +153,7 @@ private struct FireflyScanFrame: View {
             }
             .frame(width: side, height: side)
         } else {
-            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark || isPaused)) { context in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark || isResting)) { context in
                 let t = (context.date.timeIntervalSinceReferenceDate / orbitPeriod * 4)
                     .truncatingRemainder(dividingBy: 4)
 
@@ -157,7 +162,7 @@ private struct FireflyScanFrame: View {
                         .stroke(fireflyColor.opacity(0.28), lineWidth: 1)
                         .frame(width: side, height: side)
 
-                    if !showCheckmark && !isPaused {
+                    if !showCheckmark && !isResting {
                         fireflySwarm(t: t)
                     }
 

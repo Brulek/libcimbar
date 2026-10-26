@@ -1,6 +1,7 @@
 #!/bin/zsh
 # 编译并运行端到端解码自测（Tests/DecodeSelfTest.mm），需要一台已启动的 iOS 模拟器。
 # 用法：scripts/run_decode_selftest.sh [--dump-frame <png 路径>]
+#       scripts/run_decode_selftest.sh --dump-transfer <输出目录> <mode_val> <文件> [encode_id]   # 给 Debug 模拟相机用
 set -euo pipefail
 
 HERE=${0:A:h}
