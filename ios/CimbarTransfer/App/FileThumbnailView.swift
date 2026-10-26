@@ -95,10 +95,12 @@ struct FileThumbnailView: View {
 enum ThumbnailLoader {
     private static let cache = NSCache<NSString, UIImage>()
 
+    // 纯文本、表格数据之类在 46pt 里渲染出来只是一页灰字，不如类型图标好认，不做缩略图
     private nonisolated static let supportedExtensions: Set<String> = [
         "jpg", "jpeg", "png", "heic", "heif", "gif", "webp", "tiff", "bmp",
         "mp4", "mov", "m4v",
         "pdf",
+        "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pages", "numbers", "key", "rtf",
     ]
 
     nonisolated static func supports(fileExtension: String) -> Bool {

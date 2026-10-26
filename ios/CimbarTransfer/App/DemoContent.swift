@@ -6,7 +6,7 @@ import UIKit
 /// - `-SeedDemoFiles YES`：启动时往接收目录写入几份示例文件（已存在则跳过）
 /// - `-DemoDetail YES`：直接打开最新文件的简介页
 /// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
-/// - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机，直接展示对应状态；
+/// - `-DemoScan waiting|receiving|lost|stalled|error|paused|done`：扫码页跳过相机，直接展示对应状态；
 ///   容器的 Library/Caches 里有 demo-screen.png 时把它当作对准的发送端屏幕画进取景框
 enum DemoContent {
     static var scanState: String? {

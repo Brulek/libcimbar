@@ -33,6 +33,10 @@ struct AboutScreen: View {
                 Link(destination: URL(string: "https://github.com/sz3/libcimbar")!) {
                     ExternalLinkRow(title: "libcimbar 项目", detail: "GitHub", systemImage: "shippingbox")
                 }
+                // 与 App Store 上填的支持网址一致
+                Link(destination: URL(string: "https://github.com/Brulek/libcimbar/issues")!) {
+                    ExternalLinkRow(title: "反馈问题", detail: "GitHub", systemImage: "exclamationmark.bubble")
+                }
             } footer: {
                 Text("萤传是第三方开发的非官方客户端，与 libcimbar 及 cimbar.org 无隶属关系。解码部分基于 libcimbar（MPL-2.0），针对 iOS 修改过的源文件依 MPL-2.0 提供源代码，详见「开源许可」。")
                     .padding(.top, 4)

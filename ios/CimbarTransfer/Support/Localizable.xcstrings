@@ -161,6 +161,16 @@
         }
       }
     },
+    "一段时间没有扫到动画码，已关闭相机省电。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No code for a while, so the camera is off to save battery."
+          }
+        }
+      }
+    },
     "七、协议的变更与终止" : {
       "localizations" : {
         "en" : {
@@ -637,6 +647,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open Settings"
+          }
+        }
+      }
+    },
+    "反馈问题" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report a Problem"
           }
         }
       }
@@ -1331,6 +1351,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scan an animated code on another screen. Received files show up here."
+          }
+        }
+      }
+    },
+    "扫描已暂停" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanning Paused"
           }
         }
       }
@@ -2207,6 +2237,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continue"
+          }
+        }
+      }
+    },
+    "继续扫描" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume Scanning"
           }
         }
       }

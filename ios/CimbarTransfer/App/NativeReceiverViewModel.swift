@@ -26,6 +26,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     /// 自动模式下识别出的发送端模式（mode_val），0 表示尚未识别
     @Published private(set) var detectedMode = 0
     @Published private(set) var cameraPermissionDenied = false
+    /// 长时间没有东西可扫，已自动停掉相机省电；扫码期间禁用的自动锁屏也随之恢复
+    @Published private(set) var isIdlePaused = false
     @Published private(set) var torchAvailable = false
     @Published private(set) var torchActive = false
     @Published private(set) var zoomFactor: CGFloat = 1.0
@@ -70,6 +72,13 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     private var transferStartUptime: TimeInterval?
     // 仅在主线程读写：VoiceOver 已播报到的进度档（每 25% 一档）
     private var announcedProgressStep = 0
+    // 仅在主线程读写：最近一次「有事发生」（启动、识别到码、收到文件）的时间，用于空闲自动暂停
+    private var lastActivityUptime: TimeInterval = 0
+
+    /// 没识别到任何码 / 传输中途码不见了 / 已收完没再操作，各自多久后自动暂停
+    private static let idleTimeoutWaiting: TimeInterval = 90
+    private static let idleTimeoutInterrupted: TimeInterval = 300
+    private static let idleTimeoutCompleted: TimeInterval = 45
 
     override init() {
         super.init()
@@ -125,6 +134,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         #endif
         impactGenerator.prepare()
         notificationGenerator.prepare()
+        DispatchQueue.main.async {
+            self.isIdlePaused = false
+            self.lastActivityUptime = ProcessInfo.processInfo.systemUptime
+        }
         updateStatusIfIdle(String(localized: "正在启动相机"))
         publishCameraPermissionDenied(false)
         startStallTimerIfNeeded()
@@ -444,6 +457,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             remainingSeconds = nil
             progressSamples.removeAll()
         } else if result.detectedFrameCount > 0 {
+            lastActivityUptime = ProcessInfo.processInfo.systemUptime
             if !isTracking { isTracking = true }
             detectedFrameCount = Int(result.detectedFrameCount)
             if transferStartUptime == nil {
@@ -481,8 +495,11 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             progressSamples.removeAll()
             lastAdvanceFraction = -1
             // 文件已落盘，后续帧不会再产生新结果；停掉解码链，
-            // 避免相机回调继续满载 CPU（用户点「继续扫码」时恢复）
+            // 避免相机回调继续满载 CPU（用户点「继续接收」时恢复）
             pauseProcessing()
+            // 收完了用户可能放下手机去看文件，恢复正常的自动锁屏
+            lastActivityUptime = ProcessInfo.processInfo.systemUptime
+            setIdleTimerDisabled(false)
             if preferences.hapticEnabled {
                 notificationGenerator.notificationOccurred(.success)
             }
@@ -508,6 +525,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             guard self.stallTimer == nil else { return }
             self.stallTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
                 self?.evaluateStall()
+                self?.evaluateIdle()
             }
         }
     }
@@ -532,6 +550,24 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         if newHint != stallHint {
             stallHint = newHint
         }
+    }
+
+    // 主线程调用。开着扫码页走开，相机和解码会一直满载、屏幕也不会自动锁定：
+    // 一段时间没动静就停掉相机，等用户点「继续扫描」
+    private func evaluateIdle() {
+        guard !isIdlePaused, !cameraPermissionDenied, lastActivityUptime > 0 else { return }
+        let timeout: TimeInterval
+        if receivedFileURL != nil {
+            timeout = Self.idleTimeoutCompleted
+        } else if progressValue != nil {
+            timeout = Self.idleTimeoutInterrupted
+        } else {
+            timeout = Self.idleTimeoutWaiting
+        }
+        guard ProcessInfo.processInfo.systemUptime - lastActivityUptime > timeout else { return }
+        isIdlePaused = true
+        stop()
+        UIAccessibility.post(notification: .announcement, argument: String(localized: "扫描已暂停"))
     }
 
     // 主线程调用。看不到屏幕的 VoiceOver 用户只能靠播报知道进度，每过 25% 报一次
@@ -651,6 +687,8 @@ extension NativeReceiverViewModel {
             case "error":
                 self.scanErrorLatched = true
                 self.statusText = String(format: NSLocalizedString("文件解压失败（错误 %d），传输可能受损", comment: ""), -15)
+            case "paused":
+                self.isIdlePaused = true
             case "done":
                 self.progressValue = 1
                 self.transferDuration = 23

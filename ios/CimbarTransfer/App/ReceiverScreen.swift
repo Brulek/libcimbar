@@ -22,6 +22,12 @@ struct ReceiverScreen: View {
     @ScaledMetric(relativeTo: .body) private var topReservedHeight: CGFloat = 64
     private let bottomReservedHeight: CGFloat = 20
 
+    /// 还没开始接收就自动暂停了：底部「对准动画码」的提示与暂停卡片矛盾，收起
+    private var isPausedWhileWaiting: Bool {
+        viewModel.isIdlePaused && viewModel.progressValue == nil
+            && viewModel.receivedFileURL == nil && !viewModel.scanErrorLatched
+    }
+
     private var scanState: ScanState {
         viewModel.isTracking && viewModel.receivedFileURL == nil ? .detecting : .idle
     }
@@ -60,8 +66,16 @@ struct ReceiverScreen: View {
                         topReservedHeight: topReservedHeight,
                         bottomReservedHeight: bottomReservedHeight,
                         scanState: scanState,
-                        showCheckmark: showCheckmark
+                        showCheckmark: showCheckmark,
+                        isPaused: viewModel.isIdlePaused
                     )
+                }
+                .overlay {
+                    if viewModel.isIdlePaused && !showCheckmark {
+                        IdlePausedCard { viewModel.start() }
+                            .padding(.bottom, bottomReservedHeight)
+                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    }
                 }
                 .overlay {
                     if let point = focusIndicatorPoint {
@@ -83,8 +97,9 @@ struct ReceiverScreen: View {
                     highResolution: $preferences.highResolutionCapture,
                     detectedMode: viewModel.detectedMode,
                     zoomFactor: viewModel.zoomFactor,
-                    canQuickZoom: viewModel.canQuickZoom,
-                    torchAvailable: viewModel.torchAvailable,
+                    // 相机自动暂停时手电筒/变焦没有意义，先收起来
+                    canQuickZoom: viewModel.canQuickZoom && !viewModel.isIdlePaused,
+                    torchAvailable: viewModel.torchAvailable && !viewModel.isIdlePaused,
                     torchActive: viewModel.torchActive,
                     onToggleZoom: { viewModel.toggleQuickZoom() },
                     onToggleTorch: { viewModel.toggleTorch() }
@@ -98,7 +113,7 @@ struct ReceiverScreen: View {
             .padding(.top, 8)
         }
         .safeAreaInset(edge: .bottom) {
-            if !viewModel.cameraPermissionDenied {
+            if !viewModel.cameraPermissionDenied && !isPausedWhileWaiting {
                 ReceiverBottomPanel(
                     viewModel: viewModel,
                     showCheckmark: showCheckmark,
@@ -132,6 +147,10 @@ struct ReceiverScreen: View {
     private func resetScan() {
         withAnimation {
             viewModel.resetScan()
+        }
+        // 收完后放着没动、相机已自动暂停：「继续接收」顺带把相机打开
+        if viewModel.isIdlePaused {
+            viewModel.start()
         }
     }
 
@@ -353,6 +372,7 @@ private struct ReceiverBottomPanel: View {
         .glassChrome(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .animation(.easeInOut(duration: 0.25), value: viewModel.receivedFileURL != nil)
         .animation(.easeInOut(duration: 0.25), value: viewModel.scanErrorLatched)
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isIdlePaused)
         .animation(.easeInOut(duration: 0.25), value: viewModel.progressValue == nil)
     }
 }
@@ -681,6 +701,34 @@ private struct CompactActionLabelStyle: LabelStyle {
     }
 }
 
+/// 空闲自动暂停后显示在取景框中间
+private struct IdlePausedCard: View {
+    let onResume: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "pause.circle.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(Brand.glow)
+            Text("扫描已暂停")
+                .font(.headline)
+            Text("一段时间没有扫到动画码，已关闭相机省电。")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button(action: onResume) {
+                Label("继续扫描", systemImage: "play.fill")
+            }
+            .buttonStyle(.brandPrimary)
+            .padding(.top, 4)
+        }
+        .padding(24)
+        .frame(maxWidth: 320)
+        .glassChrome(in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .accessibilityElement(children: .contain)
+    }
+}
+
 private struct PermissionDeniedCard: View {
     var body: some View {
         VStack(spacing: 14) {
@@ -778,6 +826,7 @@ private struct ScanFrameOverlay: View {
     let bottomReservedHeight: CGFloat
     var scanState: ScanState = .idle
     var showCheckmark: Bool = false
+    var isPaused: Bool = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -791,7 +840,8 @@ private struct ScanFrameOverlay: View {
                 side: side,
                 cornerRadius: cornerRadius,
                 scanState: scanState,
-                showCheckmark: showCheckmark
+                showCheckmark: showCheckmark,
+                isPaused: isPaused
             )
             #if DEBUG
             .background {
@@ -819,6 +869,8 @@ private struct FireflyScanFrame: View {
     let cornerRadius: CGFloat
     let scanState: ScanState
     let showCheckmark: Bool
+    /// 相机已自动暂停：萤火虫停下，不再白跑 60fps 动画
+    var isPaused: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -852,7 +904,7 @@ private struct FireflyScanFrame: View {
             }
             .frame(width: side, height: side)
         } else {
-            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark)) { context in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: showCheckmark || isPaused)) { context in
                 let t = (context.date.timeIntervalSinceReferenceDate / orbitPeriod * 4)
                     .truncatingRemainder(dividingBy: 4)
 
@@ -861,7 +913,7 @@ private struct FireflyScanFrame: View {
                         .stroke(fireflyColor.opacity(0.28), lineWidth: 1)
                         .frame(width: side, height: side)
 
-                    if !showCheckmark {
+                    if !showCheckmark && !isPaused {
                         fireflySwarm(t: t)
                     }
 
