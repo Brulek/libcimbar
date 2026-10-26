@@ -9,47 +9,56 @@
 ## 功能
 
 **扫码页**
-- 手电筒开关、捏合变焦（双击复位）、轻点对焦
-- 实时进度：解码百分比、已识别帧数、预计剩余时间
-- 进度停滞 5s/12s 分级引导（对齐/靠近/防反光提示）
-- 接收完成即暂停解码链省电；完成卡片支持预览/分享/存相册/继续扫码
-- 适配「减弱动态效果」与动态字体
+- 自动识别发送端模式（B / Bm / Bu / 4C）：逐帧轮换候选模式，解出数据即锁定，顶部显示「自动 · B」
+- 手电筒、1×/2× 快速变焦（也可捏合，双击复位）、轻点对焦
+- 底部面板一次只说一件事：等待 → 接收中（百分比、剩余时间、已识别帧数）→ 动画码离开取景框 → 出错重扫 → 完成
+- 码离开取景框时进度保留；停滞 5s/12s 分级提示
+- 完成卡片：预览 / 存相册 / 分享 / 继续接收，显示用时；接收完成即暂停解码链省电
+- 「怎么发送文件」说明页，可复制或分享 cimbar.org 网址
+- 适配「减弱动态效果」、动态字体（大字号下按钮改竖排）、VoiceOver（每 25% 播报一次进度）
 
 **我的文件**
-- 图片/视频/PDF 真实缩略图，搜索与多种排序，多选批量删除
-- 滑动操作：删除/重命名/分享/存到相册（重命名会同步改磁盘文件名）
-- 文件详情页：原始文件名、接收时间、SHA-256 校验（可复制）
+- 按「今天 / 昨天 / 近 7 天 / 更早」分组；右上角「…」菜单里选择与排序（排序会记住）
+- 标签角标只数上次打开之后收到的文件，对应的行前有圆点
+- 图片/视频/PDF 真实缩略图；长按有大图预览和菜单；预览可左右滑动切换文件
+- 多选：全选、批量分享、批量删除；左滑删除/分享，右滑存到相册
+- 简介页：大图、预览/分享/存相册/重命名、类型/大小/接收时间、SHA-256（可复制）
+- 重命名只改名字部分，扩展名自动保留并同步改磁盘文件名
 
 **设置**
-- 解码模式：标准 Mode B / 兼容 4C / 兼容 8C / Mini / Micro（需与发送端一致）
-- 高精度采集（1080p）开关
-- 提示音/触觉反馈/接收后自动跳转
-- 保留策略（永久 / 30 天 / 7 天，按接收时间计算）
-- 在「文件」App 中直接打开接收目录
+- 解码模式（默认自动识别）、高清采集（1080p）
+- 提示音 / 振动 / 收到后自动打开「我的文件」
+- 已用空间、自动清理（从不 / 30 天 / 7 天，按接收时间）、在「文件」App 中查看、清空
+- 帮助：怎么发送文件、查看引导；关于页里是隐私政策、用户协议、开源许可
+
+**其他**
+- 「快捷指令」/ Spotlight / Siri / 操作按钮：「扫码接收文件」直接打开扫码页
+- 品牌琥珀色主题，iOS 26 起相机浮层用液态玻璃；iPad 上（iOS 17+）列表限制在可读宽度
 
 ## 截图
 
-模拟器验证截图（中/英、深/浅色、iPhone/iPad）见 [docs/screenshots/](docs/screenshots/)。
+模拟器截图（中/英、深/浅色、iPhone/iPad）见 [docs/screenshots/](docs/screenshots/)。
+App Store 尺寸的原图（6.9 寸 iPhone、13 寸 iPad）放在资料区 `~/Documents/Developer/CimbarTransfer/App Store截图/`。
 
 ## 目录
 
 - `App/`: SwiftUI 应用代码、原生扫码流程、文件缓存与分享逻辑
+- `Tests/`: 端到端解码自测（不是 Xcode 测试 target，见下文）
+- `scripts/`: 图标生成、本地化同步、挂接新源文件、解码自测
 - `project.yml`: XcodeGen 项目描述（改动 build settings 时需与 `project.pbxproj` 保持同步）
 
 ## 本地生成工程并运行
 
 ```bash
 cd ios/CimbarTransfer
-xcodegen generate   # 可选：仓库内已提交生成好的 xcodeproj
 open CimbarTransfer.xcodeproj
 ```
 
 1. 打开工程后选择真机运行（建议 iPhone）。
 2. 首次启动允许相机权限。
-3. 对准发送端屏幕，解码完成后点击「分享文件」。
+3. 对准发送端屏幕，进度到 100% 后在完成卡片里预览或分享。
 
-> 未安装 xcodegen 时也可以直接使用仓库中的 `CimbarTransfer.xcodeproj`；
-> 新增源文件可用 Python 的 `pbxproj` 库挂接（`pip3 install --user pbxproj`）。
+> 仓库中的 `CimbarTransfer.xcodeproj` 可直接打开；新增源文件用 `scripts/add_swift_file.py` 挂接。
 
 ## 构建命令（CLI）
 
@@ -70,11 +79,37 @@ xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
 > 模拟器切片的构建方法见 `../ThirdParty/README.md`。无签名证书的机器上若
 > CodeSign 报 “detritus not allowed”，对产物 `xattr -cr` 后手动 ad-hoc 签名即可。
 
+## 本地化
+
+界面文案以中文为源语言写在代码里，英文在 `Support/Localizable.xcstrings`。改完文案后：
+
+```bash
+# 1. 编译时打开字符串提取（模拟器 Debug）
+xcodebuild -project CimbarTransfer.xcodeproj -scheme CimbarTransfer \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO SWIFT_EMIT_LOC_STRINGS=YES build
+# 2. 列出缺英文的键和不再使用的键
+python3 scripts/l10n_sync.py
+# 3. 写入翻译（JSON：{中文键: 英文}，复数写成 {"one":…, "other":…}），并清掉不用的键
+python3 scripts/l10n_sync.py --apply en.json --prune
+```
+
+## 测试与调试
+
+- **端到端解码自测**：`scripts/run_decode_selftest.sh`（需要一台已启动的模拟器）。用 libcimbar 自带的编码器把 24 KB 数据编成每种模式的动画码，套进 720×1280 的相机画布，交给 `NativeCimbarDecoder` 解码并逐字节核对；覆盖自动识别四种模式、手动模式和模式不匹配。`--dump-frame out.png` 可导出一帧真实动画码。
+- **Debug 启动参数**（只在 Debug 构建里生效）：
+  - `-InitialTab library|settings`：初始标签
+  - `-SeedDemoFiles YES`：往接收目录写几份示例文件；`-DemoNow 09:41` 让它们按今天 9:41 往前排
+  - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
+  - `-DemoDetail YES`：直接打开最新文件的简介页
+- **新增源文件**：`python3 scripts/add_swift_file.py Foo.swift` 把 `App/Foo.swift` 挂进工程。不要用 `xcodegen generate` 重建：会丢掉 knownRegions 里的 en，英文本地化失效。
+
 ## 说明
 
 该 iOS 客户端当前直接走原生相机采集与 `libcimbar` 解码链路，接收完成后将文件落到 `Documents/CimbarTransfer/Inbox`（可在系统「文件」App 中浏览），并通过系统分享面板导出。旧版本写入的 `Library/Caches/CimbarTransfer/ReceivedFiles` 会在启动时自动迁移。
 
 上游 `src/lib/cimbar_js/cimbar_recv_js.cpp` 为 iOS 做了两处适配：
 `sync_thread_config()`（`Config::active_conf` 是 thread_local，GCD 队列不保证线程固定）
-与按模式缓存的 `Decoder`（避免每帧重建、重复解码符号 tile）。
+与按模式缓存的 `Decoder`（每种模式各缓存一个：避免每帧重建、重复解码符号 tile，
+自动识别逐帧轮换模式时也不用重建）。
 Debug 配置下原生解码链以 `-O2` 编译（Swift 保持 `-Onone`），否则真机调试时扫码性能严重失真。

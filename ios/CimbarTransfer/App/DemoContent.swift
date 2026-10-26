@@ -4,10 +4,34 @@ import UIKit
 /// 模拟器截图与界面验证用的示例数据，只在 Debug 构建中存在。
 ///
 /// - `-SeedDemoFiles YES`：启动时往接收目录写入几份示例文件（已存在则跳过）
-/// - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机，直接展示对应状态
+/// - `-DemoDetail YES`：直接打开最新文件的简介页
+/// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
+/// - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机，直接展示对应状态；
+///   容器的 Library/Caches 里有 demo-screen.png 时把它当作对准的发送端屏幕画进取景框
 enum DemoContent {
     static var scanState: String? {
         UserDefaults.standard.string(forKey: "DemoScan")
+    }
+
+    /// `-DemoDetail YES`：「我的文件」打开后直接进入最新文件的简介页
+    static var opensDetail: Bool {
+        UserDefaults.standard.bool(forKey: "DemoDetail")
+    }
+
+    /// 演示状态下放进取景框里的「发送端屏幕」（Library/Caches/demo-screen.png，截图前拷进容器；
+    /// 可用 scripts/run_decode_selftest.sh --dump-frame 导出一帧真实的动画码再加边框）
+    static let senderScreen: UIImage? = {
+        guard scanState != nil,
+              let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        return UIImage(contentsOfFile: caches.appendingPathComponent("demo-screen.png").path)
+    }()
+
+    /// `-DemoNow 09:41`：示例文件的接收时间以今天这个时刻为基准，和截图状态栏的时间对得上
+    private static var demoNow: Date {
+        guard let value = UserDefaults.standard.string(forKey: "DemoNow") else { return Date() }
+        let parts = value.split(separator: ":").compactMap { Int($0) }
+        guard parts.count == 2 else { return Date() }
+        return Calendar.current.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: Date()) ?? Date()
     }
 
     private static var isEnglish: Bool {
@@ -43,7 +67,7 @@ enum DemoContent {
     static func seedFilesIfRequested(force: Bool = false) {
         guard force || UserDefaults.standard.bool(forKey: "SeedDemoFiles"),
               let directory = try? ReceivedFileCache.directoryURL() else { return }
-        let now = Date()
+        let now = demoNow
         for sample in samples {
             let name = isEnglish ? sample.en : sample.zh
             let url = directory.appendingPathComponent(name)

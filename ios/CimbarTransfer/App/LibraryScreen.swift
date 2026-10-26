@@ -183,6 +183,13 @@ struct LibraryScreen: View {
             presentToast(SaveToast(message: feedback.message, style: .failure))
             store.clearFeedback()
         }
+        #if DEBUG
+        .onChange(of: store.cachedFiles.first?.id) { _ in
+            if DemoContent.opensDetail, detailTarget == nil {
+                detailTarget = sorted(store.cachedFiles).first
+            }
+        }
+        #endif
         .onChange(of: store.cachedFiles) { files in
             // 已被删除的文件不能还算在选中项里，否则底栏计数与批量操作对不上
             let present = Set(files.map(\.id))

@@ -41,6 +41,20 @@ struct ReceiverScreen: View {
                 .ignoresSafeArea()
                 .accessibilityLabel("相机取景，轻点对焦，捏合缩放")
                 .accessibilityElement(children: .ignore)
+                #if DEBUG
+                .overlay {
+                    if DemoContent.senderScreen != nil {
+                        RadialGradient(
+                            colors: [Color(red: 0.14, green: 0.16, blue: 0.22), .black],
+                            center: UnitPoint(x: 0.5, y: 0.42),
+                            startRadius: 40,
+                            endRadius: 520
+                        )
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                    }
+                }
+                #endif
                 .overlay {
                     ScanFrameOverlay(
                         topReservedHeight: topReservedHeight,
@@ -767,6 +781,19 @@ private struct ScanFrameOverlay: View {
                 scanState: scanState,
                 showCheckmark: showCheckmark
             )
+            #if DEBUG
+            .background {
+                if let screen = DemoContent.senderScreen {
+                    Image(uiImage: screen)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: side * 0.9, height: side * 0.9)
+                        .rotation3DEffect(.degrees(6), axis: (x: 0.4, y: -1, z: 0), perspective: 0.6)
+                        .blur(radius: 0.6)
+                        .shadow(color: Color(red: 0.3, green: 0.4, blue: 0.8).opacity(0.35), radius: 30)
+                }
+            }
+            #endif
             .position(center)
             .animation(.easeInOut(duration: 0.4), value: scanState)
             .animation(.easeInOut(duration: 0.4), value: showCheckmark)

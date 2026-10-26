@@ -1,6 +1,6 @@
 #!/bin/zsh
 # 编译并运行端到端解码自测（Tests/DecodeSelfTest.mm），需要一台已启动的 iOS 模拟器。
-# 用法：scripts/run_decode_selftest.sh
+# 用法：scripts/run_decode_selftest.sh [--dump-frame <png 路径>]
 set -euo pipefail
 
 HERE=${0:A:h}
@@ -52,7 +52,7 @@ wait
 
 xcrun clang++ -target $TARGET -isysroot $SDK $objects -o $OUT/DecodeSelfTest \
   -F$OPENCV_DIR -framework opencv2 -framework Foundation -framework CoreVideo \
-  -framework Accelerate -framework CoreGraphics -lz -lc++
+  -framework Accelerate -framework CoreGraphics -framework ImageIO -framework UniformTypeIdentifiers -lz
 codesign --force --sign - $OUT/DecodeSelfTest >/dev/null 2>&1
 
-xcrun simctl spawn booted $OUT/DecodeSelfTest
+xcrun simctl spawn ${SIMULATOR:-booted} $OUT/DecodeSelfTest "$@"

@@ -6,6 +6,8 @@
 
 #import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
+#import <ImageIO/ImageIO.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #import "NativeCimbarDecoder.h"
 
@@ -157,10 +159,40 @@ Result runDecode(int senderMode, int receiverMode, const std::string &payload, N
     return result;
 }
 
+// 截图素材：把一帧 B 模式动画码存成 PNG（模拟器的 OpenCV 切片没有 imgcodecs，用 ImageIO 写）
+bool dumpFrame(const char *path) {
+    std::vector<cv::Mat> frames = encodeFrames(68, "demo.bin", makePayload(64 * 1024), 4);
+    if (frames.size() < 4) {
+        return false;
+    }
+    cv::Mat rgba;
+    cv::cvtColor(frames[3], rgba, cv::COLOR_RGB2RGBA);
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef ctx = CGBitmapContextCreate(rgba.data, rgba.cols, rgba.rows, 8, rgba.step, space,
+                                             kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault);
+    CGImageRef image = CGBitmapContextCreateImage(ctx);
+    NSURL *url = [NSURL fileURLWithPath:@(path)];
+    CGImageDestinationRef dest = CGImageDestinationCreateWithURL((__bridge CFURLRef)url,
+                                                                 (__bridge CFStringRef)UTTypePNG.identifier, 1, nullptr);
+    CGImageDestinationAddImage(dest, image, nullptr);
+    const bool ok = CGImageDestinationFinalize(dest);
+    CFRelease(dest);
+    CGImageRelease(image);
+    CGContextRelease(ctx);
+    CGColorSpaceRelease(space);
+    return ok;
+}
+
 } // namespace
 
-int main() {
+int main(int argc, char **argv) {
     @autoreleasepool {
+        if (argc == 3 && strcmp(argv[1], "--dump-frame") == 0) {
+            const bool ok = dumpFrame(argv[2]);
+            printf(ok ? "wrote %s\n" : "failed to write %s\n", argv[2]);
+            return ok ? 0 : 1;
+        }
+
         const std::string payload = makePayload(24 * 1024);
         struct Case {
             const char *name;
