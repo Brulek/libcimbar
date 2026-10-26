@@ -225,7 +225,8 @@ struct ContentView: View {
     /// iPad 全屏（宽尺寸）时左边列表、右边简介；iPhone 和分屏变窄时照旧推入简介页
     @ViewBuilder
     private var libraryTab: some View {
-        if horizontalSizeClass == .regular {
+        // 一个文件都没有时不分栏：空状态居中，右边不留一大块空白（读完目录前照常分栏，免得启动时跳一下）
+        if horizontalSizeClass == .regular, !(cacheStore.hasLoaded && cacheStore.cachedFiles.isEmpty) {
             NavigationSplitView {
                 libraryScreen(splitDetail: $libraryDetail)
                     // 默认侧栏太窄：文件名被截断、日期折行
@@ -243,7 +244,8 @@ struct ContentView: View {
                         )
                         .id(file.id)
                     } else {
-                        LibraryDetailPlaceholder()
+                        // 正在读目录时还不知道有没有文件，先不提示
+                        LibraryDetailPlaceholder(showsHint: !cacheStore.cachedFiles.isEmpty)
                     }
                 }
             }
@@ -300,7 +302,19 @@ struct PreviewRequest: Identifiable {
 
 /// iPad 分栏右栏还没选文件时
 private struct LibraryDetailPlaceholder: View {
+    var showsHint = true
+
     var body: some View {
+        VStack(spacing: 12) {
+            if showsHint {
+                hint
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private var hint: some View {
         VStack(spacing: 12) {
             Image(systemName: "info.circle")
                 .font(.system(size: 44))
@@ -309,7 +323,5 @@ private struct LibraryDetailPlaceholder: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
     }
 }
