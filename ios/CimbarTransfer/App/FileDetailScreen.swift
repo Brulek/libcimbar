@@ -1,4 +1,6 @@
+import AVFoundation
 import CryptoKit
+import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -20,6 +22,7 @@ struct FileDetailScreen: View {
     @State private var photoSaved = false
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
+    @State private var mediaDetail: MediaDetail?
     /// 物理重命名会改变文件名（即 id），用本地状态跟踪当前文件
     @State private var trackedFileName: String
 
@@ -74,6 +77,12 @@ struct FileDetailScreen: View {
                     Text(file.sizeDescription)
                         .monospacedDigit()
                 }
+                if let mediaDetail {
+                    LabeledContent(mediaDetail.label) {
+                        Text(mediaDetail.value)
+                            .monospacedDigit()
+                    }
+                }
                 LabeledContent("接收时间", value: file.receivedAt.formatted(date: .abbreviated, time: .shortened))
                 // 发送端原名与当前文件名不同（重命名过/同名去重）时才值得展示
                 if originalName != file.fileName {
@@ -100,6 +109,9 @@ struct FileDetailScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: file.fileName) {
             await loadChecksum()
+        }
+        .task(id: file.fileName) {
+            mediaDetail = await MediaDetail.load(for: file.url)
         }
         .onChange(of: store.cachedFiles) { files in
             // 文件被外部删除/清空后自动退出，避免变成预览分享全是死链的僵尸页。
@@ -318,5 +330,50 @@ private struct DetailActionButton: View {
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// 简介页里按类型多给一行：图片尺寸、音视频时长、PDF 页数
+struct MediaDetail: Equatable {
+    let label: String
+    let value: String
+
+    static func load(for url: URL) async -> MediaDetail? {
+        guard let type = UTType(filenameExtension: url.pathExtension) else { return nil }
+        if type.conforms(to: .image) {
+            return await Task.detached(priority: .utility) { imageSize(url) }.value
+        }
+        if type.conforms(to: .audiovisualContent) {
+            return await duration(url)
+        }
+        if type.conforms(to: .pdf) {
+            return await Task.detached(priority: .utility) { pageCount(url) }.value
+        }
+        return nil
+    }
+
+    private static func imageSize(_ url: URL) -> MediaDetail? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = props[kCGImagePropertyPixelWidth] as? Int,
+              let height = props[kCGImagePropertyPixelHeight] as? Int else { return nil }
+        // EXIF 方向 5–8 是转了 90°，看到的宽高要对调
+        let rotated = (props[kCGImagePropertyOrientation] as? Int ?? 1) >= 5
+        let (w, h) = rotated ? (height, width) : (width, height)
+        return MediaDetail(label: String(localized: "尺寸"), value: "\(w) × \(h)")
+    }
+
+    private static func duration(_ url: URL) async -> MediaDetail? {
+        guard let time = try? await AVURLAsset(url: url).load(.duration) else { return nil }
+        let seconds = time.seconds
+        guard seconds.isFinite, seconds > 0 else { return nil }
+        let pattern: Duration.TimeFormatStyle.Pattern = seconds >= 3600 ? .hourMinuteSecond : .minuteSecond
+        let value = Duration.seconds(seconds.rounded()).formatted(.time(pattern: pattern))
+        return MediaDetail(label: String(localized: "时长"), value: value)
+    }
+
+    private static func pageCount(_ url: URL) -> MediaDetail? {
+        guard let document = CGPDFDocument(url as CFURL) else { return nil }
+        return MediaDetail(label: String(localized: "页数"), value: "\(document.numberOfPages)")
     }
 }

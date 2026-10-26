@@ -18,6 +18,11 @@ targets:
         buildPhase: resources
       - path: Support/InfoPlist.xcstrings
         buildPhase: resources
+      # iOS 16 不支持 AppShortcuts.xcstrings，Siri 短语用传统 .lproj/AppShortcuts.strings
+      - path: Support/en.lproj
+        buildPhase: resources
+      - path: Support/zh-Hans.lproj
+        buildPhase: resources
       - path: ../../src/lib/cimb_translator
         includes:
           - "**/*.cpp"

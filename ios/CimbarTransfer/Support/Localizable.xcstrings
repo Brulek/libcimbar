@@ -983,6 +983,16 @@
         }
       }
     },
+    "尺寸" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimensions"
+          }
+        }
+      }
+    },
     "已复制" : {
       "localizations" : {
         "en" : {
@@ -1651,6 +1661,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unable to add video output"
+          }
+        }
+      }
+    },
+    "时长" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
           }
         }
       }
@@ -2623,6 +2643,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Move closer so the code fills most of the viewfinder"
+          }
+        }
+      }
+    },
+    "页数" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages"
           }
         }
       }

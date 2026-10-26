@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD80696BD6F2DC747C4B78FA /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 706C9E0FCF50ABA1CE9150E9 /* AppShortcuts.strings */; };
 		7059B9B7BC9454ACA509CE7C /* ScanIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */; };
 		01699EEAFFDCC0DA27055A53 /* DemoContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */; };
 		A74D0AEC5B22145C18B557DE /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E95984C2429031F651BE7C6F /* Theme.swift */; };
@@ -85,6 +86,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6D04838440BDA68D2987C499 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
+		CECE24314CF3227F43A9867A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh-Hans; path = zh-Hans.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		081F0CF81F6AA877BDBDB89A /* ScanIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanIntent.swift; sourceTree = "<group>"; };
 		8C6F7719EB98C0EBC88DE598 /* DemoContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContent.swift; sourceTree = "<group>"; };
 		E95984C2429031F651BE7C6F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -449,6 +452,7 @@
 		B5831BEB6C48B609E8285C77 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				706C9E0FCF50ABA1CE9150E9 /* AppShortcuts.strings */,
 				7566D65EF5544E1795DEEC0E /* Assets.xcassets */,
 				1F827998BB6A6BEE77172532 /* PrivacyInfo.xcprivacy */,
 				E78041B6B11E86826C41EA05 /* Localizable.xcstrings */,
@@ -556,6 +560,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD80696BD6F2DC747C4B78FA /* AppShortcuts.strings in Resources */,
 				25C00B8E15A0E6166E93D357 /* Assets.xcassets in Resources */,
 				1024BA0225BF72704413ACB4 /* PrivacyInfo.xcprivacy in Resources */,
 				7576400BADFE0F510FFBA232 /* Localizable.xcstrings in Resources */,
@@ -636,6 +641,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		706C9E0FCF50ABA1CE9150E9 /* AppShortcuts.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				6D04838440BDA68D2987C499 /* en */,
+				CECE24314CF3227F43A9867A /* zh-Hans */,
+			);
+			name = AppShortcuts.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		086D8227B9F2521CBFFC2DDF /* Debug */ = {
