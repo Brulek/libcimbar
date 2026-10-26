@@ -15,6 +15,7 @@
 - 码离开取景框时进度保留；停滞 5s/12s 分级提示
 - 完成卡片：预览 / 存相册 / 分享 / 继续接收，显示用时；接收完成即暂停解码链省电
 - 「怎么发送文件」说明页，可复制或分享 cimbar.org 网址
+- 相机被其他 App 占用、设备过热时在面板上说明原因；媒体服务重置后自动重启
 - 适配「减弱动态效果」、动态字体（大字号下按钮改竖排）、VoiceOver（每 25% 播报一次进度）
 
 **我的文件**
@@ -22,7 +23,8 @@
 - 标签角标只数上次打开之后收到的文件，对应的行前有圆点
 - 图片/视频/PDF 真实缩略图；长按有大图预览和菜单；预览可左右滑动切换文件
 - 多选：全选、批量分享、批量删除；左滑删除/分享，右滑存到相册
-- 简介页：大图、预览/分享/存相册/重命名、类型/大小/接收时间、SHA-256（可复制）
+- 删除不弹确认框：底部 6 秒「撤销」，过时或 App 退到后台才真正删除（「清空所有文件」仍需确认）
+- 简介页：大图、预览/分享/存相册/重命名、类型/大小/接收时间、图片尺寸/音视频时长/PDF 页数、SHA-256（可复制）
 - 重命名只改名字部分，扩展名自动保留并同步改磁盘文件名
 
 **设置**
@@ -32,7 +34,7 @@
 - 帮助：怎么发送文件、查看引导；关于页里是隐私政策、用户协议、开源许可
 
 **其他**
-- 「快捷指令」/ Spotlight / Siri / 操作按钮：「扫码接收文件」直接打开扫码页
+- 「快捷指令」/ Spotlight / Siri / 操作按钮：「扫码接收文件」直接打开扫码页（Siri 短语在 `Support/*.lproj/AppShortcuts.strings`）
 - 品牌琥珀色主题，iOS 26 起相机浮层用液态玻璃；iPad 上（iOS 17+）列表限制在可读宽度
 
 ## 截图
@@ -102,7 +104,8 @@ python3 scripts/l10n_sync.py --apply en.json --prune
   - `-SeedDemoFiles YES`：往接收目录写几份示例文件；`-DemoNow 09:41` 让它们按今天 9:41 往前排
   - `-DemoScan waiting|receiving|lost|stalled|error|done`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
   - `-DemoDetail YES`：直接打开最新文件的简介页
-- **新增源文件**：`python3 scripts/add_swift_file.py Foo.swift` 把 `App/Foo.swift` 挂进工程。不要用 `xcodegen generate` 重建：会丢掉 knownRegions 里的 en，英文本地化失效。
+  - `-DemoUndoWindow 30`：把删除后的撤销窗口拉长到 30 秒（手动点测时用）
+- **新增源文件**：`python3 scripts/add_swift_file.py Foo.swift` 把 `App/Foo.swift` 挂进工程；`--resource` 挂 `Support/` 下的资源，`--localized` 挂 `Support/<语言>.lproj/` 下的本地化文件。不要用 `xcodegen generate` 重建：会丢掉 knownRegions 里的 en，英文本地化失效。
 
 ## 说明
 
