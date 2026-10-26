@@ -214,7 +214,8 @@ private struct OnboardingPageView: View {
     var body: some View {
         // 内容放不满时上下居中（iPad、短页面），放不下时可滚动（大字号）
         GeometryReader { proxy in
-            ScrollView(showsIndicators: false) {
+            // 大字号下内容超出一屏：滚动条在出现时闪一下，提示下面还有（放得下的页面不会显示）
+            ScrollView(showsIndicators: true) {
                 VStack(spacing: 32) {
                     hero
                     content
@@ -229,6 +230,7 @@ private struct OnboardingPageView: View {
                 .frame(maxWidth: 520)
                 .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.85)
             }
+            .flashScrollIndicatorsOnAppear()
         }
     }
 
@@ -322,5 +324,16 @@ private struct OnboardingPageView: View {
                 .stroke(confidentialAcknowledged ? Brand.glow.opacity(0.6) : .white.opacity(0.15), lineWidth: 1)
         )
         .animation(.easeInOut(duration: 0.2), value: confidentialAcknowledged)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func flashScrollIndicatorsOnAppear() -> some View {
+        if #available(iOS 17.0, *) {
+            scrollIndicatorsFlash(onAppear: true)
+        } else {
+            self
+        }
     }
 }
