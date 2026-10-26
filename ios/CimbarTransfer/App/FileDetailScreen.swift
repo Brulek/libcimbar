@@ -98,7 +98,8 @@ struct FileDetailScreen: View {
 
             if let zipListing, zipListing.fileCount > 0 {
                 Section {
-                    ForEach(zipListing.entries, id: \.name) { entry in
+                    // 同一个包里可能有重名的条目，用序号当标识
+                    ForEach(Array(zipListing.entries.enumerated()), id: \.offset) { _, entry in
                         let name = (entry.name as NSString).lastPathComponent
                         if ZipListing.canPreview(entry) {
                             // 不用先存到「文件」解压：点一下单独解出这个文件预览
