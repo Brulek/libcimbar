@@ -120,6 +120,16 @@
         }
       }
     },
+    "cimbar.org 的二维码" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code for cimbar.org"
+          }
+        }
+      }
+    },
     "libcimbar 项目" : {
       "localizations" : {
         "en" : {
@@ -697,6 +707,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Report a Problem"
+          }
+        }
+      }
+    },
+    "发送方是手机：用它的相机扫这个码，直接打开 cimbar.org" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sending from a phone? Scan this with its camera to open cimbar.org."
           }
         }
       }
