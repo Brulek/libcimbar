@@ -299,6 +299,8 @@ private struct Firefly: View {
 private struct TextRevealPage: View {
     let url: URL
     @State private var snippet: String?
+    /// 编码认不出来时退回类型图标，不留一张空白页
+    @State private var unreadable = false
 
     private static let codeExtensions: Set<String> = ["json", "csv", "log", "xml", "yaml", "yml"]
 
@@ -309,6 +311,14 @@ private struct TextRevealPage: View {
     }
 
     var body: some View {
+        if unreadable {
+            FileKindIcon(fileExtension: url.pathExtension, cornerRadius: 0)
+        } else {
+            page
+        }
+    }
+
+    private var page: some View {
         Color(white: 0.97)
             .overlay {
                 if let snippet {
@@ -330,6 +340,7 @@ private struct TextRevealPage: View {
                 snippet = await Task.detached(priority: .userInitiated) {
                     TextClipboard.readText(url).map { String($0.prefix(1500)) }
                 }.value
+                unreadable = snippet == nil
             }
     }
 }
