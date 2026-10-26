@@ -72,11 +72,18 @@ struct FileThumbnailView: View {
         url.pathExtension.lowercased()
     }
 
+    /// 竖长的文档页裁成正方形时保留顶部：标题和第一段才认得出是哪份文件。
+    /// 照片和视频仍然居中裁
+    private func cropAlignment(for image: UIImage) -> Alignment {
+        let isMedia = PhotoLibrarySaver.canSave(extension: fileExtension)
+        return !isMedia && image.size.height > image.size.width * 1.05 ? .top : .center
+    }
+
     var body: some View {
         ZStack {
             if let image {
                 Color.clear
-                    .overlay {
+                    .overlay(alignment: cropAlignment(for: image)) {
                         Image(uiImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
