@@ -132,7 +132,17 @@ struct FileThumbnailView: View {
 
 @MainActor
 enum ThumbnailLoader {
-    private static let cache = NSCache<NSString, UIImage>()
+    /// 按解码后的字节数计费：列表里的小图很省，简介页和取景框里的大图很占，按张数限制不准
+    private static let cache: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.totalCostLimit = 64 * 1024 * 1024
+        return cache
+    }()
+
+    private static func cost(of image: UIImage) -> Int {
+        let pixels = image.size.width * image.scale * image.size.height * image.scale
+        return Int(pixels) * 4
+    }
 
     // 纯文本、表格数据之类在 46pt 里渲染出来只是一页灰字，不如类型图标好认，不做缩略图
     private nonisolated static let supportedExtensions: Set<String> = [
@@ -171,7 +181,7 @@ enum ThumbnailLoader {
             return nil
         }
         let image = representation.uiImage
-        cache.setObject(image, forKey: cacheKey as NSString)
+        cache.setObject(image, forKey: cacheKey as NSString, cost: cost(of: image))
         return image
     }
 }

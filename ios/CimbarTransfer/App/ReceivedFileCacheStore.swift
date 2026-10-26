@@ -23,6 +23,8 @@ final class ReceivedFileCacheStore: ObservableObject {
     @Published private(set) var cacheSummary: String = String(localized: "读取中…")
     /// 界面看到的文件：磁盘上的文件减去待删除/正在删除的
     @Published private(set) var cachedFiles: [CachedReceivedFile] = []
+    /// 第一次读完目录之前列表是空的，不能当成「还没有收到文件」
+    @Published private(set) var hasLoaded = false
     @Published private(set) var feedback: CacheActionFeedback?
     @Published private(set) var pendingDeletion: PendingDeletion?
     @Published var retentionPolicy: ReceivedFileRetentionPolicy = ReceivedFileCache.retentionPolicy
@@ -185,6 +187,7 @@ final class ReceivedFileCacheStore: ObservableObject {
         let visible = hidden.isEmpty ? diskFiles : diskFiles.filter { !hidden.contains($0.id) }
         let totalBytes = visible.reduce(Int64(0)) { $0 + $1.fileSize }
         cachedFiles = visible
+        if !hasLoaded { hasLoaded = true }
         cacheSummary = ReceivedFileCache.summaryText(for: visible.count, totalBytes: totalBytes)
     }
 

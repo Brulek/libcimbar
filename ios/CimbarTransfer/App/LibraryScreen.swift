@@ -119,18 +119,24 @@ struct LibraryScreen: View {
         return sorted(base)
     }
 
+    private static func nameOrder(_ a: CachedReceivedFile, _ b: CachedReceivedFile) -> Bool {
+        a.displayName.localizedStandardCompare(b.displayName) == .orderedAscending
+    }
+
     private func sorted(_ files: [CachedReceivedFile]) -> [CachedReceivedFile] {
         switch sortOption {
-        case .dateDescending: return files.sorted { $0.receivedAt > $1.receivedAt }
-        case .dateAscending:  return files.sorted { $0.receivedAt < $1.receivedAt }
+        // 同一时刻登记的文件（比如一次从「文件」App 拖进来一批）按名称排，每次打开顺序一样
+        case .dateDescending: return files.sorted { $0.receivedAt != $1.receivedAt ? $0.receivedAt > $1.receivedAt : Self.nameOrder($0, $1) }
+        case .dateAscending:  return files.sorted { $0.receivedAt != $1.receivedAt ? $0.receivedAt < $1.receivedAt : Self.nameOrder($0, $1) }
         case .nameAscending:  return files.sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
-        case .sizeDescending: return files.sorted { $0.fileSize > $1.fileSize }
+        case .sizeDescending: return files.sorted { $0.fileSize != $1.fileSize ? $0.fileSize > $1.fileSize : Self.nameOrder($0, $1) }
         case .kind:
             // 同类里新的在前
             return files.sorted {
                 let lhs = LibraryFileKind(fileExtension: $0.fileExtension).rawValue
                 let rhs = LibraryFileKind(fileExtension: $1.fileExtension).rawValue
-                return lhs != rhs ? lhs < rhs : $0.receivedAt > $1.receivedAt
+                if lhs != rhs { return lhs < rhs }
+                return $0.receivedAt != $1.receivedAt ? $0.receivedAt > $1.receivedAt : Self.nameOrder($0, $1)
             }
         }
     }
@@ -195,7 +201,10 @@ struct LibraryScreen: View {
 
     private var content: some View {
         Group {
-            if store.cachedFiles.isEmpty {
+            if !store.hasLoaded {
+                // 文件多时读目录要一会儿；先留白，免得闪一下「还没有收到文件」
+                Color(.systemGroupedBackground).ignoresSafeArea()
+            } else if store.cachedFiles.isEmpty {
                 LibraryEmptyState(onGoToScan: onGoToScan)
             } else {
                 fileList
