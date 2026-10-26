@@ -470,6 +470,8 @@ struct LibraryScreen: View {
                     Task { await saveImageToPhotos(file) }
                 } label: { Label("存到相册", systemImage: "photo.on.rectangle") }
             }
+            // 上面一组把文件拷出去，下面一组处理这个文件本身
+            Divider()
             if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
                 Button {
                     Task {
