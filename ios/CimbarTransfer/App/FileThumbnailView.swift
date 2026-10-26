@@ -95,6 +95,13 @@ struct FileThumbnailView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        // 白底的文档页、截图贴在白色列表上没有边，加一圈很淡的描边（照片、相册 App 也这样）
+        .overlay {
+            if image != nil {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.1), lineWidth: 0.5)
+            }
+        }
         .task(id: cacheKey) {
             guard ThumbnailLoader.supports(fileExtension: fileExtension) else {
                 image = nil
