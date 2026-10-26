@@ -234,6 +234,8 @@ struct RenameAlertModifier: ViewModifier {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                 Button("保存", action: onCommitRename)
+                    // 空名一定会失败，别让人点了再看报错
+                    .disabled(renameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 Button("取消", role: .cancel) { renameTarget = nil }
             } message: {
                 RenameHint(fileExtension: renameTarget?.fileExtension ?? "")

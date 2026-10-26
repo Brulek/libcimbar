@@ -171,6 +171,7 @@ struct FileDetailScreen: View {
                     }
                 }
             }
+            .disabled(renameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             Button("取消", role: .cancel) {}
         } message: {
             RenameHint(fileExtension: file.fileExtension)
