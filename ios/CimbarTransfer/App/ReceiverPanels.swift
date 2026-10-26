@@ -95,6 +95,10 @@ private struct ProgressCard: View {
     let remainingSeconds: Int?
     let stallHint: String?
 
+    /// 估算可能变长（码短暂离开、速率下降），数字滚动方向跟着变
+    @State private var lastRemaining: Int?
+    @State private var remainingFalling = true
+
     private var percentText: String {
         progress.formatted(.percent.precision(.fractionLength(0)))
     }
@@ -127,8 +131,8 @@ private struct ProgressCard: View {
                 .foregroundStyle(.secondary)
         }
         .fixedSize()
-        // 整行都不做动画：数字从 9% 跳到 10% 变宽时，旁边的字若还在滑动会和数字叠在一起
-        .transaction { $0.animation = nil }
+        // 百分比变化时整行不做动画：数字从 9% 跳到 10% 变宽时，旁边的字若还在滑动会和数字叠在一起
+        .animation(nil, value: percentText)
     }
 
     var body: some View {
@@ -150,7 +154,7 @@ private struct ProgressCard: View {
                     .foregroundStyle(.secondary)
                     // 只有倒计时数字之间滚动；换成另一句话时整句淡入淡出，
                     // 否则逐字变形，中途是一串糊掉的字
-                    .contentTransition(.numericText(countsDown: true))
+                    .contentTransition(.numericText(countsDown: remainingFalling))
                     .id(footnoteKind)
                     .transition(.opacity)
             }
@@ -159,6 +163,12 @@ private struct ProgressCard: View {
         .animation(.easeInOut(duration: 0.25), value: stallHint)
         .animation(.easeInOut(duration: 0.25), value: isTracking)
         .animation(.easeInOut(duration: 0.25), value: footnoteKind)
+        .onChange(of: remainingSeconds) { newValue in
+            if let newValue, let lastRemaining {
+                remainingFalling = newValue <= lastRemaining
+            }
+            lastRemaining = newValue
+        }
         .animation(.easeOut(duration: 0.2), value: progress)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("正在接收")
@@ -210,7 +220,7 @@ private struct CompletedTransferCard: View {
     @State private var photoSaveNeedsSettings = false
     @State private var canCopyText = false
     @State private var textCopied = false
-    @State private var filesExportPresented = false
+    @State private var filesExportURLs: [URL] = []
     @State private var savedToFiles = false
 
     private var canSaveToPhotos: Bool {
@@ -270,7 +280,7 @@ private struct CompletedTransferCard: View {
             .tint(textCopied ? .green : nil)
         } else {
             Button {
-                filesExportPresented = true
+                filesExportURLs = [fileURL]
             } label: {
                 Label(savedToFiles ? "已存入" : "存到文件", systemImage: savedToFiles ? "checkmark" : "folder")
                     .frame(maxWidth: .infinity, minHeight: 34)
@@ -365,11 +375,8 @@ private struct CompletedTransferCard: View {
                 await saveToPhotos()
             }
         }
-        .sheet(isPresented: $filesExportPresented) {
-            FilesExportPicker(fileURL: fileURL) { saved in
-                if saved { withAnimation { savedToFiles = true } }
-            }
-            .ignoresSafeArea()
+        .filesExport(urls: $filesExportURLs) { _ in
+            withAnimation { savedToFiles = true }
         }
         .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveError != nil },

@@ -15,10 +15,11 @@ struct RevealedFile: Equatable {
     let isText: Bool
 
     init?(url: URL) {
-        isText = TextClipboard.canCopy(url)
+        let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let size = (attrs?[.size] as? NSNumber)?.int64Value ?? 0
+        isText = TextClipboard.canCopy(fileExtension: url.pathExtension, size: size)
         guard isText || ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
-        let modified = (try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date)?
-            .timeIntervalSince1970 ?? 0
+        let modified = (attrs?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
         self.url = url
         self.cacheKey = "reveal-\(url.lastPathComponent)-\(modified)"
     }

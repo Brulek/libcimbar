@@ -766,8 +766,8 @@ final class FrameReplayer {
 
 extension NativeReceiverViewModel {
     fileprivate func startReplay(_ directories: [URL]) {
+        // 和相机一样不动 isPaused：收完文件后切页再回来，解码链仍停着，等「继续接收」
         frameQueue.async {
-            self.isPaused = false
             guard self.replayer == nil else { return }
             let replayer = FrameReplayer(directories: directories)
             self.replayer = replayer

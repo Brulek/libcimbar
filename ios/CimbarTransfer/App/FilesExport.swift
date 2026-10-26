@@ -22,10 +22,6 @@ struct FilesExportPicker: UIViewControllerRepresentable {
         self.onFinish = onFinish
     }
 
-    init(fileURL: URL, onFinish: @escaping (Bool) -> Void) {
-        self.init(fileURLs: [fileURL], onFinish: onFinish)
-    }
-
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(forExporting: fileURLs, asCopy: true)
         picker.delegate = context.coordinator
@@ -51,6 +47,30 @@ struct FilesExportPicker: UIViewControllerRepresentable {
 
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
             onFinish(false)
+        }
+    }
+}
+
+extension View {
+    /// `urls` 非空时弹出「存到文件」的位置选择器，关闭后自动清空；用户存好了回调存入的个数
+    func filesExport(urls: Binding<[URL]>, onSaved: @escaping (Int) -> Void) -> some View {
+        modifier(FilesExportModifier(urls: urls, onSaved: onSaved))
+    }
+}
+
+private struct FilesExportModifier: ViewModifier {
+    @Binding var urls: [URL]
+    let onSaved: (Int) -> Void
+
+    func body(content: Content) -> some View {
+        content.sheet(isPresented: Binding(
+            get: { !urls.isEmpty },
+            set: { if !$0 { urls = [] } }
+        )) {
+            FilesExportPicker(fileURLs: urls) { [count = urls.count] saved in
+                if saved { onSaved(count) }
+            }
+            .ignoresSafeArea()
         }
     }
 }

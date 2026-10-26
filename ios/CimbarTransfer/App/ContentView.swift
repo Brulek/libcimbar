@@ -124,11 +124,13 @@ struct ContentView: View {
             if preferences.autoJumpAfterReceive {
                 autoJumpTask = Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 1_500_000_000)
-                    // 用户已在交互（重置扫码、分享/预览面板打开、手动切走）就不要再抢着切页
+                    // 用户已在交互（重置扫码、打开了任何面板——分享、预览、存到文件、提示框，
+                    // 或手动切走）就不要再抢着切页
                     guard !Task.isCancelled,
                           viewModel.receivedFileURL != nil,
                           shareRequest == nil,
                           previewRequest == nil,
+                          !Self.isPresentingModal,
                           selectedTab == .scan else { return }
                     selectedTab = .library
                 }
@@ -199,6 +201,14 @@ struct ContentView: View {
             QuickLookPreview(fileURLs: request.urls, initialIndex: request.index)
                 .ignoresSafeArea()
         }
+    }
+
+    /// 当前窗口上是否正开着某个面板（子视图自己弹出的 sheet、alert 也算）
+    private static var isPresentingModal: Bool {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .contains { $0.isKeyWindow && $0.rootViewController?.presentedViewController != nil }
     }
 
     private func resumeScanIfAppropriate() {

@@ -4,6 +4,8 @@ struct CachedReceivedFile: Identifiable, Hashable {
     let url: URL
     let fileName: String
     let displayName: String
+    /// 发送端的原文件名（改过名后仍按它能搜到）
+    let originalName: String
     let receivedAt: Date
     let modifiedAt: Date
     let fileSize: Int64
@@ -183,6 +185,7 @@ enum ReceivedFileCache {
                 url: entry.url,
                 fileName: entry.name,
                 displayName: metadata?.displayName ?? entry.name,
+                originalName: metadata?.originalName ?? entry.name,
                 receivedAt: metadata?.receivedAt ?? entry.fallbackReceivedAt,
                 modifiedAt: entry.modifiedAt,
                 fileSize: entry.fileSize
@@ -242,6 +245,7 @@ enum ReceivedFileCache {
                 url: file.url,
                 fileName: file.fileName,
                 displayName: sanitized,
+                originalName: file.originalName,
                 receivedAt: file.receivedAt,
                 modifiedAt: file.modifiedAt,
                 fileSize: file.fileSize
@@ -257,6 +261,7 @@ enum ReceivedFileCache {
             url: destination,
             fileName: newFileName,
             displayName: newFileName,
+            originalName: file.originalName,
             receivedAt: file.receivedAt,
             modifiedAt: file.modifiedAt,
             fileSize: file.fileSize

@@ -20,7 +20,7 @@ struct FileDetailScreen: View {
     @State private var photoSaveMessage: String?
     @State private var photoSaved = false
     @State private var textCopied = false
-    @State private var filesExportPresented = false
+    @State private var filesExportURLs: [URL] = []
     @State private var savedToFiles = false
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
@@ -44,10 +44,6 @@ struct FileDetailScreen: View {
     /// 重命名等操作会刷新 store，这里始终取最新快照，避免展示旧显示名
     private var file: CachedReceivedFile {
         store.cachedFiles.first { $0.fileName == trackedFileName } ?? initialFile
-    }
-
-    private var originalName: String {
-        ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.originalName ?? file.fileName
     }
 
     /// 系统给出的类型名，如「PNG 图像」「PDF 文稿」
@@ -87,9 +83,9 @@ struct FileDetailScreen: View {
                 }
                 LabeledContent("接收时间", value: file.receivedAt.formatted(date: .abbreviated, time: .shortened))
                 // 发送端原名与当前文件名不同（重命名过/同名去重）时才值得展示
-                if originalName != file.fileName {
+                if file.originalName != file.fileName {
                     LabeledContent("原始文件名") {
-                        Text(originalName)
+                        Text(file.originalName)
                             .multilineTextAlignment(.trailing)
                             .textSelection(.enabled)
                     }
@@ -128,11 +124,8 @@ struct FileDetailScreen: View {
                 dismiss()
             }
         }
-        .sheet(isPresented: $filesExportPresented) {
-            FilesExportPicker(fileURL: file.url) { saved in
-                if saved { withAnimation { savedToFiles = true } }
-            }
-            .ignoresSafeArea()
+        .filesExport(urls: $filesExportURLs) { _ in
+            withAnimation { savedToFiles = true }
         }
         .alert("重命名", isPresented: $renamePresented) {
             TextField("文件名", text: $renameText)
@@ -244,7 +237,7 @@ struct FileDetailScreen: View {
                     title: savedToFiles ? "已存入" : "存到文件",
                     systemImage: savedToFiles ? "checkmark" : "folder"
                 ) {
-                    filesExportPresented = true
+                    filesExportURLs = [file.url]
                 }
                 .tint(savedToFiles ? .green : nil)
                 .accessibilityLabel(savedToFiles ? "已存入「文件」" : "存到「文件」")

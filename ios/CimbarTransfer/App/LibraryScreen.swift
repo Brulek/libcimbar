@@ -73,8 +73,7 @@ struct LibraryScreen: View {
                 file.displayName.localizedCaseInsensitiveContains(query)
                     || file.fileName.localizedCaseInsensitiveContains(query)
                     // 改过名的文件也能按发送端的原名搜到
-                    || (ReceivedFileMetadataStore.shared.metadata(for: file.fileName)?.originalName
-                        .localizedCaseInsensitiveContains(query) ?? false)
+                    || file.originalName.localizedCaseInsensitiveContains(query)
             }
         }
         return sorted(base)
@@ -212,16 +211,9 @@ struct LibraryScreen: View {
             selectedIDs.formIntersection(present)
             if files.isEmpty { isSelecting = false }
         }
-        .sheet(isPresented: Binding(
-            get: { !filesExportURLs.isEmpty },
-            set: { if !$0 { filesExportURLs = [] } }
-        )) {
-            FilesExportPicker(fileURLs: filesExportURLs) { [count = filesExportURLs.count] saved in
-                guard saved else { return }
-                presentToast(SaveToast(message: String(localized: "已存 \(count) 个到「文件」"), style: .success))
-                endSelection()
-            }
-            .ignoresSafeArea()
+        .filesExport(urls: $filesExportURLs) { count in
+            presentToast(SaveToast(message: String(localized: "已存 \(count) 个到「文件」"), style: .success))
+            endSelection()
         }
         .alert("没能存到相册", isPresented: $photoPermissionAlert) {
             Button("去设置") { AppSettingsOpener.open() }
