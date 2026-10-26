@@ -110,6 +110,20 @@ struct ContentView: View {
             }
             .tag(AppTab.settings)
         }
+        // iPad 外接键盘：⌘1/⌘2/⌘3 切标签（按住 ⌘ 时系统会列出来）
+        .background {
+            VStack {
+                Button("扫码") { selectedTab = .scan }
+                    .keyboardShortcut("1", modifiers: .command)
+                Button("我的文件") { selectedTab = .library }
+                    .keyboardShortcut("2", modifiers: .command)
+                Button("设置") { selectedTab = .settings }
+                    .keyboardShortcut("3", modifiers: .command)
+            }
+            .opacity(0)
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true)
+        }
         .task {
             #if DEBUG
             DemoContent.seedFilesIfRequested()
