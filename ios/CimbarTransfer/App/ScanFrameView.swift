@@ -6,12 +6,29 @@ enum ScanState: Equatable {
     case detecting
 }
 
+/// 收完后放进取景框的文件（只给缩略图一定出得来的类型）
+struct RevealedFile: Equatable {
+    let url: URL
+    let cacheKey: String
+
+    init?(url: URL) {
+        guard ThumbnailLoader.supportsLargePreview(fileExtension: url.pathExtension) else { return nil }
+        let modified = (try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date)?
+            .timeIntervalSince1970 ?? 0
+        self.url = url
+        self.cacheKey = "reveal-\(url.lastPathComponent)-\(modified)"
+    }
+}
+
 struct ScanFrameOverlay: View {
     let topReservedHeight: CGFloat
     let bottomReservedHeight: CGFloat
     var scanState: ScanState = .idle
     var showCheckmark: Bool = false
     var isPaused: Bool = false
+    /// 打勾动画结束后，把收到的图片/PDF/视频缩略图放进取景框
+    var reveal: RevealedFile?
+    var onTapReveal: (URL) -> Void = { _ in }
 
     var body: some View {
         GeometryReader { proxy in
@@ -26,8 +43,31 @@ struct ScanFrameOverlay: View {
                 cornerRadius: cornerRadius,
                 scanState: scanState,
                 showCheckmark: showCheckmark,
-                isPaused: isPaused
+                isPaused: isPaused || reveal != nil
             )
+            .overlay {
+                if let reveal {
+                    Button {
+                        onTapReveal(reveal.url)
+                    } label: {
+                        FileThumbnailView(
+                            url: reveal.url,
+                            cacheKey: reveal.cacheKey,
+                            cornerRadius: cornerRadius,
+                            generationSide: side
+                        )
+                        .frame(width: side, height: side)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                                .stroke(Color.green.opacity(0.5), lineWidth: 1.5)
+                        )
+                        .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("预览 \(reveal.url.lastPathComponent)")
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                }
+            }
             #if DEBUG
             .background {
                 if let screen = DemoContent.senderScreen {
@@ -44,8 +84,10 @@ struct ScanFrameOverlay: View {
             .position(center)
             .animation(.easeInOut(duration: 0.4), value: scanState)
             .animation(.easeInOut(duration: 0.4), value: showCheckmark)
+            .animation(.easeInOut(duration: 0.5), value: reveal)
         }
-        .allowsHitTesting(false)
+        // 只有放进取景框的缩略图可以点（预览）；其余部分让给下面的相机做对焦/缩放手势
+        .allowsHitTesting(reveal != nil)
     }
 }
 

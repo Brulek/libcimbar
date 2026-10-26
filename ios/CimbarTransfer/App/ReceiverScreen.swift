@@ -11,6 +11,8 @@ struct ReceiverScreen: View {
     @State private var focusIndicatorPoint: CGPoint?
     @State private var focusIndicatorID = UUID()
     @State private var showingSenderHelp = false
+    /// 收到的文件在取景框里展示的缩略图；缓存键带修改时间（重收同名文件时不串图）
+    @State private var reveal: RevealedFile?
 
     // 底部面板通过 safeAreaInset 已从取景区扣除，这里只需让出顶部按钮行；
     // 动态字体放大时按钮变高，预留随之缩放
@@ -62,11 +64,14 @@ struct ReceiverScreen: View {
                         bottomReservedHeight: bottomReservedHeight,
                         scanState: scanState,
                         showCheckmark: showCheckmark,
-                        isPaused: viewModel.isIdlePaused
+                        isPaused: viewModel.isIdlePaused,
+                        reveal: showCheckmark ? nil : reveal,
+                        onTapReveal: { onPreview($0) }
                     )
                 }
                 .overlay {
-                    if viewModel.isIdlePaused && !showCheckmark {
+                    // 收完文件后自动暂停不用提示：卡片上的「继续接收」会重新打开相机
+                    if viewModel.isIdlePaused && viewModel.receivedFileURL == nil {
                         IdlePausedCard { viewModel.start() }
                             .padding(.bottom, bottomReservedHeight)
                             .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -164,6 +169,7 @@ struct ReceiverScreen: View {
     }
 
     private func updateCompletionState(for fileURL: URL?) async {
+        reveal = fileURL.flatMap(RevealedFile.init(url:))
         guard let fileURL else {
             lastCelebratedURL = nil
             withAnimation {

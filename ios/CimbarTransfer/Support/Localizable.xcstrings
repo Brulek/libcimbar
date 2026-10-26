@@ -2761,6 +2761,16 @@
         }
       }
     },
+    "预览 %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview %@"
+          }
+        }
+      }
+    },
     "高清采集" : {
       "localizations" : {
         "en" : {

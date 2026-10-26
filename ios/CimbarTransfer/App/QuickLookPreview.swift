@@ -12,6 +12,12 @@ struct QuickLookPreview: UIViewControllerRepresentable {
         preview.dataSource = context.coordinator
         preview.delegate = context.coordinator
         preview.currentPreviewItemIndex = min(max(initialIndex, 0), max(fileURLs.count - 1, 0))
+        // 包在导航控制器里时 QuickLook 不会自己放「完成」按钮，只能下拉关闭，用户不容易发现
+        let dismiss = context.environment.dismiss
+        preview.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            systemItem: .close,
+            primaryAction: UIAction { _ in dismiss() }
+        )
         let nav = UINavigationController(rootViewController: preview)
         nav.modalPresentationStyle = .fullScreen
         return nav
