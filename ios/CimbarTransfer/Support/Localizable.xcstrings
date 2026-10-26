@@ -481,6 +481,16 @@
         }
       }
     },
+    "全部 %lld 个文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Files (%lld)"
+          }
+        }
+      }
+    },
     "八、法律适用" : {
       "localizations" : {
         "en" : {
@@ -3069,16 +3079,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Returns the most recent file Lumen received so a shortcut can pass it on."
-          }
-        }
-      }
-    },
-    "还有 %lld 个文件" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "And %lld more"
           }
         }
       }

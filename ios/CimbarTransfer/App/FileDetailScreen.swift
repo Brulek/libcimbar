@@ -100,38 +100,15 @@ struct FileDetailScreen: View {
                 Section {
                     // 同一个包里可能有重名的条目，用序号当标识
                     ForEach(Array(zipListing.entries.enumerated()), id: \.offset) { _, entry in
-                        let name = (entry.name as NSString).lastPathComponent
-                        if ZipListing.canPreview(entry) {
-                            // 不用先存到「文件」解压：点一下单独解出这个文件预览
-                            Button {
-                                Task { await previewZipEntry(entry) }
-                            } label: {
-                                Label {
-                                    Text(name)
-                                        .lineLimit(1)
-                                        .truncationMode(.middle)
-                                } icon: {
-                                    Image(systemName: "doc")
-                                }
-                                .font(.callout)
-                            }
-                            .accessibilityHint("轻点预览")
-                        } else {
-                            Label {
-                                Text(name)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                            } icon: {
-                                Image(systemName: "doc")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .font(.callout)
-                        }
+                        ZipEntryRow(entry: entry) { await previewZipEntry(entry) }
                     }
                     if zipListing.fileCount > zipListing.names.count {
-                        Text("还有 \(zipListing.fileCount - zipListing.names.count) 个文件")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
+                        NavigationLink {
+                            ZipContentsScreen(archiveURL: file.url, title: file.displayName) { await previewZipEntry($0) }
+                        } label: {
+                            Text("全部 \(zipListing.fileCount) 个文件")
+                                .font(.callout)
+                        }
                     }
                 } header: {
                     Text("压缩包里")
@@ -560,6 +537,78 @@ struct MediaDetail: Equatable {
     private static func pageCount(_ url: URL) -> MediaDetail? {
         guard let document = CGPDFDocument(url as CFURL) else { return nil }
         return MediaDetail(label: String(localized: "页数"), value: "\(document.numberOfPages)")
+    }
+}
+
+/// zip 里的一个文件：预览得了的可以点（单独解出来看）
+private struct ZipEntryRow: View {
+    let entry: ZipArchive.Entry
+    let onPreview: () async -> Void
+
+    var body: some View {
+        let name = (entry.name as NSString).lastPathComponent
+        let folder = (entry.name as NSString).deletingLastPathComponent
+        let label = Label {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(name)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                // 在包里的哪个文件夹：同名文件分得清
+                if !folder.isEmpty {
+                    Text(folder)
+                        .font(.caption)
+                        // 在按钮里 .secondary 会变成浅一号的主题色；文件夹路径用普通的灰色
+                        .foregroundStyle(Color(.secondaryLabel))
+                        .lineLimit(1)
+                        .truncationMode(.head)
+                }
+            }
+        } icon: {
+            Image(systemName: "doc")
+        }
+        .font(.callout)
+
+        if ZipListing.canPreview(entry) {
+            Button {
+                Task { await onPreview() }
+            } label: {
+                label
+            }
+            .accessibilityHint("轻点预览")
+        } else {
+            label
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// 压缩包里的全部文件（简介页只列前几个）
+private struct ZipContentsScreen: View {
+    let archiveURL: URL
+    let title: String
+    let onPreview: (ZipArchive.Entry) async -> Void
+    @State private var listing: ZipListing?
+
+    var body: some View {
+        List {
+            if let listing {
+                ForEach(Array(listing.entries.enumerated()), id: \.offset) { _, entry in
+                    ZipEntryRow(entry: entry) { await onPreview(entry) }
+                }
+            }
+        }
+        .overlay {
+            if listing == nil {
+                ProgressView()
+            }
+        }
+        .readableListWidth()
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+            let url = archiveURL
+            listing = await Task.detached(priority: .userInitiated) { ZipListing.read(url, maxNames: 5_000) }.value
+        }
     }
 }
 
