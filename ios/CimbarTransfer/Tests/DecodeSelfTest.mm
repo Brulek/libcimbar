@@ -451,6 +451,33 @@ int main(int argc, char **argv) {
             // --dump-transfer <输出目录> <mode_val> <文件> [encode_id]
             return dumpTransfer(argv[2], atoi(argv[3]), argv[4], argc >= 6 ? atoi(argv[5]) : 101) ? 0 : 1;
         }
+        if (argc >= 3 && strcmp(argv[1], "--tiny") == 0) {
+            // --tiny <mode_val> [字节数] [接收模式]：只跑一个小文件，在全新进程里测，不受前面测试留下的全局状态影响。
+            // 环境变量 TINY_TRACE=1（经 SIMCTL_CHILD_ 前缀传入）逐帧打印解码输出
+            const int mode = atoi(argv[2]);
+            const std::string payload = argc >= 4 ? makePayload(atoi(argv[3])) : std::string("https://www.apple.com/iphone/\n");
+            const int receiver = argc >= 5 ? atoi(argv[4]) : 0;
+            if (getenv("TINY_TRACE")) {
+                std::vector<CVPixelBufferRef> frames = cameraFrames(encodeFrames(mode, "link.txt", payload, 12));
+                std::thread worker([&] {
+                    NativeCimbarDecoder *decoder = [NativeCimbarDecoder new];
+                    decoder.decodeMode = receiver;
+                    [decoder reset];
+                    for (size_t i = 0; i < frames.size(); ++i) {
+                        NativeCimbarDecodeOutput *o = [decoder processPixelBuffer:frames[i]];
+                        printf("frame %zu idle=%d progress=%s count=%lu file=%s status=%s\n", i, o.isIdle,
+                               o.progressFraction ? o.progressFraction.stringValue.UTF8String : "-",
+                               (unsigned long)o.detectedFrameCount, o.fileURL.lastPathComponent.UTF8String ?: "-",
+                               o.statusText.UTF8String ?: "-");
+                    }
+                });
+                worker.join();
+                return 0;
+            }
+            Result r = runDecode(mode, receiver, payload, @"link.txt");
+            printf("tiny link rx%d<-%d received=%d detected=%d frames=%d\n", receiver, mode, r.received, r.detectedMode, r.framesFed);
+            return r.received ? 0 : 1;
+        }
         if (argc == 3 && strcmp(argv[1], "--dump-frame") == 0) {
             const bool ok = dumpFrame(argv[2]);
             printf(ok ? "wrote %s\n" : "failed to write %s\n", argv[2]);
@@ -518,9 +545,9 @@ int main(int argc, char **argv) {
                 text += "第 " + std::to_string(i) + " 条：备注内容，用来看文字很多时取景框里怎么显示。\n";
             }
             for (int mode : {68, 67, 66, 4}) {
-                // 只有一个网址的极小文件：只记录、不算失败。发送端（含 cimbar.org）把不足一块的
-                // 数据用全 0 填充，画面几乎是同一种格子，解码器难以对齐，Bu 模式基本收不到。
-                // 这是 libcimbar 编码端的问题，接收端修不了
+                // 只有一个网址的极小文件：只记录、不算失败。结果受同一进程里前面测试的影响（这里多半能收到），
+                // 全新的解码器收不到不足一个喷泉块的文件——单独测用 --tiny <mode_val> [字节数]，每次一个新进程。
+                // 原因还没查清；试过把填充改成随机字节，没用
                 Result r = runDecode(mode, 0, "https://www.apple.com/iphone/\n", @"link.txt");
                 printf("INFO  tiny link auto<-%d received=%d detected=%d frames=%d\n",
                        mode, r.received, r.detectedMode, r.framesFed);
