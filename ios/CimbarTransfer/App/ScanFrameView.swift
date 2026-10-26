@@ -325,7 +325,8 @@ private struct TextRevealPage: View {
 
     /// 一行短文字（一个网址、一串口令）：放大摆在页面中间，不孤零零缩在左上角
     private func isShortLine(_ text: String) -> Bool {
-        text.count <= 140 && !text.contains("\n")
+        // 不能用 contains("\n")：Windows 的 \r\n 在 Swift 里是一个字符，会被当成单行
+        text.count <= 140 && !text.contains(where: \.isNewline)
     }
 
     var body: some View {
