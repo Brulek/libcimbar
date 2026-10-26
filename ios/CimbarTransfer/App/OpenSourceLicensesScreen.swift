@@ -6,7 +6,7 @@ struct OpenSourceLicensesScreen: View {
             name: "libcimbar",
             license: "Mozilla Public License 2.0",
             urlString: "https://github.com/sz3/libcimbar",
-            note: String(localized: "萤传基于 libcimbar 源码实现解码，为 iOS 做了少量修改（接收端 C 接口的小幅扩展、按模式缓存解码器）。修改后的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。")
+            note: String(localized: "萤传的解码用的是 libcimbar 源码，为 iOS 改过几个文件。改过的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。")
         ),
         LicenseEntry(name: "OpenCV", license: "Apache License 2.0", urlString: "https://opencv.org/", note: nil),
         LicenseEntry(name: "zstd", license: "BSD License", urlString: "https://github.com/facebook/zstd", note: nil),

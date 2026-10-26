@@ -2633,16 +2633,6 @@
         }
       }
     },
-    "萤传基于 libcimbar 源码实现解码，为 iOS 做了少量修改（接收端 C 接口的小幅扩展、按模式缓存解码器）。修改后的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lumen decodes using the libcimbar sources, with small changes for iOS (minor extensions to the receiver C interface and a per-mode decoder cache). The modified source code is public under MPL-2.0 at github.com/Brulek/libcimbar."
-          }
-        }
-      }
-    },
     "萤传是独立开发的客户端，与 cimbar.org 无隶属关系。解码基于开源的 libcimbar，见「开源许可」。" : {
       "localizations" : {
         "en" : {
@@ -2659,6 +2649,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lumen is built on the following open-source software. Thanks to their authors."
+          }
+        }
+      }
+    },
+    "萤传的解码用的是 libcimbar 源码，为 iOS 改过几个文件。改过的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lumen decodes with the libcimbar sources, with a few files changed for iOS. The changed source code is public under MPL-2.0 at github.com/Brulek/libcimbar."
           }
         }
       }
