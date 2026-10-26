@@ -20,6 +20,8 @@ struct FileDetailScreen: View {
     @State private var photoSaveMessage: String?
     @State private var photoSaved = false
     @State private var textCopied = false
+    @State private var filesExportPresented = false
+    @State private var savedToFiles = false
     @State private var photoSaveNeedsSettings = false
     @State private var renameFailed = false
     @State private var mediaDetail: MediaDetail?
@@ -126,6 +128,12 @@ struct FileDetailScreen: View {
                 dismiss()
             }
         }
+        .sheet(isPresented: $filesExportPresented) {
+            FilesExportPicker(fileURL: file.url) { saved in
+                if saved { withAnimation { savedToFiles = true } }
+            }
+            .ignoresSafeArea()
+        }
         .alert("重命名", isPresented: $renamePresented) {
             TextField("文件名", text: $renameText)
                 .textInputAutocapitalization(.never)
@@ -226,6 +234,15 @@ struct FileDetailScreen: View {
                     }
                 }
                 .tint(textCopied ? .green : nil)
+            } else {
+                DetailActionButton(
+                    title: savedToFiles ? "已存入" : "存到文件",
+                    systemImage: savedToFiles ? "checkmark" : "folder"
+                ) {
+                    filesExportPresented = true
+                }
+                .tint(savedToFiles ? .green : nil)
+                .accessibilityLabel(savedToFiles ? "已存入「文件」" : "存到「文件」")
             }
             DetailActionButton(title: "重命名", systemImage: "pencil") {
                 renameText = file.renameStem

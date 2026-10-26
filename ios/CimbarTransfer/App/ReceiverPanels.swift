@@ -199,6 +199,8 @@ private struct CompletedTransferCard: View {
     @State private var photoSaveNeedsSettings = false
     @State private var canCopyText = false
     @State private var textCopied = false
+    @State private var filesExportPresented = false
+    @State private var savedToFiles = false
 
     private var canSaveToPhotos: Bool {
         PhotoLibrarySaver.canSave(extension: fileURL.pathExtension)
@@ -219,11 +221,14 @@ private struct CompletedTransferCard: View {
 
     @ViewBuilder
     private var actionButtons: some View {
-        Button(action: onPreview) {
-            Label("预览", systemImage: "eye")
-                .frame(maxWidth: .infinity, minHeight: 34)
+        // 压缩包的系统预览只有一个图标和大小，点进去什么也做不了
+        if !FilesExport.isArchive(fileURL.pathExtension) {
+            Button(action: onPreview) {
+                Label("预览", systemImage: "eye")
+                    .frame(maxWidth: .infinity, minHeight: 34)
+            }
+            .buttonStyle(.bordered)
         }
-        .buttonStyle(.bordered)
 
         if canSaveToPhotos {
             Button {
@@ -248,6 +253,17 @@ private struct CompletedTransferCard: View {
             }
             .buttonStyle(.bordered)
             .tint(textCopied ? .green : nil)
+        } else {
+            Button {
+                filesExportPresented = true
+            } label: {
+                Label(savedToFiles ? "已存入" : "存到文件", systemImage: savedToFiles ? "checkmark" : "folder")
+                    .frame(maxWidth: .infinity, minHeight: 34)
+            }
+            .buttonStyle(.bordered)
+            .tint(savedToFiles ? .green : nil)
+            // 英文按钮上只放得下 Save，由文件夹图标表示存到哪；读屏读全称
+            .accessibilityLabel(savedToFiles ? "已存入「文件」" : "存到「文件」")
         }
 
         Button(action: onShare) {
@@ -328,9 +344,16 @@ private struct CompletedTransferCard: View {
             photoSaveError = nil
             canCopyText = TextClipboard.canCopy(fileURL)
             textCopied = false
+            savedToFiles = false
             if AppPreferences.shared.autoSaveToPhotos, canSaveToPhotos, !isDuplicate, !photoSaved {
                 await saveToPhotos()
             }
+        }
+        .sheet(isPresented: $filesExportPresented) {
+            FilesExportPicker(fileURL: fileURL) { saved in
+                if saved { withAnimation { savedToFiles = true } }
+            }
+            .ignoresSafeArea()
         }
         .alert("没能存到相册", isPresented: Binding(
             get: { photoSaveError != nil },

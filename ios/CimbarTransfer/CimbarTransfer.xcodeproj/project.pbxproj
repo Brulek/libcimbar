@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		25EA1170BCA01910A4C2887F /* FilesExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588BAD622E288E2713C8AA18 /* FilesExport.swift */; };
 		CA80863B12856147344F8399 /* TextClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51E1BEEB2245A0792873803D /* TextClipboard.swift */; };
 		ACB68456E8D9ED7E835D6EDB /* LibraryComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */; };
 		8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */; };
@@ -91,6 +92,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		588BAD622E288E2713C8AA18 /* FilesExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesExport.swift; sourceTree = "<group>"; };
 		51E1BEEB2245A0792873803D /* TextClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextClipboard.swift; sourceTree = "<group>"; };
 		F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryComponents.swift; sourceTree = "<group>"; };
 		7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanFrameView.swift; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 		914E46346A19BB6F9393637A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				588BAD622E288E2713C8AA18 /* FilesExport.swift */,
 				51E1BEEB2245A0792873803D /* TextClipboard.swift */,
 				F89D80F6B39ED8EB057803A6 /* LibraryComponents.swift */,
 				7C8F21004AE45F78A30C44C3 /* ScanFrameView.swift */,
@@ -590,6 +593,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				25EA1170BCA01910A4C2887F /* FilesExport.swift in Sources */,
 				CA80863B12856147344F8399 /* TextClipboard.swift in Sources */,
 				ACB68456E8D9ED7E835D6EDB /* LibraryComponents.swift in Sources */,
 				8D1FE67853391E669F150FFF /* ScanFrameView.swift in Sources */,
