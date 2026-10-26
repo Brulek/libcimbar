@@ -54,7 +54,8 @@ final class ReceivedFileCacheStore: ObservableObject {
                 self?.publish(files: files)
             } catch {
                 self?.onMain {
-                    $0.cachedFiles = []
+                    $0.diskFiles = []
+                    $0.applyVisibleFiles()
                     $0.cacheSummary = String(localized: "存储目录不可用")
                 }
             }

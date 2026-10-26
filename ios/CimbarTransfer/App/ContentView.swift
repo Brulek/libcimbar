@@ -143,7 +143,7 @@ struct ContentView: View {
         .onChange(of: preferences.highResolutionCapture) { enabled in
             viewModel.setHighResolutionCapture(enabled)
         }
-        .onReceive(AppNavigator.shared.$scanRequest.compactMap { $0 }) { _ in
+        .onReceive(AppNavigator.shared.scanRequests) { _ in
             // 快捷指令 / 操作按钮：回到扫码页；正在看的预览、分享面板先收起
             shareRequest = nil
             previewRequest = nil

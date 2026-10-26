@@ -3,14 +3,14 @@ import Combine
 
 /// 进程内的跳转请求：App Intent 在 App 内执行，通过它通知 ContentView 切到扫码页
 @MainActor
-final class AppNavigator: ObservableObject {
+final class AppNavigator {
     static let shared = AppNavigator()
 
-    /// 每次请求换一个新值，ContentView 监听变化
-    @Published private(set) var scanRequest: UUID?
+    /// 不用 @Published：它会把旧值重放给新订阅者，界面重建时会再跳一次扫码页
+    let scanRequests = PassthroughSubject<Void, Never>()
 
     func requestScan() {
-        scanRequest = UUID()
+        scanRequests.send()
     }
 }
 

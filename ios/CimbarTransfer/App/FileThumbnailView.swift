@@ -107,6 +107,17 @@ enum ThumbnailLoader {
         supportedExtensions.contains(fileExtension.lowercased())
     }
 
+    // 长按的大图预览只给缩略图一定能出来的类型；文档类偶尔生成失败，会变成一块空的大图标
+    private nonisolated static let largePreviewExtensions: Set<String> = [
+        "jpg", "jpeg", "png", "heic", "heif", "gif", "webp", "tiff", "bmp",
+        "mp4", "mov", "m4v",
+        "pdf",
+    ]
+
+    nonisolated static func supportsLargePreview(fileExtension: String) -> Bool {
+        largePreviewExtensions.contains(fileExtension.lowercased())
+    }
+
     static func thumbnail(for url: URL, side: CGFloat, cacheKey: String) async -> UIImage? {
         if let hit = cache.object(forKey: cacheKey as NSString) {
             return hit

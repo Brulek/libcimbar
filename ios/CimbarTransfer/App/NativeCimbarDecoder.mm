@@ -108,8 +108,11 @@ static const NSUInteger kAutoUnlockFrames = 150;
     } catch (...) {
     }
 
+    // 一帧异常不该抹掉已锁存的错误和已识别的模式（VM 会照单全收这两个字段）
     NativeCimbarDecodeOutput *failure = [NativeCimbarDecodeOutput new];
-    failure.statusText = NSLocalizedString(@"解码出错，已自动恢复", nil);
+    failure.statusText = _stickyErrorText ?: NSLocalizedString(@"解码出错，已自动恢复", nil);
+    failure.hasStickyError = (_stickyErrorText != nil);
+    failure.detectedMode = self.isAutoMode ? _lockedMode : 0;
     return failure;
 }
 

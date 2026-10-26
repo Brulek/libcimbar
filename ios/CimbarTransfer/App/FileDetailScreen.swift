@@ -96,9 +96,9 @@ struct FileDetailScreen: View {
 
             Section {
                 Button(role: .destructive) {
-                    // 回到列表后底部有「撤销」，这里不再二次确认
+                    // 回到列表后底部有「撤销」，这里不再二次确认。
+                    // 文件一从列表移走，下面的 onChange 就会退出本页，这里不再单独 dismiss
                     store.deleteWithUndo(ids: [file.id], message: String(localized: "已删除「\(file.displayName)」"))
-                    dismiss()
                 } label: {
                     Label {
                         Text("删除文件")

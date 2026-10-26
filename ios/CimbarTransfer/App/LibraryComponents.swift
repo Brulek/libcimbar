@@ -246,7 +246,7 @@ struct FileContextMenu<MenuItems: View>: ViewModifier {
     func body(content: Content) -> some View {
         if !isEnabled {
             content
-        } else if ThumbnailLoader.supports(fileExtension: file.fileExtension) {
+        } else if ThumbnailLoader.supportsLargePreview(fileExtension: file.fileExtension) {
             content.contextMenu {
                 menuItems()
             } preview: {

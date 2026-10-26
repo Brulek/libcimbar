@@ -59,6 +59,8 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
 
     // 仅在 sessionQueue 上读写
     private var videoDevice: AVCaptureDevice?
+    /// 界面当前要不要相机在跑（扫码页可见且没自动暂停）；媒体服务重置后据此决定是否重启
+    private var wantsSessionRunning = false
     private var maxZoomFactor: CGFloat = 1.0
     // 仅在主线程读写：捏合手势开始时的基准倍率
     private var zoomGestureBase: CGFloat = 1.0
@@ -120,7 +122,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         guard let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError,
               error.code == .mediaServicesWereReset else { return }
         sessionQueue.async { [weak self] in
-            guard let self, self.isConfigured, !self.session.isRunning else { return }
+            guard let self, self.isConfigured, self.wantsSessionRunning, !self.session.isRunning else { return }
             self.session.startRunning()
         }
     }
@@ -169,6 +171,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
         }
         sessionQueue.async { [weak self] in
             guard let self else { return }
+            self.wantsSessionRunning = false
             if let device = self.videoDevice, device.hasTorch, device.torchMode != .off,
                (try? device.lockForConfiguration()) != nil {
                 device.torchMode = .off
@@ -217,7 +220,9 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
     /// 已完成的接收卡片保留（新模式会在用户点「继续扫码」时随 resetScan 生效）
     func setDecodeMode(_ mode: Int) {
         decodeModeState.withLock { $0 = Int32(mode) }
-        if receivedFileURL == nil {
+        // 正在顺利接收（已有进度）说明当前模式是对的，不为切模式丢掉进度：新模式下次扫码生效。
+        // 还没收到任何数据时才立即重置，换个模式重新找码
+        if receivedFileURL == nil && progressValue == nil {
             resetScan()
         }
     }
@@ -358,6 +363,7 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
                 }
             }
 
+            self.wantsSessionRunning = true
             if !self.session.isRunning {
                 self.session.startRunning()
             }
@@ -497,9 +503,10 @@ final class NativeReceiverViewModel: NSObject, ObservableObject {
             // 文件已落盘，后续帧不会再产生新结果；停掉解码链，
             // 避免相机回调继续满载 CPU（用户点「继续接收」时恢复）
             pauseProcessing()
-            // 收完了用户可能放下手机去看文件，恢复正常的自动锁屏
+            // 收完了用户可能放下手机去看文件，恢复正常的自动锁屏。
+            // 走 sessionQueue，和 start()/stop() 对 idleTimer 的写入保持先后顺序
             lastActivityUptime = ProcessInfo.processInfo.systemUptime
-            setIdleTimerDisabled(false)
+            sessionQueue.async { [weak self] in self?.setIdleTimerDisabled(false) }
             if preferences.hapticEnabled {
                 notificationGenerator.notificationOccurred(.success)
             }
