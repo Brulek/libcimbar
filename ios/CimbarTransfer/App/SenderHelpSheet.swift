@@ -5,7 +5,7 @@ import SwiftUI
 struct SenderHelpSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var copied = false
-
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         NavigationStack {
@@ -21,7 +21,11 @@ struct SenderHelpSheet: View {
                 Section {
                     // 发送方是另一台手机时，用它的相机扫一下就能打开，不用手打网址
                     if let qrImage = SenderSite.qrImage {
-                        HStack(spacing: 16) {
+                        // 大字号下说明文字放到码的下面，挤在旁边会一行一两个字
+                        let layout = dynamicTypeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                            : AnyLayout(HStackLayout(spacing: 16))
+                        layout {
                             Image(uiImage: qrImage)
                                 .interpolation(.none)
                                 .resizable()
@@ -77,13 +81,15 @@ struct SenderHelpSheet: View {
 private struct StepRow: View {
     let number: Int
     let text: LocalizedStringKey
+    /// 圆圈跟着序号的字号放大，固定 24pt 时大字号下数字会溢出圆圈
+    @ScaledMetric(relativeTo: .subheadline) private var badgeSize: CGFloat = 24
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text("\(number)")
                 .font(.subheadline.weight(.bold).monospacedDigit())
                 .foregroundStyle(Brand.ink)
-                .frame(width: 24, height: 24)
+                .frame(width: badgeSize, height: badgeSize)
                 .background(Color.accentColor, in: Circle())
             Text(text)
                 .fixedSize(horizontal: false, vertical: true)

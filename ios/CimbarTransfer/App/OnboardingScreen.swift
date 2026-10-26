@@ -210,6 +210,9 @@ struct OnboardingPage: Identifiable {
 private struct OnboardingPageView: View {
     let page: OnboardingPage
     @Binding var confidentialAcknowledged: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// 序号图标随字号放大，固定 26pt 时大字号下会被挤出左边
+    @ScaledMetric(relativeTo: .body) private var bulletSymbolWidth: CGFloat = 26
 
     var body: some View {
         // 内容放不满时上下居中（iPad、短页面），放不下时可滚动（大字号）
@@ -238,7 +241,11 @@ private struct OnboardingPageView: View {
     private var senderLink: some View {
         VStack(spacing: 16) {
             if let qrImage = SenderSite.qrImage {
-                HStack(spacing: 14) {
+                // 大字号下说明文字放在码的下面，挤在旁边会一行一两个字
+                let layout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(spacing: 10))
+                    : AnyLayout(HStackLayout(spacing: 14))
+                layout {
                     Image(uiImage: qrImage)
                         .interpolation(.none)
                         .resizable()
@@ -250,8 +257,9 @@ private struct OnboardingPageView: View {
                     Text("发送方是手机：用它的相机扫这个码")
                         .font(.footnote)
                         .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .center : .leading)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: 150, alignment: .leading)
+                        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? nil : 150, alignment: .leading)
                 }
             }
             ShareLink(item: SenderSite.url) {
@@ -313,7 +321,7 @@ private struct OnboardingPageView: View {
                     Image(systemName: bullet.symbol)
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Brand.glow)
-                        .frame(width: 26, alignment: .center)
+                        .frame(width: bulletSymbolWidth, alignment: .center)
                     Text(bullet.text)
                         .font(.body)
                         .foregroundStyle(.white.opacity(0.92))
