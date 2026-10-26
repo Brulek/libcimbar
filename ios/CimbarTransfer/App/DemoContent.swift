@@ -5,6 +5,7 @@ import UIKit
 ///
 /// - `-SeedDemoFiles YES`：启动时往接收目录写入几份示例文件（已存在则跳过）
 /// - `-DemoDetail YES`：直接打开最新文件的简介页
+/// - `-DemoSearch 关键词`：「我的文件」直接带上搜索词
 /// - `-DemoSelect YES`：「我的文件」直接进入多选并选中前两个
 /// - `-DemoNow 09:41`：示例文件按今天 9:41 往前排接收时间
 /// - `-DemoFrames <目录>[:<目录>…]`：回放 run_decode_selftest.sh --dump-transfer 导出的帧，代替相机；
@@ -26,6 +27,11 @@ enum DemoContent {
     static var replayFramesPerSecond: Double {
         let value = UserDefaults.standard.double(forKey: "DemoFramesFPS")
         return value > 0 ? value : 15
+    }
+
+    /// `-DemoSearch 关键词`：「我的文件」打开时直接带上搜索词
+    static var searchQuery: String? {
+        UserDefaults.standard.string(forKey: "DemoSearch")
     }
 
     /// `-DemoSelect YES`：「我的文件」打开后进入多选，选中前两个文件

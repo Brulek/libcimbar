@@ -109,6 +109,7 @@ python3 scripts/l10n_sync.py --apply en.json --prune
   - `-InitialTab library|settings`：初始标签
   - `-SeedDemoFiles YES`：往接收目录写几份示例文件；`-DemoNow 09:41` 让它们按今天 9:41 往前排
   - `-DemoScan waiting|receiving|lost|stalled|error|paused|done|done-text`：扫码页跳过相机直接展示某个状态；App 容器 `Library/Caches/demo-screen.png` 存在时画成取景框里的发送端屏幕
+  - `-DemoSearch 关键词`：「我的文件」直接带上搜索词
   - `-DemoSelect YES`：「我的文件」直接进入多选并选中前两个
   - `-DemoFrames <目录>[:<目录>…]`：模拟相机。先用 `scripts/run_decode_selftest.sh --dump-transfer <目录> <模式值> <文件>` 把一个文件导出成整段动画码帧，App 按 15 fps 回放给真实的解码链，进度、完成、重复文件、发送端换模式都能在模拟器里走一遍；`-DemoFramesFPS 3` 调慢回放
   - `-DemoDetail YES`：直接打开最新文件的简介页

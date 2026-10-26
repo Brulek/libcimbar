@@ -10,6 +10,8 @@ struct LibraryScreen: View {
 
     @AppStorage(LibrarySortOption.defaultsKey) private var sortOption: LibrarySortOption = .dateDescending
     @State private var searchText = ""
+    /// 搜索时才建：小文本的全文（文件名 → 内容），能按内容搜到「那条有 Wi-Fi 密码的笔记」
+    @State private var textIndex: [String: String] = [:]
     @State private var renameTarget: CachedReceivedFile?
     @State private var renameText: String = ""
     @State private var isSelecting: Bool = false
@@ -30,6 +32,11 @@ struct LibraryScreen: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// 开始搜索、或搜索时文件有增删改名，重建内容索引
+    private var textIndexKey: String {
+        trimmedSearch.isEmpty ? "" : store.cachedFiles.map(\.fileName).joined(separator: "\u{1}")
+    }
+
     private var filteredFiles: [CachedReceivedFile] {
         let query = trimmedSearch
         let base: [CachedReceivedFile]
@@ -41,6 +48,7 @@ struct LibraryScreen: View {
                     || file.fileName.localizedCaseInsensitiveContains(query)
                     // 改过名的文件也能按发送端的原名搜到
                     || file.originalName.localizedCaseInsensitiveContains(query)
+                    || (textIndex[file.fileName]?.localizedCaseInsensitiveContains(query) ?? false)
             }
         }
         return sorted(base)
@@ -122,6 +130,23 @@ struct LibraryScreen: View {
             }
         }
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
+        .task(id: textIndexKey) {
+            guard !trimmedSearch.isEmpty else { return }
+            let files = store.cachedFiles
+                .filter { TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize) }
+                .map { (name: $0.fileName, url: $0.url) }
+            let known = textIndex
+            // 读文件、猜编码放后台；已经读过的不再读
+            let built = await Task.detached(priority: .userInitiated) { () -> [String: String] in
+                var index: [String: String] = [:]
+                for file in files {
+                    if Task.isCancelled { break }
+                    index[file.name] = known[file.name] ?? TextClipboard.readText(file.url)
+                }
+                return index
+            }.value
+            if !Task.isCancelled { textIndex = built }
+        }
         .toolbar { toolbarContent }
         // 多选时底部是操作栏；iOS 26 的悬浮标签栏会和它挤在同一行、挡住中间的按钮，
         // 和「照片」「文件」一样选择期间收起标签栏。iPad 分栏时标签栏在顶上，不挡，留着
@@ -139,6 +164,9 @@ struct LibraryScreen: View {
         .onChange(of: store.cachedFiles.first?.id) { _ in
             if DemoContent.opensDetail, detailTarget == nil, splitDetail?.wrappedValue == nil {
                 if let first = sorted(store.cachedFiles).first { showDetail(first) }
+            }
+            if let query = DemoContent.searchQuery, searchText.isEmpty {
+                searchText = query
             }
             if DemoContent.opensSelection, !isSelecting {
                 isSelecting = true
@@ -306,6 +334,7 @@ struct LibraryScreen: View {
                 isSelecting: isSelecting,
                 isSelected: selectedIDs.contains(file.id),
                 dayShownInHeader: sortOption.isByDate && trimmedSearch.isEmpty,
+                contentMatch: contentMatch(for: file),
                 referenceDay: dayStamp,
                 onDetail: { showDetail(file) }
             )
@@ -388,6 +417,25 @@ struct LibraryScreen: View {
                 delete(file)
             } label: { Label("删除", systemImage: "trash") }
         })
+    }
+
+    /// 名字里没有、是按内容搜到的：给出命中的那一行，不然看着像搜错了
+    private func contentMatch(for file: CachedReceivedFile) -> String? {
+        let query = trimmedSearch
+        guard !query.isEmpty,
+              !file.displayName.localizedCaseInsensitiveContains(query),
+              !file.originalName.localizedCaseInsensitiveContains(query),
+              let text = textIndex[file.fileName],
+              let range = text.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) else { return nil }
+        let line = text.lineRange(for: range)
+        var snippet = text[line].trimmingCharacters(in: .whitespacesAndNewlines)
+        // 一行很长时只留命中处前后一段
+        if snippet.count > 60, let hit = snippet.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) {
+            let start = snippet.index(hit.lowerBound, offsetBy: -20, limitedBy: snippet.startIndex) ?? snippet.startIndex
+            let end = snippet.index(hit.upperBound, offsetBy: 30, limitedBy: snippet.endIndex) ?? snippet.endIndex
+            snippet = (start > snippet.startIndex ? "…" : "") + String(snippet[start..<end]) + (end < snippet.endIndex ? "…" : "")
+        }
+        return snippet
     }
 
     private func isOpenInSplit(_ file: CachedReceivedFile) -> Bool {
