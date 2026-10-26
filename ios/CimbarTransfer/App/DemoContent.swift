@@ -168,8 +168,8 @@ enum DemoContent {
 
     private static func notesText() -> String {
         isEnglish
-            ? "Meeting notes\n\n1. Ship the new scanner UI\n2. Review App Store screenshots\n3. Next sync on Friday\n"
-            : "会议纪要\n\n1. 新版扫码界面上线\n2. 更新 App Store 截图\n3. 周五再对一次进度\n"
+            ? "Product review · Oct 28\n\n1. Homepage redesign approved\n2. Final designs due Monday\n3. Next review: Thursday 2 pm, Room 302\n\nGuest Wi-Fi: Lumen-Guest\nPassword: sunset-2027\n"
+            : "产品评审会 · 10 月 28 日\n\n1. 首页改版方案通过\n2. 下周一前交终版设计稿\n3. 下次评审：周四下午 2 点，302 会议室\n\n访客 Wi-Fi：Lumen-Guest\n密码：sunset-2027\n"
     }
 
     private static func salesCSV() -> String {
