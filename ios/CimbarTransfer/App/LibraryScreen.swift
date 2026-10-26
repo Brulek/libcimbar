@@ -9,6 +9,7 @@ struct LibraryScreen: View {
     let onGoToScan: () -> Void
 
     @AppStorage(LibrarySortOption.defaultsKey) private var sortOption: LibrarySortOption = .dateDescending
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var searchText = ""
     /// 搜索时才建：小文本的全文（文件名 → 内容），能按内容搜到「那条有 Wi-Fi 密码的笔记」
     @State private var textIndex: [String: IndexedText] = [:]
@@ -345,9 +346,15 @@ struct LibraryScreen: View {
                         Text(title)
                     } else if let sortTitle = flatSortTitle {
                         // 按名称、大小排时列表没有分组标题，看不出排过序（设置页「已用空间」进来会改成按大小）
-                        HStack {
+                        // 大字号下按钮换到下一行，挤在一行时「从大到小排列」会从词中间断开
+                        let layout = dynamicTypeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+                            : AnyLayout(HStackLayout())
+                        layout {
                             Text(sortTitle)
-                            Spacer()
+                            if !dynamicTypeSize.isAccessibilitySize {
+                                Spacer()
+                            }
                             // 多选时不换排序，免得选中的行跳走
                             if !isSelecting {
                                 Button("按日期") { sortOption = .dateDescending }
