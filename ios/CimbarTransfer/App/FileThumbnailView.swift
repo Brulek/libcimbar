@@ -42,12 +42,17 @@ struct FileKindIcon: View {
     }
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(style.tint.opacity(0.18))
-            Image(systemName: style.symbol)
-                .font(.title3)
-                .foregroundStyle(style.tint)
+        // 图标随底块等比缩放：列表里 46pt、简介页 132pt 都要好看
+        GeometryReader { proxy in
+            let side = min(proxy.size.width, proxy.size.height)
+            ZStack {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(style.tint.opacity(0.18))
+                Image(systemName: style.symbol)
+                    .font(.system(size: side * 0.4, weight: .medium))
+                    .foregroundStyle(style.tint)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
     }
 }
