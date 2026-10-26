@@ -37,7 +37,10 @@ struct LatestReceivedFileIntent: AppIntent {
         // 刚删、还在「撤销」窗口里的文件界面上已经不见了，这里也不该交出去
         let hidden = ReceivedFileCacheStore.pendingDeletionIDs
         let files = try ReceivedFileCache.listFiles().filter { !hidden.contains($0.id) }
-        guard let latest = files.max(by: { $0.receivedAt < $1.receivedAt }) else {
+        // 标注版沿用原文件的接收时间：时间相同时取先写入磁盘的那份，即原文件
+        guard let latest = files.max(by: {
+            $0.receivedAt != $1.receivedAt ? $0.receivedAt < $1.receivedAt : $0.modifiedAt > $1.modifiedAt
+        }) else {
             throw LatestFileError.noFiles
         }
         return .result(value: IntentFile(fileURL: latest.url, filename: latest.fileName))
