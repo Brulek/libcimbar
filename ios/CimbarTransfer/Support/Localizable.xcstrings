@@ -3001,12 +3001,12 @@
         }
       }
     },
-    "萤传的解码用的是 libcimbar 源码，为 iOS 改过几个文件。改过的源代码依 MPL-2.0 公开在 github.com/Brulek/libcimbar。" : {
+    "萤传的解码用的是 libcimbar 源码，其中改过几个文件。改过的源代码依各自的许可（libcimbar 为 MPL-2.0）公开在 github.com/Brulek/libcimbar。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lumen decodes with the libcimbar sources, with a few files changed for iOS. The changed source code is public under MPL-2.0 at github.com/Brulek/libcimbar."
+            "value" : "Lumen decodes with the libcimbar sources, with a few files changed. The changed source code is public under its licenses (MPL-2.0 for libcimbar) at github.com/Brulek/libcimbar."
           }
         }
       }

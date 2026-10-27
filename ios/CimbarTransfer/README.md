@@ -132,6 +132,6 @@ python3 scripts/l10n_sync.py --apply en.json --prune
   试出数据说明发送端换了模式，这时调新增的 `cimbard_reset()`，按新模式从头收；
   重组先恢复到临时缓冲、成功才替换（修掉解压器视图悬空的 use-after-free）；新增错误码 -16（解压器初始化失败）、-15（解压流损坏）。
 - `src/lib/fountain/fountain_decoder_sink.h`：`recover()` 先核对槽位里的流大小和文件一致（与 `decode_frame()` 同一个检查），恢复成功才标记为已完成。
-- `src/third_party_lib/wirehair/gf256.cpp`：三个变量加 `[[maybe_unused]]`，消掉编译警告。
+- `src/third_party_lib/wirehair/gf256.cpp`：`CpuHasNeon64`（三个预处理分支里各声明一次）加 `[[maybe_unused]]`，消掉编译警告。
 - `web/recv.js`：重组失败时的报错信息和提前返回。
 Debug 配置下原生解码链以 `-O2` 编译（Swift 保持 `-Onone`），否则真机调试时扫码性能严重失真。

@@ -215,8 +215,8 @@ struct LibraryEmptyState: View {
     let onGoToScan: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    /// 说明和按钮平时收窄到 280；辅助功能字号下放开，否则英文按钮会从词中间断开
-    private var columnWidth: CGFloat { dynamicTypeSize.isAccessibilitySize ? .infinity : 280 }
+    /// 说明和按钮平时收窄到 280；辅助功能字号下放宽（否则英文按钮会从词中间断开），iPad 上也不铺满整屏
+    private var columnWidth: CGFloat { dynamicTypeSize.isAccessibilitySize ? 480 : 280 }
 
     var body: some View {
         // 放得下就在页面中间；最大字号下放不下时改成可以滚动，不截字

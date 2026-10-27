@@ -7,7 +7,7 @@
 > 1. 从本仓库 GitHub Release `frameworks-v1` 下载 `opencv2.xcframework.zip`，解压到 `ios/ThirdParty/`；
 > 2. 按下文构建方法自建。
 >
-> 许可：OpenCV 4.12.0 依 Apache License 2.0；框架里内置的 libjpeg-turbo、libpng、libwebp、zlib、protobuf、ade 各有其许可，全文见同一 Release 里的 `OPENCV-LICENSES.txt`。
+> 许可：OpenCV 4.12.0 依 Apache License 2.0；框架里内置的 libjpeg-turbo、libpng、libwebp、zlib、protobuf、ade、Flatbuffers 各有其许可，全文见同一 Release 里的 `OPENCV-LICENSES.txt`。
 
 - `ios-arm64`：设备切片。二进制来自原始 opencv2.framework（官方 iOS 包）的 arm64 切片
   （`lipo -thin arm64`），字节与替换前完全一致；Headers/Resources 原样保留（全模块头）。

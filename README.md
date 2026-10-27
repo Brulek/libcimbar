@@ -24,10 +24,10 @@ Under the MPL-2.0, like the rest of libcimbar:
   - reassembly recovers into a scratch buffer and commits only on success (fixes a use-after-free of the decompressor's view);
   - new error codes: -16 when the decompressor can't be initialised, -15 from `cimbard_decompress_read()` for a corrupt stream;
   - debug output compiles out under `CIMBARD_NO_DEBUG`.
-- `src/lib/fountain/fountain_decoder_sink.h`: `recover()` checks that the slot's stream has the expected file size (the same check `decode_frame()` uses), so a stale id can't destroy another stream's progress, and it marks a file done only when recovery succeeded.
+- `src/lib/fountain/fountain_decoder_sink.h`: `recover()` checks that the slot's stream has the expected file size (the same check `decode_frame()` uses), and marks a file done only when recovery succeeded, so a failed recover leaves the stream receivable instead of discarding it.
 - `web/recv.js`: error message and early return when reassembly fails.
 
-Under wirehair's BSD-3-Clause license: `src/third_party_lib/wirehair/gf256.cpp`, `[[maybe_unused]]` on three variables to silence warnings.
+Under wirehair's BSD-3-Clause license: `src/third_party_lib/wirehair/gf256.cpp`, `[[maybe_unused]]` on `CpuHasNeon64` (declared in three preprocessor branches) to silence a warning.
 
 ## License
 
