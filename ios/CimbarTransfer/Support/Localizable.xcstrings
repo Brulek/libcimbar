@@ -286,7 +286,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No internet or pairing. The two devices only need to be near each other."
+            "value" : "No internet or pairing, just two devices close together"
           }
         }
       }
@@ -691,6 +691,28 @@
         }
       }
     },
+    "删除 %lld 个文件" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld File"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Delete %lld Files"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "删除后无法恢复。" : {
       "localizations" : {
         "en" : {
@@ -736,7 +758,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The code is shown on screen, so anyone nearby can capture it too."
+            "value" : "The code is shown on screen, so anyone nearby can capture it too"
           }
         }
       }
@@ -1818,7 +1840,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By %@"
+            "value" : "Sort by %@"
           }
         }
       }
@@ -1828,7 +1850,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By Name"
+            "value" : "Sorted by Name"
           }
         }
       }
@@ -1848,7 +1870,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "By Date"
+            "value" : "Sort by Date"
           }
         }
       }
@@ -2665,6 +2687,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version %@"
+          }
+        }
+      }
+    },
+    "现在就删掉超过 30 天的文件？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Files Older Than 30 Days Now?"
+          }
+        }
+      }
+    },
+    "现在就删掉超过 7 天的文件？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Files Older Than 7 Days Now?"
           }
         }
       }

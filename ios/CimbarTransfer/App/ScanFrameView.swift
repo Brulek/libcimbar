@@ -108,12 +108,11 @@ struct ScanFrameOverlay: View {
                         .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
                     }
                     .buttonStyle(.plain)
-                    // 压缩包等的预览只有图标和大小，点了没用
-                    .allowsHitTesting(FilesExport.hasUsefulPreview(reveal.url.pathExtension))
+                    // 压缩包等预览不了的：点了和完成卡片上的文件行一样，去「我的文件」看简介
                     .accessibilityLabel(!FilesExport.hasUsefulPreview(reveal.url.pathExtension)
                         ? Text(verbatim: reveal.url.lastPathComponent)
                         : Text("预览 \(reveal.url.lastPathComponent)"))
-                    .accessibilityRemoveTraits(FilesExport.hasUsefulPreview(reveal.url.pathExtension) ? [] : .isButton)
+                    .accessibilityHint(FilesExport.hasUsefulPreview(reveal.url.pathExtension) ? Text("打开预览") : Text("查看文件简介"))
                     .accessibilityValue(Text(verbatim: reveal.textSnippet.map { String($0.prefix(300)) } ?? ""))
                     .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 }

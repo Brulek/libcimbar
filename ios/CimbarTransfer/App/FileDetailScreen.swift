@@ -182,6 +182,8 @@ struct FileDetailScreen: View {
             await loadChecksum()
         }
         .task(id: file.fileName) {
+            // 这次运行里已经存过（自动存、完成卡片、右滑、长按）：显示「已存入」，免得再存一份
+            photoSaved = PhotoLibrarySaver.savedPaths.contains(file.url.path)
             mediaDetail = await MediaDetail.load(for: file.url)
         }
         .task(id: file.fileName) {

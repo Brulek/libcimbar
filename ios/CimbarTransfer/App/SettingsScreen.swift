@@ -9,6 +9,8 @@ struct SettingsScreen: View {
     /// 和其他行的图标块（IconTile）一样随字号放大
     @ScaledMetric(relativeTo: .body) private var brandMarkSide: CGFloat = 29
     @State private var clearConfirm = false
+    /// 改成「7 天后 / 30 天后」时已经有过期文件：先问，确认了才改（一改就会立刻删掉它们）
+    @State private var pendingRetention: ReceivedFileRetentionPolicy?
     @State private var showingOnboarding = false
     @State private var showingSenderHelp = false
     @State private var clearFeedbackMessage: String?
@@ -67,7 +69,13 @@ struct SettingsScreen: View {
                 .accessibilityHint("按大小查看文件")
                 Picker(selection: Binding(
                     get: { store.retentionPolicy },
-                    set: { store.updateRetentionPolicy($0) }
+                    set: { newPolicy in
+                        if overdueCount(for: newPolicy) > 0 {
+                            pendingRetention = newPolicy
+                        } else {
+                            store.updateRetentionPolicy(newPolicy)
+                        }
+                    }
                 )) {
                     ForEach(ReceivedFileRetentionPolicy.allCases) { policy in
                         Text(policy.description).tag(policy)
@@ -139,6 +147,21 @@ struct SettingsScreen: View {
         }
         .readableListWidth()
         .navigationTitle("设置")
+        .confirmationDialog(
+            pendingRetentionTitle,
+            isPresented: Binding(get: { pendingRetention != nil }, set: { if !$0 { pendingRetention = nil } }),
+            titleVisibility: .visible
+        ) {
+            if let policy = pendingRetention {
+                Button("删除 \(overdueCount(for: policy)) 个文件", role: .destructive) {
+                    store.updateRetentionPolicy(policy)
+                    pendingRetention = nil
+                }
+            }
+            Button("取消", role: .cancel) { pendingRetention = nil }
+        } message: {
+            Text("删除后无法恢复。")
+        }
         .confirmationDialog("清空所有文件？", isPresented: $clearConfirm, titleVisibility: .visible) {
             Button("清空 \(store.cachedFiles.count) 个文件", role: .destructive) {
                 store.clearAllCache()
@@ -182,6 +205,21 @@ struct SettingsScreen: View {
             OnboardingScreen(isHelpMode: true) {
                 showingOnboarding = false
             }
+        }
+    }
+
+    /// 按这个策略现在就会被删掉的文件个数
+    private func overdueCount(for policy: ReceivedFileRetentionPolicy) -> Int {
+        guard let maxAge = policy.maxAgeSeconds else { return 0 }
+        let now = Date()
+        return store.cachedFiles.filter { now.timeIntervalSince($0.receivedAt) > maxAge }.count
+    }
+
+    private var pendingRetentionTitle: String {
+        switch pendingRetention {
+        case .days7: return String(localized: "现在就删掉超过 7 天的文件？")
+        case .days30: return String(localized: "现在就删掉超过 30 天的文件？")
+        case .keepAll, nil: return ""
         }
     }
 
