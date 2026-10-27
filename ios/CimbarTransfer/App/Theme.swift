@@ -29,6 +29,9 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
+            // 大字号下按钮文字会折行：居中、离圆角留出空隙，英文不至于从词中间断开贴着边
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 12)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             // 不可点时系统会把强调色压成灰色，深色字叠上去几乎看不见：改成灰字 + 淡底（深浅背景各一套）

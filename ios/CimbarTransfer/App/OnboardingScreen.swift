@@ -5,6 +5,7 @@ struct OnboardingScreen: View {
     var isHelpMode: Bool = false
     let onFinished: () -> Void
     @ScaledMetric(relativeTo: .headline) private var closeSide: CGFloat = 44
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// 关闭按钮浮在页面上方：至少 44pt，封顶约 xxxLarge 的大小，再大会盖住页面内容、挡住滚动
     private var closeFrame: CGFloat { min(max(closeSide, 44), 60) }
 
@@ -114,16 +115,12 @@ struct OnboardingScreen: View {
     }
 
     private var actionRow: some View {
-        HStack(spacing: 12) {
-            if !isLastPage {
-                Button(action: skip) {
-                    Text("跳过")
-                        .font(.headline)
-                        .foregroundStyle(.white.opacity(0.7))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                }
-                .buttonStyle(.plain)
+        // 大字号下两个按钮并排时「继续」会从词中间断开：改成上下排，主按钮在上
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        let layout = stacked ? AnyLayout(VStackLayout(spacing: 4)) : AnyLayout(HStackLayout(spacing: 12))
+        return layout {
+            if !isLastPage && !stacked {
+                skipButton
             }
 
             Button(action: isLastPage ? complete : next) {
@@ -131,8 +128,23 @@ struct OnboardingScreen: View {
             }
             .buttonStyle(.brandPrimary)
             .disabled(!canFinish)
+
+            if !isLastPage && stacked {
+                skipButton
+            }
         }
         .animation(.easeInOut(duration: 0.2), value: isLastPage)
+    }
+
+    private var skipButton: some View {
+        Button(action: skip) {
+            Text("跳过")
+                .font(.headline)
+                .foregroundStyle(.white.opacity(0.7))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+        }
+        .buttonStyle(.plain)
     }
 
     private var isLastPage: Bool { pageIndex == pages.count - 1 }
