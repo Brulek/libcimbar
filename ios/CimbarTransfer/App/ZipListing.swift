@@ -20,7 +20,11 @@ struct ZipListing: Equatable {
         let files = entries.filter { !$0.name.hasSuffix("/") && !isMacJunk($0.name) }
         return ZipListing(
             fileCount: files.count,
-            totalSize: files.reduce(0) { $0 + Int64(clamping: $1.uncompressedSize) },
+            // 声明的大小是外部数据（ZIP64 可以写到 2^64），加起来要封顶，不能溢出崩溃
+            totalSize: files.reduce(Int64(0)) { sum, entry in
+                let (result, overflow) = sum.addingReportingOverflow(Int64(clamping: entry.uncompressedSize))
+                return overflow ? .max : result
+            },
             entries: Array(files.prefix(maxNames))
         )
     }

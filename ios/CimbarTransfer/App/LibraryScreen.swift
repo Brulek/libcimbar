@@ -151,9 +151,10 @@ struct LibraryScreen: View {
         }
         .modifier(LibrarySearchModifier(isEnabled: !store.cachedFiles.isEmpty, text: $searchText))
         .task(id: textIndexKey) {
-            guard !trimmedSearch.isEmpty else { return }
+            guard !trimmedSearch.isEmpty else { isIndexing = false; return }
             isIndexing = true
-            defer { isIndexing = false }
+            // 被新一轮取代的旧任务不能把新一轮刚设上的标记清掉
+            defer { if !Task.isCancelled { isIndexing = false } }
             let files = store.cachedFiles
                 .filter {
                     TextClipboard.canCopy(fileExtension: $0.fileExtension, size: $0.fileSize)
@@ -164,7 +165,8 @@ struct LibraryScreen: View {
             // 读文件、猜编码放后台；已经读过且没改过的不再读，读不出的也记下（空文字），免得每次重读
             // 总量封顶（UTF-8 约 24 MB）：几百个大文本也不至于把内存吃满。列表新的在前，先顾最近收到的；
             // 超出的不记入，下次还会试
-            let built = await Task.detached(priority: .userInitiated) { () -> [String: IndexedText] in
+            // Task.detached 不继承外层的取消：外层 .task 被取消时手动取消它，循环里的 Task.isCancelled 才有用
+            let job = Task.detached(priority: .userInitiated) { () -> [String: IndexedText] in
                 var index: [String: IndexedText] = [:]
                 var budget = Self.contentIndexBudget
                 for file in files {
@@ -179,7 +181,8 @@ struct LibraryScreen: View {
                     budget -= entry.text.utf8.count
                 }
                 return index
-            }.value
+            }
+            let built = await withTaskCancellationHandler { await job.value } onCancel: { job.cancel() }
             if !Task.isCancelled {
                 textIndex = built
                 textIndexVersion &+= 1
@@ -189,16 +192,18 @@ struct LibraryScreen: View {
             let query = trimmedSearch
             guard !query.isEmpty else {
                 contentHits = []
+                isMatching = false
                 return
             }
             isMatching = true
-            defer { isMatching = false }
+            defer { if !Task.isCancelled { isMatching = false } }
             let index = textIndex
-            let hits = await Task.detached(priority: .userInitiated) { () -> Set<String> in
+            let job = Task.detached(priority: .userInitiated) { () -> Set<String> in
                 Set(index.compactMap { name, entry in
                     entry.text.range(of: query, options: Self.contentSearchOptions) != nil ? name : nil
                 })
-            }.value
+            }
+            let hits = await withTaskCancellationHandler { await job.value } onCancel: { job.cancel() }
             if !Task.isCancelled { contentHits = hits }
         }
         .toolbar { toolbarContent }

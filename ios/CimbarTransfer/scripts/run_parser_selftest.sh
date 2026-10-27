@@ -52,6 +52,17 @@ with zipfile.ZipFile('inline.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
     z.writestr('xl/worksheets/sheet1.xml', '<worksheet><sheetData><row><c t="inlineStr"><is><t>导出的名单</t></is></c>'
                '<c><v>42</v></c><c t="inlineStr"><is><t>第二格</t></is></c></row></sheetData></worksheet>')
     z.writestr('xl/worksheets/sheet2.xml', '<worksheet><sheetData><row><c t="inlineStr"><is><t>第二张表</t></is></c></row></sheetData></worksheet>')
+# 两个条目各自在 ZIP64 扩展字段里声明 2^64-1 字节：总大小相加不能溢出
+import struct
+def huge_zip(path):
+    central = b''
+    for i, name in enumerate([b'a.bin', b'b.bin']):
+        extra = struct.pack('<HHQQ', 0x0001, 16, 0xFFFFFFFFFFFFFFFF, 0)
+        central += struct.pack('<IHHHHHHIIIHHHHHII', 0x02014b50, 45, 45, 0, 0, 0, 0, 0,
+                               0xFFFFFFFF, 0xFFFFFFFF, len(name), len(extra), 0, 0, 0, 0, 0) + name + extra
+    eocd = struct.pack('<IHHHHIIH', 0x06054b50, 0, 0, 2, 2, len(central), 0, 0)
+    open(path, 'wb').write(central + eocd)
+huge_zip('huge.zip')
 # 磁盘上 0.5 MB、解开 500 MB 的幻灯片
 with zipfile.ZipFile('bomb.pptx', 'w', zipfile.ZIP_DEFLATED) as z:
     filler = ' ' * (10 * 1024 * 1024)

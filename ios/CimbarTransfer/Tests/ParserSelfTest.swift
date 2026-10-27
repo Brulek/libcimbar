@@ -30,6 +30,8 @@ enum ParserSelfTest {
         let gbk = ZipListing.read(file("gbk.zip"))
         check("GBK names", gbk?.names.first == "报告.docx", "\(gbk?.names ?? [])")
 
+        let huge = ZipListing.read(file("huge.zip"))
+        check("huge declared sizes", huge?.fileCount == 2 && huge?.totalSize == .max, "\(String(describing: huge?.totalSize))")
         check("long comment", ZipListing.read(file("comment.zip"))?.fileCount == 1, "")
         check("not a zip", ZipListing.read(file("bad.zip")) == nil, "")
 
