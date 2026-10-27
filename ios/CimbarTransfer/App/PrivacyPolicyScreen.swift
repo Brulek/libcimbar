@@ -48,7 +48,7 @@ struct PrivacyPolicyScreen: View {
                 }
 
                 PolicySection(title: "八、联系我们") {
-                    Text("如对本政策有任何疑问，请通过 App Store 评价或开发者邮箱联系我们。")
+                    Text("如对本政策有任何疑问，请在「关于萤传」里点「反馈问题」，或在 github.com/Brulek/libcimbar/issues 提交问题。")
                 }
 
                 Text("最后更新时间：2026 年 10 月")

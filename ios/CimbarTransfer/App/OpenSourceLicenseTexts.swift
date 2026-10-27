@@ -6,9 +6,15 @@ enum OpenSourceLicenseTexts {
         "libcimbar": #"""
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-本应用基于 libcimbar 构建，包含少量适配 iOS 的修改（接收端 C 接口的小幅扩展）。原始项目源代码：
+本应用基于 libcimbar 构建，为 iOS 改过几个源文件（接收端 C 接口、喷泉码接收缓存等）。原始项目源代码：
 https://github.com/sz3/libcimbar
-修改后的源文件依 MPL-2.0 以源代码形式提供，可通过 App Store 页面的支持渠道获取。
+修改后的源文件依 MPL-2.0 以源代码形式公开在：
+https://github.com/Brulek/libcimbar
+
+Lumen is built on libcimbar, with a few source files changed for iOS (the receiver C interface, the fountain-code receive buffer and others). Original source:
+https://github.com/sz3/libcimbar
+The changed source files are available in source code form under the MPL-2.0 at:
+https://github.com/Brulek/libcimbar
 """#,
         "OpenCV": #"""
 Copyright (C) 2000-2025, OpenCV Foundation and contributors. All rights reserved.

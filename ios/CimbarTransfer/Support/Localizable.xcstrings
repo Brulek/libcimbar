@@ -1103,12 +1103,12 @@
         }
       }
     },
-    "如对本政策有任何疑问，请通过 App Store 评价或开发者邮箱联系我们。" : {
+    "如对本政策有任何疑问，请在「关于萤传」里点「反馈问题」，或在 github.com/Brulek/libcimbar/issues 提交问题。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "If you have any questions about this policy, contact us through an App Store review or the developer's email address."
+            "value" : "If you have any questions about this policy, tap Report a Problem in About Lumen, or open an issue at github.com/Brulek/libcimbar/issues."
           }
         }
       }
