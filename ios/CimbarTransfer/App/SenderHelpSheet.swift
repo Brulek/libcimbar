@@ -60,7 +60,7 @@ struct SenderHelpSheet: View {
                     Label("在网页菜单里调低 Framerate", systemImage: "speedometer")
                     // 自测里画面模糊、偏远时 Bm/Bu 仍能收完而 B 不行；萤传自动识别，换了也不用改设置
                     Label("距离远或屏幕小时，把网页菜单里的 Mode 换成 Bm 或 Bu", systemImage: "square.grid.2x2")
-                    // 不足一个喷泉块的文件，发送端用 0 填满，新打开的接收端读不出来（见改版记录）
+                    // 不足一个喷泉块的文件，发送端用 0 填满（zstd_compressor.h 的 pad），新打开的接收端读不出来
                     Label("只发一个网址这类很短的文字时，和别的文件一起打包再发", systemImage: "doc.zipper")
                 }
                 .font(.subheadline)
@@ -91,6 +91,7 @@ private struct StepRow: View {
                 .foregroundStyle(Brand.ink)
                 .frame(width: badgeSize, height: badgeSize)
                 .background(Brand.fill, in: Circle())
+                .brandFillOutline(Circle())
             Text(text)
                 .fixedSize(horizontal: false, vertical: true)
         }

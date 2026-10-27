@@ -234,13 +234,10 @@ struct LibraryEmptyState: View {
                 .frame(maxWidth: 280)
             Button(action: onGoToScan) {
                 Label("去扫码", systemImage: "viewfinder")
-                    .font(.headline)
-                    .padding(.horizontal, 8)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Brand.fill)
-            .foregroundStyle(Brand.ink)
-            .controlSize(.large)
+            // 和引导页同一种主按钮（含「增强对比度」时的描边），宽度跟上面的说明一样，不铺满整屏
+            .buttonStyle(.brandPrimary)
+            .frame(maxWidth: 280)
             .padding(.top, 8)
         }
         .padding(24)

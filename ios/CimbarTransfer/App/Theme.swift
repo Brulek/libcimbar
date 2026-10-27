@@ -14,6 +14,30 @@ enum Brand {
     /// 深色字（ink）下面的琥珀底。不直接用强调色：「增强对比度」时强调色在浅色模式里变成深棕，
     /// 深色字压在上面只有约 3.7:1；这里那一档反而调亮，四种外观下都在 6:1 以上
     static let fill = Color("BrandFill")
+    /// 「增强对比度」+ 浅色时，调亮的琥珀底和白底只差约 2.5:1，外面描这圈深琥珀（对白底约 4.8:1）
+    static let fillOutline = Color(red: 0.62, green: 0.40, blue: 0.0)
+}
+
+/// 琥珀底（Brand.fill）的描边，只在「增强对比度」且浅色时出现
+private struct BrandFillOutline<S: InsettableShape>: ViewModifier {
+    let shape: S
+    let isActive: Bool
+    @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content.overlay {
+            if isActive && contrast == .increased && colorScheme == .light {
+                shape.strokeBorder(Brand.fillOutline, lineWidth: 1)
+            }
+        }
+    }
+}
+
+extension View {
+    func brandFillOutline<S: InsettableShape>(_ shape: S, isActive: Bool = true) -> some View {
+        modifier(BrandFillOutline(shape: shape, isActive: isActive))
+    }
 }
 
 extension Brand {
@@ -43,6 +67,7 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
                 isEnabled ? AnyShapeStyle(Brand.fill) : AnyShapeStyle(disabledFill),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
+            .brandFillOutline(RoundedRectangle(cornerRadius: 16, style: .continuous), isActive: isEnabled)
             .opacity(configuration.isPressed ? 0.8 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
