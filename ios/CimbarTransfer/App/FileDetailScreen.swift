@@ -338,6 +338,7 @@ struct FileDetailScreen: View {
                 .tint(photoSaved ? .green : nil)
                 .allowsHitTesting(!photoSaved)
                 .accessibilityLabel(photoSaved ? "已存到相册" : "存到相册")
+                .accessibilityInputLabels(photoSaved ? [Text("已存入"), Text("已存到相册")] : [Text("存相册"), Text("存到相册")])
             } else if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
                 DetailActionButton(
                     title: textCopied ? "已复制" : "复制文字",
@@ -594,7 +595,7 @@ private struct ZipEntryRow: View {
             } label: {
                 label
             }
-            .accessibilityHint("轻点预览")
+            .accessibilityHint("打开预览")
         } else {
             label
                 .foregroundStyle(.secondary)

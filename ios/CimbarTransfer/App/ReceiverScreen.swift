@@ -353,7 +353,7 @@ private struct ReceiverTopBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("变焦 \(zoomText)")
-                .accessibilityHint(isZoomed ? "轻点恢复 1 倍" : "轻点放大到 2 倍")
+                .accessibilityHint(isZoomed ? "恢复到 1 倍" : "放大到 2 倍")
             }
 
             if torchAvailable {

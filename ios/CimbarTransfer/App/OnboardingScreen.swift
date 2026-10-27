@@ -5,6 +5,8 @@ struct OnboardingScreen: View {
     var isHelpMode: Bool = false
     let onFinished: () -> Void
     @ScaledMetric(relativeTo: .headline) private var closeSide: CGFloat = 44
+    /// 关闭按钮浮在页面上方：至少 44pt，封顶约 xxxLarge 的大小，再大会盖住页面内容、挡住滚动
+    private var closeFrame: CGFloat { min(max(closeSide, 44), 60) }
 
     @State private var pageIndex: Int = {
         #if DEBUG
@@ -63,12 +65,14 @@ struct OnboardingScreen: View {
                 Button(action: onFinished) {
                     Image(systemName: "xmark")
                         .font(.headline)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(.white.opacity(0.8))
-                        .frame(width: closeSide, height: closeSide)
+                        .frame(width: closeFrame, height: closeFrame)
                         .background(.white.opacity(0.12), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("关闭")
+                .accessibilityShowsLargeContentViewer()
             }
             Spacer()
         }

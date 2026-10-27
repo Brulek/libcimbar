@@ -671,6 +671,16 @@
         }
       }
     },
+    "切换选中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggles selection"
+          }
+        }
+      }
+    },
     "删除" : {
       "localizations" : {
         "en" : {
@@ -1507,6 +1517,16 @@
         }
       }
     },
+    "恢复到 1 倍" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resets zoom to 1×"
+          }
+        }
+      }
+    },
     "您可随时在应用内手动删除，或在「设置 → 自动清理」中设置自动删除" : {
       "localizations" : {
         "en" : {
@@ -1649,6 +1669,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open"
+          }
+        }
+      }
+    },
+    "打开预览" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a preview"
           }
         }
       }
@@ -1989,6 +2019,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sort by Date"
+          }
+        }
+      }
+    },
+    "放大到 2 倍" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zooms in to 2×"
           }
         }
       }
@@ -2413,6 +2453,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "View Intro"
+          }
+        }
+      }
+    },
+    "查看文件简介" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the file's info"
           }
         }
       }
@@ -3089,62 +3139,12 @@
         }
       }
     },
-    "轻点切换选中" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toggles selection"
-          }
-        }
-      }
-    },
-    "轻点恢复 1 倍" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Resets zoom to 1×"
-          }
-        }
-      }
-    },
-    "轻点放大到 2 倍" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zooms in to 2×"
-          }
-        }
-      }
-    },
     "轻点文件右边的 ⓘ 查看简介" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap ⓘ next to a file to see its info"
-          }
-        }
-      }
-    },
-    "轻点查看简介" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shows the file's info"
-          }
-        }
-      }
-    },
-    "轻点预览" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens a preview"
           }
         }
       }

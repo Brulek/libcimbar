@@ -456,7 +456,8 @@ struct LibraryScreen: View {
         // iPad 分栏：右边正在看的那个文件在列表里标出来
         .listRowBackground(isOpenInSplit(file) ? Color.accentColor.opacity(0.16) : nil)
         .accessibilityAddTraits(isOpenInSplit(file) ? .isSelected : [])
-        .accessibilityHint(isSelecting ? "轻点切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "轻点查看简介" : "轻点预览")
+        // 读屏提示只说结果、不说手势：读屏下单击只是选中，要双击才执行
+        .accessibilityHint(isSelecting ? "切换选中" : !FilesExport.hasUsefulPreview(file.fileExtension) ? "查看文件简介" : "打开预览")
         .accessibilityAddTraits(isSelecting && selectedIDs.contains(file.id) ? [.isSelected] : [])
         // 行里的 ⓘ 嵌在行按钮里，VoiceOver 不一定能单独聚焦到；给一个具名操作（左滑的分享/删除系统会自动列出）
         .modifier(DetailAccessibilityAction(isEnabled: !isSelecting) { showDetail(file) })

@@ -179,7 +179,7 @@ struct LibraryRow: View {
                 Image(systemName: "info.circle")
                     .font(.title3)
                     .foregroundStyle(.tint)
-                    .frame(width: detailSide, height: detailSide)
+                    .frame(width: max(44, detailSide), height: max(44, detailSide))
                     .contentShape(Rectangle())
             }
             .buttonStyle(.borderless)

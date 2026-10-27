@@ -301,6 +301,8 @@ private struct CompletedTransferCard: View {
             .allowsHitTesting(!photoSaved)
             // 按钮上只写「存相册」，读屏说全：英文里两个按钮都只有一个 Save
             .accessibilityLabel(photoSaved ? "已存到相册" : "存到相册")
+            // 语音控制按看得见的字下指令：「存相册」也要认
+            .accessibilityInputLabels(photoSaved ? [Text("已存入"), Text("已存到相册")] : [Text("存相册"), Text("存到相册")])
         } else if canCopyText {
             Button {
                 Task {
@@ -377,7 +379,7 @@ private struct CompletedTransferCard: View {
             .accessibilityLabel("已收到 \(fileURL.lastPathComponent)")
             .accessibilityValue(detailText)
             // 预览不了的（压缩包等）点了去「我的文件」看简介
-            .accessibilityHint(hasNoPreview ? Text("轻点查看简介") : Text("轻点预览"))
+            .accessibilityHint(hasNoPreview ? Text("查看文件简介") : Text("打开预览"))
 
             // 大字号下三个按钮并排放不下，改为竖排，不截断文字
             ViewThatFits(in: .horizontal) {
