@@ -64,7 +64,8 @@ cd ios/CimbarTransfer
 open CimbarTransfer.xcodeproj
 ```
 
-1. 打开工程后选择真机运行（建议 iPhone）。
+0. 先准备 OpenCV：从本仓库 Release `frameworks-v1` 下载 `opencv2.xcframework.zip`，解压到 `ios/ThirdParty/`（或按 [ThirdParty/README.md](../ThirdParty/README.md) 自建）。框架不入 git，没有它工程编不过。
+1. 打开工程后选择真机运行（建议 iPhone）。真机要签名：在 Signing & Capabilities 里换成你自己的 Team，Bundle Identifier 也换成你自己的（`com.brulek.lumen` 属于作者的开发者账号）；只想确认能编译，用下面带 `CODE_SIGNING_ALLOWED=NO` 的命令。
 2. 首次启动允许相机权限。
 3. 对准发送端屏幕，进度到 100% 后在完成卡片里预览或分享。
 
@@ -124,11 +125,13 @@ python3 scripts/l10n_sync.py --apply en.json --prune
 
 该 iOS 客户端当前直接走原生相机采集与 `libcimbar` 解码链路，接收完成后将文件落到 `Documents/CimbarTransfer/Inbox`（可在系统「文件」App 中浏览），并通过系统分享面板导出。旧版本写入的 `Library/Caches/CimbarTransfer/ReceivedFiles` 会在启动时自动迁移。
 
-改过的上游文件（都在 MPL-2.0 下，清单也在仓库根目录 README）：
+改过的上游文件（完整清单在仓库根目录 README；libcimbar 的文件是 MPL-2.0，wirehair 的 gf256.cpp 是 BSD-3-Clause）：
 - `src/lib/cimbar_js/cimbar_recv_js.cpp/.h`：`sync_thread_config()`（`Config::active_conf` 是 thread_local，GCD 队列不保证线程固定）；
   按模式缓存的 `Decoder`（每种模式各缓存一个：避免每帧重建、重复解码符号 tile，自动识别逐帧轮换模式时也不用重建）；
-  `cimbard_set_decode_mode_keep_sink()`（换模式不清空已收到的喷泉块，发送端中途换模式时接着收）。
-- `src/lib/fountain/fountain_decoder_sink.h`：`recover()` 先核对槽位里还是同一个文件，恢复成功才标记为已完成。
-- `src/third_party_lib/wirehair/gf256.cpp`：未用变量的编译警告。
+  新增 `cimbard_set_decode_mode_keep_sink()`：只换逐帧解码模式、不动喷泉接收缓存，自动识别在传输停滞时用别的模式试一帧而不丢已有进度；
+  试出数据说明发送端换了模式，这时调新增的 `cimbard_reset()`，按新模式从头收；
+  重组先恢复到临时缓冲、成功才替换（修掉解压器视图悬空的 use-after-free）；新增错误码 -16（解压器初始化失败）、-15（解压流损坏）。
+- `src/lib/fountain/fountain_decoder_sink.h`：`recover()` 先核对槽位里的流大小和文件一致（与 `decode_frame()` 同一个检查），恢复成功才标记为已完成。
+- `src/third_party_lib/wirehair/gf256.cpp`：三个变量加 `[[maybe_unused]]`，消掉编译警告。
 - `web/recv.js`：重组失败时的报错信息和提前返回。
 Debug 配置下原生解码链以 `-O2` 编译（Swift 保持 `-Onone`），否则真机调试时扫码性能严重失真。

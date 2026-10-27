@@ -213,8 +213,20 @@ struct SearchEmptyRow: View {
 
 struct LibraryEmptyState: View {
     let onGoToScan: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// 说明和按钮平时收窄到 280；辅助功能字号下放开，否则英文按钮会从词中间断开
+    private var columnWidth: CGFloat { dynamicTypeSize.isAccessibilitySize ? .infinity : 280 }
 
     var body: some View {
+        // 放得下就在页面中间；最大字号下放不下时改成可以滚动，不截字
+        ViewThatFits(in: .vertical) {
+            content
+            ScrollView { content }
+        }
+    }
+
+    private var content: some View {
         VStack(spacing: 14) {
             Image("BrandMark")
                 .resizable()
@@ -226,18 +238,19 @@ struct LibraryEmptyState: View {
                 .accessibilityHidden(true)
             Text("还没有收到文件")
                 .font(.title3.weight(.semibold))
+                .multilineTextAlignment(.center)
                 .padding(.top, 6)
             Text("扫描屏幕上的动画码，收到的文件会出现在这里。")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: 280)
+                .frame(maxWidth: columnWidth)
             Button(action: onGoToScan) {
                 Label("去扫码", systemImage: "viewfinder")
             }
             // 和引导页同一种主按钮（含「增强对比度」时的描边），宽度跟上面的说明一样，不铺满整屏
             .buttonStyle(.brandPrimary)
-            .frame(maxWidth: 280)
+            .frame(maxWidth: columnWidth)
             .padding(.top, 8)
         }
         .padding(24)
