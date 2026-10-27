@@ -53,6 +53,8 @@ struct LibraryRow: View {
     /// 按内容搜到时命中的那一行，和搜索词（在行里加粗）
     var contentMatch: String?
     var searchQuery = ""
+    /// ⓘ 的点按区域跟着字号放大，至少 44pt
+    @ScaledMetric(relativeTo: .title3) private var detailSide: CGFloat = 44
 
     private var highlightedMatch: AttributedString {
         var text = AttributedString(contentMatch ?? "")
@@ -177,7 +179,7 @@ struct LibraryRow: View {
                 Image(systemName: "info.circle")
                     .font(.title3)
                     .foregroundStyle(.tint)
-                    .frame(width: 36, height: 36)
+                    .frame(width: detailSide, height: detailSide)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.borderless)

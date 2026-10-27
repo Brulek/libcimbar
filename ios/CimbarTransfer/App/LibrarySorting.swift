@@ -13,6 +13,8 @@ enum LibrarySortOption: String, CaseIterable, Identifiable {
 
     /// 记住所选排序的 UserDefaults 键（设置页「已用空间」也会改它）
     static let defaultsKey = "org.cimbar.library-sort"
+    /// 设置页「已用空间」改成按大小之前的排法：列表顶上的按钮改回它
+    static let beforeSizeKey = "org.cimbar.library-sort-before-size"
 
     var displayName: String {
         switch self {

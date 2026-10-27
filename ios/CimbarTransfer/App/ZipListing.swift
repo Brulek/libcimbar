@@ -13,6 +13,8 @@ struct ZipListing: Equatable {
     var names: [String] { entries.map(\.name) }
 
     static let maxNames = 8
+    /// 「全部 N 个文件」和按内容搜索最多列这么多个
+    static let maxListedNames = 5_000
 
     /// `maxNames`：简介页只列几个；按内容搜索时要全部文件名
     static func read(_ url: URL, maxNames: Int = maxNames) -> ZipListing? {

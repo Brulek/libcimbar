@@ -12,7 +12,14 @@ struct FileKindIcon: View {
         let tint: Color
     }
 
-    private var style: IconStyle {
+    /// 按扩展名取类型图标（压缩包里的文件列表也用）
+    static func symbol(for fileExtension: String) -> String {
+        style(for: fileExtension).symbol
+    }
+
+    private var style: IconStyle { Self.style(for: fileExtension) }
+
+    private static func style(for fileExtension: String) -> IconStyle {
         switch fileExtension.lowercased() {
         case "jpg", "jpeg", "png", "heic", "heif", "gif", "webp", "tiff", "bmp":
             return IconStyle(symbol: "photo", tint: .pink)

@@ -30,7 +30,7 @@ enum SearchableText {
             return pdfText(url)
         case "zip":
             // 一行一个文件路径，命中时结果里显示的就是包里的那个文件
-            return ZipListing.read(url, maxNames: 5_000)?.names.joined(separator: "\n")
+            return ZipListing.read(url, maxNames: ZipListing.maxListedNames)?.names.joined(separator: "\n")
         case let ext where isOfficeDocument(ext):
             return OfficeText.read(url).map { String($0.prefix(maxCharacters)) }
         default:

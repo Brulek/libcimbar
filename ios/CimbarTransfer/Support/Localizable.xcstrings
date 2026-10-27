@@ -901,6 +901,16 @@
         }
       }
     },
+    "只列出前 %lld 个文件；要看全部，请存到「文件」里解压" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the first %lld files are listed. To see all of them, save the archive to Files and unzip it."
+          }
+        }
+      }
+    },
     "只发一个网址这类很短的文字时，和别的文件一起打包再发" : {
       "localizations" : {
         "en" : {
@@ -1312,7 +1322,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saved %1$lld, %2$lld couldn't be saved"
+            "value" : "%1$lld saved to Photos, %2$lld failed"
           }
         }
       }
@@ -1604,6 +1614,12 @@
             "state" : "translated",
             "value" : "Open Link"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开链接"
+          }
         }
       }
     },
@@ -1732,7 +1748,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save Selected Files to Files"
+            "value" : "Save Selected to Files"
           }
         }
       }
@@ -1742,7 +1758,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Save Selected Photos and Videos"
+            "value" : "Save Selected to Photos"
           }
         }
       }
@@ -1763,6 +1779,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manual Mode"
+          }
+        }
+      }
+    },
+    "按%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By %@"
           }
         }
       }
@@ -1947,6 +1973,16 @@
         }
       }
     },
+    "改为按%@排列" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort by %@"
+          }
+        }
+      }
+    },
     "改为按日期排列" : {
       "localizations" : {
         "en" : {
@@ -2072,7 +2108,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Camera unavailable: %@"
+            "value" : "Couldn't start the camera: %@"
           }
         }
       }
@@ -2217,13 +2253,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld file couldn't be cleared. Please try again later."
+                  "value" : "%lld file couldn't be deleted. Please try again later."
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld files couldn't be cleared. Please try again later."
+                  "value" : "%lld files couldn't be deleted. Please try again later."
                 }
               }
             }
@@ -2668,7 +2704,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Code in view, but it can't be read"
+            "value" : "Code in View but Can't Be Read"
           }
         }
       }
@@ -3068,7 +3104,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap to reset to 1×"
+            "value" : "Resets zoom to 1×"
           }
         }
       }
@@ -3078,7 +3114,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap to zoom to 2×"
+            "value" : "Zooms in to 2×"
           }
         }
       }
@@ -3098,7 +3134,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap to show info"
+            "value" : "Shows the file's info"
           }
         }
       }
@@ -3108,7 +3144,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap to preview"
+            "value" : "Opens a preview"
           }
         }
       }

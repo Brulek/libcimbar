@@ -9,6 +9,7 @@ struct LibraryScreen: View {
     let onGoToScan: () -> Void
 
     @AppStorage(LibrarySortOption.defaultsKey) private var sortOption: LibrarySortOption = .dateDescending
+    @AppStorage(LibrarySortOption.beforeSizeKey) private var sortBeforeSize: LibrarySortOption = .dateDescending
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var searchText = ""
     /// 搜索时才建：小文本的全文（文件名 → 内容），能按内容搜到「那条有 Wi-Fi 密码的笔记」
@@ -214,6 +215,10 @@ struct LibraryScreen: View {
         .refreshable {
             store.refresh(cleanup: false)
         }
+        // 改回过一次就作废：以后按大小排时按钮照常是「按日期」
+        .onChange(of: sortOption) { newValue in
+            if newValue != .sizeDescending { sortBeforeSize = .dateDescending }
+        }
         .onAppear(perform: openRequestedDetail)
         .onChange(of: detailRequest?.wrappedValue) { _ in openRequestedDetail() }
         .onChange(of: store.cachedFiles) { _ in openRequestedDetail() }
@@ -376,10 +381,14 @@ struct LibraryScreen: View {
                             }
                             // 多选时不换排序，免得选中的行跳走
                             if !isSelecting {
-                                Button("按日期") { sortOption = .dateDescending }
-                                    .font(.footnote.weight(.semibold))
-                                    .textCase(nil)
-                                    .accessibilityLabel("改为按日期排列")
+                                Button(restoreSort.isByDate ? String(localized: "按日期") : String(localized: "按\(restoreSort.displayName)")) {
+                                    sortOption = restoreSort
+                                }
+                                .font(.footnote.weight(.semibold))
+                                .textCase(nil)
+                                .accessibilityLabel(restoreSort.isByDate
+                                    ? String(localized: "改为按日期排列")
+                                    : String(localized: "改为按\(restoreSort.displayName)排列"))
                             }
                         }
                     }
@@ -399,6 +408,11 @@ struct LibraryScreen: View {
 
     private var selectionTitle: String {
         selectedIDs.isEmpty ? String(localized: "选择文件") : String(localized: "已选 \(selectedIDs.count) 个")
+    }
+
+    /// 列表顶上按钮改回的排法：从设置页「已用空间」进来时是原来那种，否则是按日期
+    private var restoreSort: LibrarySortOption {
+        sortOption == .sizeDescending && sortBeforeSize != .sizeDescending ? sortBeforeSize : .dateDescending
     }
 
     /// 不分组的排序（名称、大小）在列表顶上写明排法；搜索结果不分组，也不显示

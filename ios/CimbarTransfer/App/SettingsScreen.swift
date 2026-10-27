@@ -6,6 +6,8 @@ struct SettingsScreen: View {
     /// 「已用空间」点进去：到「我的文件」按大小排，看是什么占地方
     var onShowFilesBySize: () -> Void = {}
     @ObservedObject private var preferences = AppPreferences.shared
+    /// 和其他行的图标块（IconTile）一样随字号放大
+    @ScaledMetric(relativeTo: .body) private var brandMarkSide: CGFloat = 29
     @State private var clearConfirm = false
     @State private var showingOnboarding = false
     @State private var showingSenderHelp = false
@@ -128,8 +130,8 @@ struct SettingsScreen: View {
                                 .resizable()
                                 .scaledToFit()
                                 .accessibilityIgnoresInvertColors()
-                                .frame(width: 29, height: 29)
-                                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                                .frame(width: brandMarkSide, height: brandMarkSide)
+                                .clipShape(RoundedRectangle(cornerRadius: brandMarkSide * 0.24, style: .continuous))
                         }
                     }
                 }

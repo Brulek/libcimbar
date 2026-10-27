@@ -49,6 +49,8 @@ struct ContentView: View {
     @State private var previewRequest: PreviewRequest?
     /// 从扫码页要打开简介的文件名，「我的文件」打开后清掉
     @State private var libraryDetailRequest: String?
+    /// 从后台回来才算「打开萤传」：这时按自动清理删过期文件（弹权限框、拉下通知中心也会经过 inactive/active，不能在那时删）
+    @State private var returnedFromBackground = false
     @State private var autoJumpTask: Task<Void, Never>?
     /// 本次打开「我的文件」之前的上次访问时间：之后收到的文件在列表里标为新
     @State private var libraryNewSince: Date = AppPreferences.shared.libraryLastViewed
@@ -109,7 +111,13 @@ struct ContentView: View {
 
             NavigationStack {
                 SettingsScreen(store: cacheStore) {
-                    UserDefaults.standard.set(LibrarySortOption.sizeDescending.rawValue, forKey: LibrarySortOption.defaultsKey)
+                    // 记下原来的排法，列表顶上的按钮能一下改回去（不只是改回按日期）
+                    let defaults = UserDefaults.standard
+                    let current = defaults.string(forKey: LibrarySortOption.defaultsKey) ?? LibrarySortOption.dateDescending.rawValue
+                    if current != LibrarySortOption.sizeDescending.rawValue {
+                        defaults.set(current, forKey: LibrarySortOption.beforeSizeKey)
+                    }
+                    defaults.set(LibrarySortOption.sizeDescending.rawValue, forKey: LibrarySortOption.defaultsKey)
                     selectedTab = .library
                 }
             }
@@ -214,9 +222,12 @@ struct ContentView: View {
                 if selectedTab == .scan {
                     viewModel.start()
                 }
-                // 收到的文件在「文件」App 里也看得到：在那边删了、改名或拖进来新文件，回来时列表要跟上
-                cacheStore.refresh(cleanup: false)
+                // 收到的文件在「文件」App 里也看得到：在那边删了、改名或拖进来新文件，回来时列表要跟上；
+                // 从后台回来时顺带按自动清理删过期文件，简介页写的「下次打开萤传时」才作数
+                cacheStore.refresh(cleanup: returnedFromBackground)
+                returnedFromBackground = false
             case .background:
+                returnedFromBackground = true
                 viewModel.stop()
                 // 撤销窗口内被切到后台：直接删掉，免得下次打开文件又「复活」
                 cacheStore.commitPendingDeletion()

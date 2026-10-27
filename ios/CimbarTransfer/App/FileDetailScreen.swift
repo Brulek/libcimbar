@@ -337,6 +337,7 @@ struct FileDetailScreen: View {
                 }
                 .tint(photoSaved ? .green : nil)
                 .allowsHitTesting(!photoSaved)
+                .accessibilityLabel(photoSaved ? "已存到相册" : "存到相册")
             } else if TextClipboard.canCopy(fileExtension: file.fileExtension, size: file.fileSize) {
                 DetailActionButton(
                     title: textCopied ? "已复制" : "复制文字",
@@ -583,7 +584,7 @@ private struct ZipEntryRow: View {
                 }
             }
         } icon: {
-            Image(systemName: "doc")
+            Image(systemName: FileKindIcon.symbol(for: (entry.name as NSString).pathExtension))
         }
         .font(.callout)
 
@@ -611,8 +612,15 @@ private struct ZipContentsScreen: View {
     var body: some View {
         List {
             if let listing {
-                ForEach(Array(listing.entries.enumerated()), id: \.offset) { _, entry in
-                    ZipEntryRow(entry: entry) { await onPreview(entry) }
+                Section {
+                    ForEach(Array(listing.entries.enumerated()), id: \.offset) { _, entry in
+                        ZipEntryRow(entry: entry) { await onPreview(entry) }
+                    }
+                } footer: {
+                    // 标题写的是全部 N 个，列不完要说清楚
+                    if listing.fileCount > listing.entries.count {
+                        Text("只列出前 \(listing.entries.count) 个文件；要看全部，请存到「文件」里解压")
+                    }
                 }
             }
         }
@@ -626,7 +634,7 @@ private struct ZipContentsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             let url = archiveURL
-            listing = await Task.detached(priority: .userInitiated) { ZipListing.read(url, maxNames: 5_000) }.value
+            listing = await Task.detached(priority: .userInitiated) { ZipListing.read(url, maxNames: ZipListing.maxListedNames) }.value
         }
     }
 }

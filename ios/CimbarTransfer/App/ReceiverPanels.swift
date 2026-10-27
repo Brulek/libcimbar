@@ -93,7 +93,8 @@ private struct WaitingCard: View {
             Button(action: onShowSenderHelp) {
                 Image(systemName: "questionmark")
                     .font(.headline)
-                    .frame(width: 40, height: 40)
+                    // 面板字号封顶在辅助功能第二档，按钮固定 44pt（最小点按尺寸）就够
+                    .frame(width: 44, height: 44)
                     .background(.white.opacity(0.12), in: Circle())
             }
             .buttonStyle(.plain)
@@ -298,6 +299,8 @@ private struct CompletedTransferCard: View {
             // 存好后不再可点，但不用 disabled：灰掉的样子像出错，绿色对勾才像「完成了」
             .disabled(photoSaving)
             .allowsHitTesting(!photoSaved)
+            // 按钮上只写「存相册」，读屏说全：英文里两个按钮都只有一个 Save
+            .accessibilityLabel(photoSaved ? "已存到相册" : "存到相册")
         } else if canCopyText {
             Button {
                 Task {

@@ -16,7 +16,14 @@ struct ReceiverScreen: View {
 
     // 底部面板通过 safeAreaInset 已从取景区扣除，这里只需让出顶部按钮行；
     // 动态字体放大时按钮变高，预留随之缩放
-    @ScaledMetric(relativeTo: .body) private var topReservedHeight: CGFloat = 64
+    // 按钮行在调用处封顶 xxxLarge，@ScaledMetric 看不到那个封顶，这里按同一档自己封顶，
+    // 否则大字号下取景框上方空出一大条
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    private var topReservedHeight: CGFloat {
+        let capped = min(dynamicTypeSize, .xxxLarge)
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(capped))
+        return UIFontMetrics(forTextStyle: .body).scaledValue(for: 64, compatibleWith: traits)
+    }
     private let bottomReservedHeight: CGFloat = 20
 
     /// 还没开始接收就自动暂停了：底部「对准动画码」的提示与暂停卡片矛盾，收起
@@ -101,6 +108,8 @@ struct ReceiverScreen: View {
                     if viewModel.isIdlePaused && viewModel.receivedFileURL == nil {
                         // 与取景框同样的上下预留，卡片才会落在取景框正中
                         IdlePausedCard { viewModel.start() }
+                            // 和底部面板同样封顶：卡片不能滚动，再大就把按钮挤出屏幕
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                             .padding(.top, topReservedHeight)
                             .padding(.bottom, bottomReservedHeight)
                             .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -116,6 +125,7 @@ struct ReceiverScreen: View {
                 .overlay {
                     if viewModel.cameraPermissionDenied {
                         PermissionDeniedCard()
+                            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                             .padding(.horizontal, 24)
                     }
                 }

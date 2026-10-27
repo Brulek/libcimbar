@@ -4,6 +4,7 @@ struct OnboardingScreen: View {
     /// 从「设置 → 查看引导」打开时为 true：可随时关闭、不要求重新勾选承诺
     var isHelpMode: Bool = false
     let onFinished: () -> Void
+    @ScaledMetric(relativeTo: .headline) private var closeSide: CGFloat = 44
 
     @State private var pageIndex: Int = {
         #if DEBUG
@@ -63,7 +64,7 @@ struct OnboardingScreen: View {
                     Image(systemName: "xmark")
                         .font(.headline)
                         .foregroundStyle(.white.opacity(0.8))
-                        .frame(width: 40, height: 40)
+                        .frame(width: closeSide, height: closeSide)
                         .background(.white.opacity(0.12), in: Circle())
                 }
                 .buttonStyle(.plain)
