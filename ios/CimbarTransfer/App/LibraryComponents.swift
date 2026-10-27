@@ -25,6 +25,7 @@ struct SaveToast: Identifiable, Equatable {
 
 struct ToastView: View {
     let toast: SaveToast
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         HStack(spacing: 10) {
@@ -32,11 +33,13 @@ struct ToastView: View {
                 .foregroundStyle(toast.style == .success ? Color.green : Color.orange)
             Text(toast.message)
                 .font(.subheadline.weight(.medium))
-                .lineLimit(2)
+                // 大字号下两行放不下：不截，整句显示；多行时胶囊改成圆角矩形
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.regularMaterial, in: Capsule())
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: dynamicTypeSize.isAccessibilitySize ? 22 : 999, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
         .padding(.horizontal, 24)
         .accessibilityElement(children: .combine)
@@ -272,6 +275,7 @@ struct RenameAlertModifier: ViewModifier {
 struct UndoBar: View {
     let message: String
     let onUndo: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         HStack(spacing: 12) {
@@ -279,7 +283,8 @@ struct UndoBar: View {
                 .foregroundStyle(.secondary)
             Text(message)
                 .font(.subheadline)
-                .lineLimit(1)
+                // 大字号下一行只剩几个字：允许折三行，文件名照旧从中间省略
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
                 .truncationMode(.middle)
             Spacer(minLength: 8)
             Button("撤销", action: onUndo)
@@ -287,7 +292,7 @@ struct UndoBar: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
-        .background(.regularMaterial, in: Capsule())
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: dynamicTypeSize.isAccessibilitySize ? 22 : 999, style: .continuous))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
         .padding(.horizontal, 16)
         .frame(maxWidth: 560)
