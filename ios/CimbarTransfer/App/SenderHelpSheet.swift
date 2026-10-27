@@ -90,7 +90,7 @@ private struct StepRow: View {
                 .font(.subheadline.weight(.bold).monospacedDigit())
                 .foregroundStyle(Brand.ink)
                 .frame(width: badgeSize, height: badgeSize)
-                .background(Color.accentColor, in: Circle())
+                .background(Brand.fill, in: Circle())
             Text(text)
                 .fixedSize(horizontal: false, vertical: true)
         }

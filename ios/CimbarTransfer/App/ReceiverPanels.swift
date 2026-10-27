@@ -335,6 +335,7 @@ private struct CompletedTransferCard: View {
                 .foregroundStyle(Brand.ink)
         }
         .buttonStyle(.borderedProminent)
+        .tint(Brand.fill)
         .scaleEffect(highlightShareAction ? 1.03 : 1)
     }
 

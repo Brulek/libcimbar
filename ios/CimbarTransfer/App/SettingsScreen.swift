@@ -46,7 +46,7 @@ struct SettingsScreen: View {
                     TileLabel("照片和视频自动存到相册", systemName: "photo.on.rectangle", color: .orange)
                 }
                 Toggle(isOn: $preferences.autoJumpAfterReceive) {
-                    TileLabel("自动打开「我的文件」", systemName: "folder.fill", color: .blue)
+                    TileLabel("自动打开「我的文件」", systemName: "tray.full.fill", color: .blue)
                 }
             }
 

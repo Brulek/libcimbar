@@ -238,6 +238,7 @@ struct LibraryEmptyState: View {
                     .padding(.horizontal, 8)
             }
             .buttonStyle(.borderedProminent)
+            .tint(Brand.fill)
             .foregroundStyle(Brand.ink)
             .controlSize(.large)
             .padding(.top, 8)

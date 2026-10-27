@@ -103,7 +103,8 @@ struct ContentView: View {
 
             libraryTab
             .tabItem {
-                Label("我的文件", systemImage: "folder")
+                // 不用文件夹：「存到「文件」」按钮用的是文件夹，标签也用会让人以为两者是一回事
+                Label("我的文件", systemImage: "tray.full")
             }
             .tag(AppTab.library)
             // 只数上次打开「我的文件」之后收到的，总数没有提醒价值

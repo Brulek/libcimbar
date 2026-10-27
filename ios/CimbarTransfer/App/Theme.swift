@@ -11,6 +11,9 @@ enum Brand {
     static let nightDeep = Color(red: 0.02, green: 0.03, blue: 0.09)
     /// 琥珀色按钮上的文字色：白字在琥珀上对比度不足
     static let ink = Color(red: 0.13, green: 0.09, blue: 0.02)
+    /// 深色字（ink）下面的琥珀底。不直接用强调色：「增强对比度」时强调色在浅色模式里变成深棕，
+    /// 深色字压在上面只有约 3.7:1；这里那一档反而调亮，四种外观下都在 6:1 以上
+    static let fill = Color("BrandFill")
 }
 
 extension Brand {
@@ -37,7 +40,7 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
             // 不可点时系统会把强调色压成灰色，深色字叠上去几乎看不见：改成灰字 + 淡底（深浅背景各一套）
             .foregroundStyle(isEnabled ? AnyShapeStyle(Brand.ink) : AnyShapeStyle(disabledText))
             .background(
-                isEnabled ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(disabledFill),
+                isEnabled ? AnyShapeStyle(Brand.fill) : AnyShapeStyle(disabledFill),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
             .opacity(configuration.isPressed ? 0.8 : 1)
