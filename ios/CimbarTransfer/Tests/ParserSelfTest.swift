@@ -49,7 +49,7 @@ enum ParserSelfTest {
         check("docx", docx.contains("A&B 公司 <重点>") && docx.contains("Second paragraph \"quoted\"."), docx.debugDescription)
 
         let xlsx = OfficeText.read(file("book.xlsx")) ?? ""
-        check("xlsx", xlsx == "客户名称\n北京 分行\n中文&符号", xlsx.debugDescription)
+        check("xlsx", xlsx == "项目名称\n上海 仓库\n中文&符号", xlsx.debugDescription)
 
         let inline = OfficeText.read(file("inline.xlsx")) ?? ""
         check("xlsx inline strings", inline == "导出的名单\n第二格\n第二张表", inline.debugDescription)

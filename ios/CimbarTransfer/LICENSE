@@ -1,0 +1,11 @@
+Copyright (c) 2026 Brulek. All rights reserved.
+
+The files in this directory make up the Lumen (萤传) iOS app: its source code,
+images, icons, logo artwork and text. They are published so the app can be built
+and reviewed, but no license to copy, modify or distribute them is granted. In
+particular, the Lumen and 萤传 names, the app icon and the logo artwork may not be
+used for other apps.
+
+This does not cover the libcimbar sources elsewhere in this repository. Those,
+including the changes made to them for this app, are under the Mozilla Public
+License 2.0 (see ../../LICENSE), and third-party libraries keep their own licenses.

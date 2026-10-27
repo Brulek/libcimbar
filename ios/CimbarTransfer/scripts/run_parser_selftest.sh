@@ -34,8 +34,8 @@ with zipfile.ZipFile('stored.zip', 'w', zipfile.ZIP_STORED) as z:
 with zipfile.ZipFile('stored.docx', 'w', zipfile.ZIP_STORED) as z:
     z.writestr('word/document.xml', '<w:document><w:body><w:p><w:r><w:t>不压缩的 Word</w:t></w:r></w:p></w:body></w:document>')
 with zipfile.ZipFile('book.xlsx', 'w', zipfile.ZIP_DEFLATED) as z:
-    z.writestr('xl/sharedStrings.xml', '<sst><si><t>客户名称</t></si><si><r><t xml:space="preserve">北京 </t></r>'
-               '<r><t>分行</t></r></si><si><t>&#x4E2D;文&amp;符号</t></si></sst>')
+    z.writestr('xl/sharedStrings.xml', '<sst><si><t>项目名称</t></si><si><r><t xml:space="preserve">上海 </t></r>'
+               '<r><t>仓库</t></r></si><si><t>&#x4E2D;文&amp;符号</t></si></sst>')
 with zipfile.ZipFile('deck.pptx', 'w', zipfile.ZIP_DEFLATED) as z:
     for n, t in [(1, '封面标题'), (10, '第十页'), (2, '第二页')]:
         z.writestr(f'ppt/slides/slide{n}.xml', f'<p:sld><a:p><a:r><a:t>{t}</a:t></a:r></a:p></p:sld>')

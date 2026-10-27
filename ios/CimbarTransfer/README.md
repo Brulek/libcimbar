@@ -48,7 +48,7 @@
 ## 截图
 
 模拟器截图（中/英、深/浅色、iPhone/iPad）见 [docs/screenshots/](docs/screenshots/)。
-App Store 尺寸的原图（6.9 寸 iPhone、13 寸 iPad）放在资料区 `~/Documents/Developer/CimbarTransfer/App Store截图/`。
+App Store 尺寸的原图（6.9 寸 iPhone、13 寸 iPad）不放在仓库里。
 
 ## 目录
 
@@ -106,7 +106,7 @@ python3 scripts/l10n_sync.py --apply en.json --prune
 
 ## 测试与调试
 
-- **端到端解码自测**：`scripts/run_decode_selftest.sh`（需要一台已启动的模拟器）。用 libcimbar 自带的编码器把 24 KB 数据编成每种模式的动画码，套进 720×1280 的相机画布，交给 `NativeCimbarDecoder` 解码并逐字节核对；覆盖自动识别四种模式、手动模式（含旧版 8C）、模式不匹配、拍摄质量变差（倾斜/模糊/偏暗/噪点，自动与手动所需帧数相同）、取景框里没有码不误锁、同一文件收两遍不存副本（同一个解码器、重开 App 后各一次）、发送端中途换模式、码离开很久再回来接着收、压缩后不到一帧的小文本四种模式都能收、发送端给的怪文件名（路径分隔符、空名、点开头、换行、超长）都落在收件目录里且名字可用。`--dump-frame out.png` 可导出一帧真实动画码，`--dump-transfer` 导出整段传输给 Debug 模拟相机用。`--tiny <模式值> [字节数]` 在全新进程里单独测一个小文件（发送端用 0 填充不足一个喷泉块的文件，全新的解码器读不出来；见改版记录）。
+- **端到端解码自测**：`scripts/run_decode_selftest.sh`（需要一台已启动的模拟器）。用 libcimbar 自带的编码器把 24 KB 数据编成每种模式的动画码，套进 720×1280 的相机画布，交给 `NativeCimbarDecoder` 解码并逐字节核对；覆盖自动识别四种模式、手动模式（含旧版 8C）、模式不匹配、拍摄质量变差（倾斜/模糊/偏暗/噪点，自动与手动所需帧数相同）、取景框里没有码不误锁、同一文件收两遍不存副本（同一个解码器、重开 App 后各一次）、发送端中途换模式、码离开很久再回来接着收、压缩后不到一帧的小文本四种模式都能收、发送端给的怪文件名（路径分隔符、空名、点开头、换行、超长）都落在收件目录里且名字可用。`--dump-frame out.png` 可导出一帧真实动画码，`--dump-transfer` 导出整段传输给 Debug 模拟相机用。`--tiny <模式值> [字节数]` 在全新进程里单独测一个小文件（发送端用 0 填充不足一个喷泉块的文件，全新的解码器读不出来；问题在编码端 `src/lib/compression/zstd_compressor.h` 的 `pad()`）。
 - **zip / Office 解析自测**：`scripts/run_parser_selftest.sh`（在 Mac 上直接跑，不需要模拟器）。当场生成访达压缩的 zip（含 `__MACOSX`）、ZIP64、Windows 中文系统的 GBK 文件名、长注释、非 zip 文件、docx（textutil 生成）、xlsx、pptx 和一个解开有 500 MB 的幻灯片，核对 `ZipListing` 与 `OfficeText` 的结果和解压上限。
 - **Debug 启动参数**（只在 Debug 构建里生效）：
   - `-InitialTab library|settings`：初始标签
@@ -124,8 +124,11 @@ python3 scripts/l10n_sync.py --apply en.json --prune
 
 该 iOS 客户端当前直接走原生相机采集与 `libcimbar` 解码链路，接收完成后将文件落到 `Documents/CimbarTransfer/Inbox`（可在系统「文件」App 中浏览），并通过系统分享面板导出。旧版本写入的 `Library/Caches/CimbarTransfer/ReceivedFiles` 会在启动时自动迁移。
 
-上游 `src/lib/cimbar_js/cimbar_recv_js.cpp` 为 iOS 做了两处适配：
-`sync_thread_config()`（`Config::active_conf` 是 thread_local，GCD 队列不保证线程固定）
-与按模式缓存的 `Decoder`（每种模式各缓存一个：避免每帧重建、重复解码符号 tile，
-自动识别逐帧轮换模式时也不用重建）。
+改过的上游文件（都在 MPL-2.0 下，清单也在仓库根目录 README）：
+- `src/lib/cimbar_js/cimbar_recv_js.cpp/.h`：`sync_thread_config()`（`Config::active_conf` 是 thread_local，GCD 队列不保证线程固定）；
+  按模式缓存的 `Decoder`（每种模式各缓存一个：避免每帧重建、重复解码符号 tile，自动识别逐帧轮换模式时也不用重建）；
+  `cimbard_set_decode_mode_keep_sink()`（换模式不清空已收到的喷泉块，发送端中途换模式时接着收）。
+- `src/lib/fountain/fountain_decoder_sink.h`：`recover()` 先核对槽位里还是同一个文件，恢复成功才标记为已完成。
+- `src/third_party_lib/wirehair/gf256.cpp`：未用变量的编译警告。
+- `web/recv.js`：重组失败时的报错信息和提前返回。
 Debug 配置下原生解码链以 `-O2` 编译（Swift 保持 `-Onone`），否则真机调试时扫码性能严重失真。
